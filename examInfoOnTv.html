@@ -43,6 +43,17 @@
     .btn-gray { background: #334155; color: #e2e8f0; }
     .btn-gray:hover { background: #475569; }
     .ring-focus { outline: none; box-shadow: 0 0 0 3px rgba(34,211,238,.35); }
+    /* 讓 exam 類型的字體更大、更醒目 */
+    .timeline-item[data-index][data-type="exam"] .text-sm,
+    .timeline-item.exam .text-sm {
+      font-size: 1.125rem; /* text-lg */
+      font-weight: 700; /* 加粗 */
+      color: var(--accent); /* sky-400 顏色 */
+    }
+    
+    .timeline-item.exam.active .text-sm {
+      color: var(--bad); /* 當前考試項目時變紅 */
+    }
   </style>
 </head>
 <body onload="init()">
@@ -305,7 +316,7 @@
         else if (item.type === 'break') { colorClass = 'text-emerald-300'; icon = '☕'; }
 
         const html = `
-          <div id="schedule-item-${originalIndex}" class="timeline-item py-1 pr-2 cursor-pointer rounded-md hover:bg-slate-800/60" data-index="${originalIndex}">
+          <div id="schedule-item-${originalIndex}" class="timeline-item ${item.type}" data-type="${item.type}" data-index="${originalIndex}">
             <div class="timeline-indicator"></div>
             <div class="flex items-center gap-2">
               <div class="text-xs font-bold w-12 flex-shrink-0 text-slate-400">${item.start}</div>
@@ -629,3 +640,4 @@
   <footer class="fixed bottom-2 right-4 text-[12px] text-slate-400/60 select-none">Developed by <span class="font-semibold">DennisZ</span></footer>
 </body>
 </html>
+
