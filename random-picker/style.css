@@ -515,7 +515,7 @@ input[type="number"] {
         grid-template-columns: 1fr; 
     } 
     .display {
-        font-size: 64px; 
+        font-size: 100px; 
     }
 }
 
@@ -551,4 +551,5 @@ input[type="number"] {
         width: 100%;
         text-align: left;
     }
+
 }
