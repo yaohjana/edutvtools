@@ -3,7 +3,7 @@
  */
 
 // =================================================================
-// 0. 核心定義與狀態
+// 0. 核心定義與狀態 (略)
 // =================================================================
 
 const $ = (s) => document.querySelector(s);
@@ -34,8 +34,8 @@ let state = {
     // 設定項
     groupSize: 1, 
     noRepeat: true,
-    soundOn: true,      // 追蹤音效狀態
-    voiceEnabled: true, // 追蹤語音狀態
+    soundOn: true,      
+    voiceEnabled: true, 
 };
 
 // 新增音效物件 (需要準備 click.mp3, start.mp3, roll.mp3, stop.mp3 檔案)
@@ -55,7 +55,7 @@ const FLICKER_ANIMATION = [
 const FLICKER_OPTIONS = { duration: 320, easing: 'ease-out' };
 
 
-// 範本資料 (保持不變)
+// 範本資料
 const TEMPLATES = {
     numbers: Array.from({ length: 33 }, (_, i) => `${i + 1} 號`).join('\n'),
     fruits: [
@@ -80,7 +80,7 @@ const TEMPLATES = {
 
 
 // =================================================================
-// 1. 資料存取與初始化
+// 1. 資料存取與初始化 
 // =================================================================
 
 function save() {
@@ -109,7 +109,6 @@ function load() {
 }
 
 function loadUISettings() {
-    // 從 HTML 元素中讀取當前設定狀態
     state.noRepeat = $('#noRepeat').checked;
     state.soundOn = $('#soundOn').checked;
     state.voiceEnabled = $('#voiceOn').checked;
@@ -120,7 +119,7 @@ function loadUISettings() {
 }
 
 // =================================================================
-// 2. 名單管理 (略)
+// 2. 名單管理
 // =================================================================
 
 function updateListFromTextarea() {
@@ -219,30 +218,23 @@ function speakResult(text) {
     }
 }
 
-/**
- * 切換音效開關並更新 UI
- */
 function toggleSound() {
     state.soundOn = !state.soundOn;
     $('#soundOn').checked = state.soundOn;
     playSound('click');
     if (!state.soundOn) {
-        stopSound('roll'); // 如果關閉音效，停止正在播放的滾動音
+        stopSound('roll'); 
     }
-    // 不需 loadUISettings，因為狀態已經更新
 }
 
-/**
- * 切換語音開關並更新 UI
- */
 function toggleVoice() {
     state.voiceEnabled = !state.voiceEnabled;
     $('#voiceOn').checked = state.voiceEnabled;
     playSound('click');
     if (state.voiceEnabled) {
-        window.speechSynthesis.getVoices(); // 啟動時預載語音
+        window.speechSynthesis.getVoices(); 
     } else {
-        window.speechSynthesis.cancel(); // 關閉時停止正在說話的語音
+        window.speechSynthesis.cancel(); 
     }
 }
 
@@ -276,7 +268,7 @@ function updateStats() {
     STATS.textContent = `${total} 位學生`;
     
     if (total === 0) {
-        PROGRESS.textContent = '名單空白';
+        PROGRESS.textContent = '名單空白，已載入預設號碼'; // 提示已載入
         PROGRESS.className = 'muted';
     } else if (drawnCount === 0) {
         PROGRESS.textContent = '尚未抽點';
@@ -289,7 +281,6 @@ function updateStats() {
         PROGRESS.className = '';
     }
     
-    // 按鈕狀態更新
     BTN_START.disabled = total === 0;
     
     if (state.isRolling) {
@@ -319,7 +310,7 @@ function rollTheDice() {
     }
 
     if (availableNames.length === 0) {
-        toggleRoll(); // 自動停止
+        toggleRoll(); 
         updateDisplay('名單空白或已抽完');
         return;
     }
@@ -329,13 +320,18 @@ function rollTheDice() {
     let tempNames = [...availableNames];
 
     for (let i = 0; i < drawSize; i++) {
-        const randomIndex = Math.floor(Math.random() * tempNames.length);
+        const randomIndex = Math.floor(RNG() * tempNames.length);
         drawnNames.push(tempNames[randomIndex]);
         tempNames.splice(randomIndex, 1);
     }
 
     const result = drawnNames.join('、');
     updateDisplay(result);
+}
+
+// 使用 Math.random 避免需要額外的 RNG 庫
+function RNG() {
+    return Math.random();
 }
 
 function startRoll() {
@@ -358,7 +354,7 @@ function stopRoll() {
     stopSound('roll'); 
     playSound('stop'); 
 
-    rollTheDice(); // 執行最後一次點名
+    rollTheDice(); 
     
     const finalNames = state.lastDrawnName.split('、').map(n => n.trim()).filter(Boolean);
 
@@ -378,9 +374,7 @@ function stopRoll() {
     updateStats(); 
 }
 
-// 核心功能：切換開始/停止
 function toggleRoll() {
-   
     if (state.isRolling) {
         stopRoll();
     } else {
@@ -407,7 +401,7 @@ function toggleFullscreen() {
     }
 }
 
-// 模態框控制
+// 模態框控制 (略)
 function openModal() {
     playSound('click'); 
     HELP_MODAL.classList.remove('hidden');
@@ -422,12 +416,12 @@ function closeModal() {
 // =================================================================
 
 function bindUI() {
-    // 名單編輯與載入
+    // 名單編輯與載入 (略)
     $('#btnUpdateList').onclick = updateListFromTextarea;
     $('#btnClear').onclick = clearList;
     $('#btnLoadTemplate').onclick = loadTemplate;
     
-    // 抽點控制：使用單一函式
+    // 抽點控制
     BTN_START.onclick = toggleRoll; 
     BTN_RESET.onclick = () => resetDraw(true);
 
@@ -436,17 +430,16 @@ function bindUI() {
     BTN_CLOSE_MODAL.onclick = closeModal;
     MODAL_OVERLAY.onclick = closeModal; 
 
-    // 設定項監聽 (確保點擊 UI 元素時也能同步更新狀態)
+    // 設定項監聽 (略)
     $('#noRepeat').addEventListener('change', (e) => { state.noRepeat = e.target.checked; updateStats(); playSound('click'); });
     $('#soundOn').addEventListener('change', toggleSound); 
     $('#voiceOn').addEventListener('change', toggleVoice);
     $('#groupSize').addEventListener('change', () => { loadUISettings(); playSound('click'); });
 
-    // 全域快捷鍵
+    // 全域快捷鍵 (略)
     document.addEventListener('keydown', (e) => {
         const key = e.key.toLowerCase();
         
-        // 如果模態框開啟，只允許 ESC 關閉
         if (e.key === 'Escape') {
             if (!HELP_MODAL.classList.contains('hidden')) {
                 closeModal();
@@ -455,20 +448,21 @@ function bindUI() {
             return;
         }
 
-        // 排除輸入元素被選中時的快捷鍵干擾
         const isInputFocus = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
         if (isInputFocus) return;
 
-        if (key === ' ') { // Space 鍵
-            e.preventDefault(); 
-            toggleRoll(); 
-        } else if (key === 'r') { // R 鍵
+        if (key === ' ') { 
+            if (!BTN_START.disabled) {
+                e.preventDefault(); 
+                toggleRoll(); 
+            }
+        } else if (key === 'r') { 
             resetDraw(); 
-        } else if (key === 'f') { // F 鍵
+        } else if (key === 'f') { 
             toggleFullscreen(); 
-        } else if (key === 'm') { // M 鍵 (靜音/音效)
+        } else if (key === 'm') { 
             toggleSound(); 
-        } else if (key === 'v') { // V 鍵 (語音開關)
+        } else if (key === 'v') { 
             toggleVoice();
         }
     });
@@ -484,6 +478,15 @@ function bindUI() {
 function main() {
     load(); 
     
+    // ！！！ 檢查名單是否為空，並載入預設範本 ！！！
+    if (state.students.length === 0) {
+        const defaultList = TEMPLATES.numbers;
+        state.students = defaultList.split('\n').map(name => name.trim()).filter(n => n.length > 0);
+        // 不呼叫 save()，讓使用者可以輕鬆替換而不必立即儲存到 LocalStorage
+        updateDisplay('已自動載入 1-33 號範本');
+    }
+    
+    // 確保 textarea 顯示當前名單（可能是從 LocalStorage 載入，也可能是新載入的範本）
     NAME_LIST_TEXTAREA.value = state.students.join('\n');
     
     loadUISettings(); 
@@ -492,6 +495,5 @@ function main() {
 
     window.speechSynthesis.getVoices();
 }
-
 
 window.addEventListener('DOMContentLoaded', main);
