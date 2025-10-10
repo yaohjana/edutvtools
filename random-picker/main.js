@@ -380,11 +380,7 @@ function stopRoll() {
 
 // 核心功能：切換開始/停止
 function toggleRoll() {
-    if (state.students.length === 0) {
-        alert('請先輸入名單！');
-        return;
-    }
-    
+   
     if (state.isRolling) {
         stopRoll();
     } else {
@@ -496,5 +492,6 @@ function main() {
 
     window.speechSynthesis.getVoices();
 }
+
 
 window.addEventListener('DOMContentLoaded', main);
