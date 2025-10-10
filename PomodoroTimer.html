@@ -201,9 +201,16 @@
             </div>
             
             <!-- 主要計時器顯示區塊 -->
-            <div id="timer-display" class="mb-10 p-4 rounded-3xl shadow-2xl transition duration-500 ease-in-out dark:bg-gray-700 w-full max-w-4xl text-center">
-                25:00
+            <div id="timer-display" class="relative mb-10 p-4 rounded-3xl shadow-2xl transition duration-500 ease-in-out dark:bg-gray-700 w-full max-w-4xl text-center">
+              <!-- 右上角 +1 分鐘圓形按鈕 -->
+              <button id="add-minute-btn"
+                      class="absolute top-3 right-3 w-12 h-12 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-bold shadow-lg 
+                             focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-gray-700">
+                +1
+              </button>
+              <span id="timer-text">25:00</span>
             </div>
+
 
             <!-- 控制按鈕區塊 -->
             <div class="flex flex-wrap justify-center gap-4 mb-10 w-full max-w-4xl">
@@ -388,6 +395,9 @@
         let audioContext;
         let isTicking = false;
         
+        const timerText = document.getElementById('timer-text');
+        const addMinuteBtn = document.getElementById('add-minute-btn');
+
         // 偵測螢幕大小以選擇正確的輸入元素
         function setupSidebarInputs() {
             const isDesktop = window.innerWidth >= 1024; // Tailwind lg breakpoint
@@ -561,9 +571,25 @@
         function updateTimerDisplay() {
             const minutes = Math.floor(secondsLeft / 60);
             const seconds = secondsLeft % 60;
-            timerDisplay.textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            if (timerText) {
+                timerText.textContent =
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
         }
+        function addOneMinute() {
+            // 直接延長目前剩餘時間 60 秒
+            secondsLeft += 60;
+            updateTimerDisplay();
+            updateButtonStates();
+        
+            // 小小的視覺回饋（可選）
+            const btn = document.getElementById('add-minute-btn');
+            if (btn) {
+                btn.classList.add('scale-105');
+                setTimeout(() => btn.classList.remove('scale-105'), 120);
+            }
+        }
+
 
         /**
          * 更新右上角實時時間 (精確到秒)
@@ -858,7 +884,12 @@
             iconToggleTicking.addEventListener('click', () => handleIconToggle(iconToggleTicking, toggleTicking));
             iconToggleAlarm.addEventListener('click', () => handleIconToggle(iconToggleAlarm, toggleAlarm));
             iconToggleSpeech.addEventListener('click', () => handleIconToggle(iconToggleSpeech, toggleSpeech));
-
+            
+            // 綁定 +1 分鐘按鈕
+            if (addMinuteBtn) {
+                addMinuteBtn.addEventListener('click', addOneMinute);
+            }
+            
             // 確保 Chrome/Safari 啟動音頻上下文
             document.addEventListener('click', initAudioContext, { once: true });
             
@@ -869,3 +900,4 @@
     </script>
 </body>
 </html>
+
