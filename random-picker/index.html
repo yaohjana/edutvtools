@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>歡樂籤筒</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="app-header">
+<h1>歡樂籤筒</h1>
+</header>
+<main class="app-main">
+<section class="panel large">
+<div id="display" class="display">按下 **Space** 鍵啟動</div>
+<div class="display-sub">
+<span id="stats">0 位學生</span>
+<span id="progress" class="muted">尚未抽點</span>
+</div>
+<div class="actions">
+<button id="btnStart" class="btn primary huge" title="開始/停止抽點（Space）">
+    按下 Space 鍵開始
+</button>
+<button id="btnReset" class="btn" title="重置抽過名單（R）">重置已抽名單</button>
+</div>
+<div class="row">
+    <button id="btnHelp" class="btn muted" style="padding: 6px 10px; font-size: 14px;">說明 & 快捷鍵</button>
+    
+    <label class="switch">
+        <input type="checkbox" id="noRepeat" checked>
+        <span>抽過不重複</span>
+    </label>
+    
+    <label class="switch">
+        <input type="checkbox" id="soundOn" checked>
+        <span>音效 (M)</span>
+    </label>
+    
+    <label class="switch">
+        <input type="checkbox" id="voiceOn" checked>
+        <span>語音播報 (V)</span>
+    </label>
+    
+    <label for="groupSize">群組抽取人數</label>
+    <input type="number" id="groupSize" min="1" value="1" inputmode="numeric" pattern="[0-9]*" />
+</div>
+</section>
+
+
+<section class="panel">
+<h2>學生名單 (一行一筆)</h2>
+<textarea id="nameList" class="textarea" rows="10" placeholder="請將學生姓名/號碼，一行一筆貼入此處。點擊「更新名單」儲存"></textarea>
+<div class="row">
+<button id="btnUpdateList" class="btn primary">更新名單</button>
+<button id="btnClear" class="btn" title="清空名單">清空名單</button>
+</div>
+<div class="row row-template">
+<label for="templateSelect">載入範本</label>
+<select id="templateSelect" class="input">
+<option value="none" selected>選擇範本...</option>
+<option value="numbers">1-33號碼</option>
+<option value="fruits">33種水果</option>
+<option value="animals">33種動物</option>
+<option value="characters">33種小說人物</option>
+</select>
+<button id="btnLoadTemplate" class="btn">載入</button>
+</div>
+</section>
+</main>
+
+
+<footer class="app-footer">
+    <div class="muted">Developed by DennisZ</div>
+</footer>
+
+<div id="fixedSummary">
+    <div class="list-title">當前名單摘要：</div>
+    <div id="compactList" class="compact-list"></div>
+</div>
+
+
+<div id="helpModal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <button class="modal-close-btn" id="btnCloseModal">X</button>
+        <h2>操作說明與快捷鍵</h2>
+        <p>本工具會將您的名單儲存於瀏覽器中，離線可用。名單變動會重置已抽名單。</p>
+        <div class="key-shortcuts">
+            <h3>快捷鍵一覽</h3>
+            <ul>
+                <li><strong><kbd>Space</kbd></strong>：開始 / 停止抽點</li>
+                <li><strong><kbd>M</kbd></strong>：切換音效開關 (Mute)</li>
+                <li><strong><kbd>V</kbd></strong>：切換語音開關 (Voice)</li>
+                <li><strong><kbd>R</kbd></strong>：重置已抽名單</li>
+                <li><strong><kbd>F</kbd></strong>：切換全螢幕</li>
+            </ul>
+            <p class="muted" style="margin-top: 15px;">**注意：** 在輸入框中時，快捷鍵不會觸發抽點。</p>
+			<p class="muted" style="margin-top: 15px;">
+				音效素材來源：<a href="https://pixabay.com/zh/sound-effects/" target="_blank">Pixabay</a>，
+				依 Pixabay Content License 授權使用。
+			</p>
+        </div>
+    </div>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
