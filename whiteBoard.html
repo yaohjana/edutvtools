@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Digital Whiteboard｜HTML5 精美範例</title>
+<title>Digital Whiteboard</title>
 <style>
 :root{
   --bg:#0f172a; /* slate-900 */
@@ -25,13 +25,13 @@ body{
 .logo{font-weight:800;letter-spacing:1px}
 .badge{font-size:12px;padding:4px 8px;border:1px solid #334155;border-radius:999px;color:var(--muted)}
 .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:10px 12px;border-radius:12px;border:1px solid #334155;background:#0b1220;color:#e5e7eb;box-shadow:0 2px 0 #00000055;user-select:none}
+.btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:14px 16px;border-radius:14px;border:1px solid #334155;background:#0b1220;color:#e5e7eb;box-shadow:0 2px 0 #00000055;user-select:none;font-size:16px;line-height:1}
 .btn:hover{filter:brightness(1.12)}
 .btn.active{outline:2px solid var(--primary);}
 .sep{width:1px;height:28px;background:#243041;margin:0 6px}
 label{font-size:13px;color:var(--muted)}
 input[type="range"]{accent-color:var(--primary)}
-.color{width:28px;height:28px;border-radius:8px;border:1px solid #334155;cursor:pointer}
+.color{width:32px;height:32px;border-radius:8px;border:1px solid #334155;cursor:pointer}
 .picker{display:flex;gap:6px;align-items:center}
 .right{margin-left:auto;display:flex;gap:8px;align-items:center}
 
@@ -44,12 +44,8 @@ input[type="range"]{accent-color:var(--primary)}
 
 /* floating text editor */
 .text-editor{position:absolute;z-index:10;display:none}
-.text-editor textarea{min-width:280px;min-height:80px;padding:10px 12px;border-radius:12px;border:1px solid #374151;background:#0b1220;color:#e5e7eb;font-size:20px;line-height:1.4}
+.text-editor textarea{min-width:320px;min-height:90px;padding:10px 12px;border-radius:12px;border:1px solid #374151;background:#0b1220;color:#e5e7eb;font-size:20px;line-height:1.4}
 .text-editor .actions{margin-top:6px;display:flex;gap:6px}
-
-/* sticker note */
-.note{position:absolute;min-width:120px;min-height:80px;padding:10px 12px;border-radius:12px;background:#fde68a;color:#1f2937;border:1px solid #f59e0b;box-shadow:0 8px 30px #00000055}
-.note .handle{position:absolute;right:6px;top:6px;font-size:12px;color:#78350f;cursor:grab}
 
 footer{display:flex;gap:12px;align-items:center;justify-content:center;color:var(--muted);padding:8px;border-top:1px solid #1f2937;background:#0b1220}
 kbd{background:#111827;padding:2px 5px;border-radius:6px;border:1px solid #374151;color:#e5e7eb;font-size:12px}
@@ -58,7 +54,7 @@ kbd{background:#111827;padding:2px 5px;border-radius:6px;border:1px solid #37415
 <body>
   <div class="header">
     <div class="logo">Digital Whiteboard</div>
-    <span class="badge">HTML5 • Pointer Events • 離線可用</span>
+    <span class="badge">Developed by DennisZ</span>
 
     <div class="toolbar">
       <button class="btn tool" data-tool="pen" title="畫筆 (P)">✏️ 畫筆</button>
@@ -86,6 +82,9 @@ kbd{background:#111827;padding:2px 5px;border-radius:6px;border:1px solid #37415
       <button class="btn" id="redo" title="重做 (Ctrl+Y)">↷ 重做</button>
       <button class="btn" id="clear" title="清空看板">🗑️ 清空</button>
       <button class="btn" id="save" title="匯出 PNG">💾 匯出</button>
+      <div class="sep"></div>
+      <button class="btn" id="paste" title="貼上剪貼簿 (Ctrl+V)">📋 貼上</button>
+      <button class="btn" id="lockToggle" title="鎖定/解鎖已選取物件">🔒 鎖定/解鎖</button>
     </div>
 
     <div class="right">
@@ -104,21 +103,23 @@ kbd{background:#111827;padding:2px 5px;border-radius:6px;border:1px solid #37415
         <button class="btn" id="textCancel">取消</button>
       </div>
     </div>
-    <div class="hint">快捷鍵：<kbd>P</kbd>筆 <kbd>H</kbd>螢光 <kbd>E</kbd>擦 <kbd>L</kbd>線 <kbd>R</kbd>矩形 <kbd>T</kbd>文字 <kbd>Z</kbd>雷射｜<kbd>Ctrl</kbd>+<kbd>Z</kbd> 復原 <kbd>Ctrl</kbd>+<kbd>Y</kbd> 重做｜<kbd>F</kbd> 全螢幕</div>
+    <div class="hint">快捷鍵：<kbd>P</kbd>筆 <kbd>H</kbd>螢光 <kbd>E</kbd>擦 <kbd>L</kbd>線 <kbd>R</kbd>矩形 <kbd>T</kbd>文字 <kbd>Z</kbd>雷射｜<kbd>Ctrl</kbd>+<kbd>Z</kbd> 復原 <kbd>Ctrl</kbd>+<kbd>Y</kbd> 重做｜<kbd>F</kbd> 全螢幕｜<kbd>Ctrl</kbd>+<kbd>V</kbd> 貼上</div>
     <div class="toast" id="toast">已匯出 PNG 檔</div>
   </div>
 
   <footer>
-    <div>畫筆會自動根據 <em>Pointer Events</em> 的 <code>pressure</code> 改變粗細（可關閉）。支援觸控/滑鼠/手寫筆。</div>
+    <div>畫筆會自動根據 <em>Pointer Events</em> 的 <code>pressure</code> 改變粗細（可關閉）。支援觸控/滑鼠/手寫筆。貼上支援文字與圖片；貼上後可拖曳，並可鎖定。</div>
   </footer>
 
 <script>
 /**
- * Digital Whiteboard – 單檔版
- * 功能：畫筆、螢光筆、橡皮擦、直線、矩形、文字、雷射筆、撤銷/重做、格線、匯出 PNG、全螢幕
- * 實作：以向量操作記錄 history，重繪渲染，避免位圖快照造成高記憶體壓力。
+ * Digital Whiteboard V2 – 單檔版
+ * + 大尺寸工具按鈕
+ * + 貼上剪貼簿文字或圖片（Ctrl+V / 按鈕）
+ * + 貼上物件可移動、可鎖定/解鎖、可刪除（Delete/Backspace）
  */
 const $ = (s)=>document.querySelector(s);
+const $$ = (s)=>Array.from(document.querySelectorAll(s));
 
 const canvas = $('#board');
 const ctx = canvas.getContext('2d');
@@ -137,6 +138,11 @@ let laserTrail = [];
 const history = []; // vector ops
 let redoStack = [];
 
+// 物件層（貼上後可移動/鎖定）
+const objects = []; // {type:'image'|'textblock', x,y,w,h,img?, text?, color?, size?, locked:false}
+let selected = -1;
+let draggingObj = false; let dragDX = 0, dragDY = 0;
+
 function resize(){
   const dpr = Math.max(1, window.devicePixelRatio || 1);
   const {clientWidth:w, clientHeight:h} = canvas.parentElement;
@@ -147,10 +153,7 @@ function resize(){
 }
 window.addEventListener('resize', resize);
 
-function setActiveTool(t){
-  tool = t; $$('.tool').forEach(b=>b.classList.toggle('active', b.dataset.tool===t));
-}
-function $$(s){return Array.from(document.querySelectorAll(s))}
+function setActiveTool(t){ tool = t; $$('.tool').forEach(b=>b.classList.toggle('active', b.dataset.tool===t)); }
 
 // UI binds
 $$('.tool').forEach(b=>b.addEventListener('click',()=>setActiveTool(b.dataset.tool)));
@@ -163,6 +166,11 @@ $('#clear').addEventListener('click', ()=>{history.length=0; redoStack.length=0;
 $('#save').addEventListener('click', exportPNG);
 $('#fullscreen').addEventListener('click', toggleFullscreen);
 $('#toggleGrid').addEventListener('click', ()=>{grid.style.display = grid.style.display==='none' ? '' : 'none'});
+$('#paste').addEventListener('click', pasteFromClipboard);
+$('#lockToggle').addEventListener('click', toggleLock);
+
+// paste via keyboard
+window.addEventListener('paste', handlePaste);
 
 // Pointer Events
 canvas.addEventListener('pointerdown', onDown);
@@ -179,8 +187,15 @@ function getPos(e){
 
 function onDown(e){
   if(e.button===1) return; // ignore middle
-  canvas.setPointerCapture(e.pointerId);
   const pos = getPos(e);
+  // 先檢測物件命中，命中則進入拖曳
+  const idx = hitObject(pos.x,pos.y);
+  if(idx>=0){
+    selected = idx; render();
+    if(!objects[idx].locked){ draggingObj = true; dragDX = pos.x-objects[idx].x; dragDY = pos.y-objects[idx].y; }
+    return; // 不進入畫筆流程
+  }
+  canvas.setPointerCapture(e.pointerId);
   drawing = true; startPoint = pos; tempShape = null;
   if(tool==='pen' || tool==='highlighter' || tool==='eraser'){
     const stroke = {type: tool, color, size, points:[{x:pos.x,y:pos.y,p:pos.p}]};
@@ -189,12 +204,17 @@ function onDown(e){
     laserTrail.push({x:pos.x,y:pos.y,t:performance.now()});
   } else if(tool==='text'){
     openTextEditor(pos.x,pos.y);
-    drawing=false; // text via editor
+    drawing=false; // 文字用編輯器插入
   }
 }
 
 function onMove(e){
   const pos = getPos(e);
+  if(draggingObj && selected>=0){
+    const o = objects[selected];
+    if(!o.locked){ o.x = pos.x - dragDX; o.y = pos.y - dragDY; render(); }
+    return;
+  }
   if(tool==='laser'){
     laserTrail.push({x:pos.x,y:pos.y,t:performance.now()});
     render();
@@ -205,7 +225,6 @@ function onMove(e){
     const stroke = history[history.length-1];
     const pressure = pressureEnabled ? Math.max(0.2, pos.p) : 1;
     stroke.points.push({x:pos.x,y:pos.y,p:pressure});
-    // 使用合併事件，提升平滑度
     const coalesced = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
     for(const ce of coalesced){
       const cp = getPos(ce);
@@ -219,23 +238,22 @@ function onMove(e){
 }
 
 function onUp(){
+  if(draggingObj){ draggingObj=false; return; }
   if(!drawing) return;
   drawing = false;
-  if(tempShape){
-    history.push(tempShape); redoStack.length=0; tempShape=null; render();
-  }
+  if(tempShape){ history.push(tempShape); redoStack.length=0; tempShape=null; render(); }
 }
 
 // Drawing
 function render(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  // draw all ops
-  for(const op of history){
-    drawOp(op, ctx);
-  }
+  // vector history
+  for(const op of history){ drawOp(op, ctx); }
   // preview temp
   if(tempShape){ drawOp(tempShape, ctx, true); }
-  // laser trail (not persistent)
+  // objects layer
+  drawObjects();
+  // laser
   drawLaser();
 }
 
@@ -295,21 +313,11 @@ const editor = $('#textEditor');
 const textInput = $('#textInput');
 $('#textOk').addEventListener('click', ()=>{
   const text = textInput.value.trim();
-  if(text){
-    history.push({type:'text', text, x: editor.dataset.x|0, y: editor.dataset.y|0, color, size: Math.max(16, size)});
-    redoStack.length=0; render();
-  }
+  if(text){ history.push({type:'text', text, x: editor.dataset.x|0, y: editor.dataset.y|0, color, size: Math.max(16, size)}); redoStack.length=0; render(); }
   closeTextEditor();
 });
 $('#textCancel').addEventListener('click', closeTextEditor);
-
-function openTextEditor(x,y){
-  editor.style.left = x + 'px';
-  editor.style.top = y + 'px';
-  editor.dataset.x = x; editor.dataset.y = y;
-  editor.style.display = 'block';
-  textInput.value=''; textInput.focus();
-}
+function openTextEditor(x,y){ editor.style.left = x + 'px'; editor.style.top = y + 'px'; editor.dataset.x = x; editor.dataset.y = y; editor.style.display = 'block'; textInput.value=''; textInput.focus(); }
 function closeTextEditor(){ editor.style.display='none'; }
 
 // helpers
@@ -317,13 +325,10 @@ function undo(){ if(history.length){ redoStack.push(history.pop()); render(); } 
 function redo(){ if(redoStack.length){ history.push(redoStack.pop()); render(); } }
 function toggleFullscreen(){ if(!document.fullscreenElement){ document.documentElement.requestFullscreen?.(); } else { document.exitFullscreen?.(); } }
 function exportPNG(){
-  // 將格線暫時隱藏，避免烙印在輸出
   const wasHidden = grid.style.display==='none';
-  grid.style.display='none';
-  render();
+  grid.style.display='none'; render();
   requestAnimationFrame(()=>{
-    const a = document.createElement('a'); a.download='whiteboard.png';
-    a.href = canvas.toDataURL('image/png'); a.click();
+    const a = document.createElement('a'); a.download='whiteboard.png'; a.href = canvas.toDataURL('image/png'); a.click();
     grid.style.display = wasHidden? 'none' : '';
     showToast('已匯出 PNG 檔'); render();
   });
@@ -331,15 +336,99 @@ function exportPNG(){
 function showToast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1200); }
 
 function wrapText(c, text, x, y, maxWidth, lineHeight){
-  const words = text.split(/\s+/); let line=''; let yy=y;
+  const words = String(text).split(/\s+/); let line=''; let yy=y; const lines=[];
   for(let n=0;n<words.length;n++){
     const test = line + (line?' ':'') + words[n];
     const w = c.measureText(test).width;
-    if(w>maxWidth && n>0){ c.fillText(line, x, yy); line = words[n]; yy+=lineHeight; }
+    if(w>maxWidth && n>0){ lines.push({text:line, x, y:yy}); line = words[n]; yy+=lineHeight; }
     else line = test;
   }
-  c.fillText(line, x, yy);
+  lines.push({text:line, x, y:yy});
+  for(const L of lines){ c.fillText(L.text, L.x, L.y); }
+  return {w:maxWidth, h:(lines.length-1)*lineHeight};
 }
+
+// ===== 物件層：繪製、命中、貼上、鎖定 =====
+function drawObjects(){
+  for(let i=0;i<objects.length;i++){
+    const o = objects[i];
+    if(o.type==='image' && o.img){ ctx.drawImage(o.img, o.x, o.y, o.w, o.h); }
+    if(o.type==='textblock'){
+      ctx.save(); ctx.fillStyle = o.color || '#e5e7eb'; ctx.font = `${o.size||24}px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto`;
+      wrapText(ctx, o.text, o.x, o.y, o.w||600, 1.35*(o.size||24));
+      ctx.restore();
+    }
+  }
+  if(selected>=0){ drawSelection(objects[selected]); }
+}
+function drawSelection(o){
+  ctx.save(); ctx.setLineDash([6,6]); ctx.lineWidth=2; ctx.strokeStyle = o.locked? '#f87171':'#22d3ee';
+  const b = getBounds(o);
+  ctx.strokeRect(b.x-4,b.y-4,b.w+8,b.h+8);
+  ctx.setLineDash([]); ctx.fillStyle = o.locked? '#f87171':'#22d3ee';
+  ctx.beginPath(); ctx.arc(b.x+b.w, b.y-10, 6, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+function getBounds(o){
+  if(o.type==='image'){ return {x:o.x, y:o.y, w:o.w, h:o.h}; }
+  if(o.type==='textblock'){
+    ctx.save(); ctx.font = `${o.size||24}px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto`;
+    const lineH = 1.35*(o.size||24);
+    const words = String(o.text||'').split(/\s+/); let line=''; let lines=1; const maxW = o.w||600;
+    for(let i=0;i<words.length;i++){ const t = (line?line+' ':'')+words[i]; if(ctx.measureText(t).width > maxW && i>0){ lines++; line=words[i]; } else { line=t; } }
+    ctx.restore();
+    return {x:o.x, y:o.y-(o.size||24), w:maxW, h: lines*lineH};
+  }
+  return {x:o.x||0,y:o.y||0,w:o.w||0,h:o.h||0};
+}
+function hitObject(x,y){
+  for(let i=objects.length-1;i>=0;i--){
+    const b = getBounds(objects[i]);
+    if(x>=b.x && x<=b.x+b.w && y>=b.y && y<=b.y+b.h) return i;
+  }
+  return -1;
+}
+
+async function pasteFromClipboard(){
+  try{
+    if(navigator.clipboard && navigator.clipboard.read){
+      const items = await navigator.clipboard.read();
+      for(const item of items){
+        for(const type of item.types){
+          if(type.startsWith('image/')){
+            const blob = await item.getType(type);
+            const img = new Image(); const url = URL.createObjectURL(blob);
+            img.onload = ()=>{ objects.push({type:'image', img, x:60, y:60, w:Math.min(600,img.width), h:Math.min(400,img.height), locked:false}); URL.revokeObjectURL(url); render(); };
+            img.src = url; return;
+          }
+        }
+      }
+      const text = await navigator.clipboard.readText();
+      if(text){ objects.push({type:'textblock', text, x:60, y:80, w:600, color, size: Math.max(18, size), locked:false}); render(); return; }
+    }
+    alert('無法直接讀取剪貼簿，請使用 Ctrl+V 於畫布上貼上。');
+  }catch(err){ console.warn(err); alert('讀取剪貼簿失敗，請改用 Ctrl+V。'); }
+}
+
+function handlePaste(e){
+  const cd = e.clipboardData; if(!cd) return;
+  for(const item of cd.items){
+    if(item.type && item.type.startsWith('image/')){
+      const file = item.getAsFile(); const img = new Image(); const url = URL.createObjectURL(file);
+      img.onload = ()=>{ objects.push({type:'image', img, x:60, y:60, w:Math.min(600,img.width), h:Math.min(400,img.height), locked:false}); URL.revokeObjectURL(url); render(); };
+      img.src = url; e.preventDefault(); return;
+    }
+  }
+  const text = cd.getData('text/plain');
+  if(text){ objects.push({type:'textblock', text, x:60, y:80, w:600, color, size: Math.max(18, size), locked:false}); render(); e.preventDefault(); }
+}
+
+function toggleLock(){ if(selected>=0){ objects[selected].locked = !objects[selected].locked; render(); } }
+
+// 選取物件後可刪除（未鎖定）
+window.addEventListener('keydown', (e)=>{
+  if((e.key==='Delete' || e.key==='Backspace') && selected>=0){ const o = objects[selected]; if(!o.locked){ objects.splice(selected,1); selected=-1; render(); } }
+});
 
 // keyboard shortcuts
 window.addEventListener('keydown', (e)=>{
@@ -355,7 +444,6 @@ window.addEventListener('keydown', (e)=>{
 // init
 setActiveTool('pen');
 resize();
-
 </script>
 </body>
 </html>
