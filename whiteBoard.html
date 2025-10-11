@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Digital Whiteboard｜HTML5 精美範例</title>
+<style>
+:root{
+  --bg:#0f172a; /* slate-900 */
+  --panel:#0b1220ee;
+  --ink:#e5e7eb; /* default pen */
+  --muted:#94a3b8;
+  --primary:#22d3ee; /* cyan */
+  --accent:#a78bfa; /* violet */
+  --warn:#fb7185;   /* rose */
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:radial-gradient(1200px 800px at 50% -200px,#1e293b,var(--bg));
+  color:#e5e7eb;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.header{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #1f2937;background:linear-gradient(#0b1220, #0b1220f2);backdrop-filter:blur(8px)}
+.logo{font-weight:800;letter-spacing:1px}
+.badge{font-size:12px;padding:4px 8px;border:1px solid #334155;border-radius:999px;color:var(--muted)}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:10px 12px;border-radius:12px;border:1px solid #334155;background:#0b1220;color:#e5e7eb;box-shadow:0 2px 0 #00000055;user-select:none}
+.btn:hover{filter:brightness(1.12)}
+.btn.active{outline:2px solid var(--primary);}
+.sep{width:1px;height:28px;background:#243041;margin:0 6px}
+label{font-size:13px;color:var(--muted)}
+input[type="range"]{accent-color:var(--primary)}
+.color{width:28px;height:28px;border-radius:8px;border:1px solid #334155;cursor:pointer}
+.picker{display:flex;gap:6px;align-items:center}
+.right{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+.canvas-wrap{position:relative;flex:1;overflow:hidden}
+#grid{position:absolute;inset:0;pointer-events:none;background-size:40px 40px;background-image:linear-gradient(to right,#1f2937 1px,transparent 1px),linear-gradient(to bottom,#1f2937 1px,transparent 1px);opacity:.35}
+#board{position:absolute;inset:0;touch-action:none;cursor:crosshair}
+.hint{position:absolute;left:12px;bottom:12px;color:var(--muted);background:#0b1220cc;border:1px solid #1f2937;border-radius:10px;padding:8px 10px;backdrop-filter:blur(6px);font-size:13px}
+.toast{position:absolute;top:16px;left:50%;transform:translateX(-50%);background:#111827;border:1px solid #1f2937;border-radius:12px;padding:10px 14px;opacity:0;transition:opacity .25s ease}
+.toast.show{opacity:1}
+
+/* floating text editor */
+.text-editor{position:absolute;z-index:10;display:none}
+.text-editor textarea{min-width:280px;min-height:80px;padding:10px 12px;border-radius:12px;border:1px solid #374151;background:#0b1220;color:#e5e7eb;font-size:20px;line-height:1.4}
+.text-editor .actions{margin-top:6px;display:flex;gap:6px}
+
+/* sticker note */
+.note{position:absolute;min-width:120px;min-height:80px;padding:10px 12px;border-radius:12px;background:#fde68a;color:#1f2937;border:1px solid #f59e0b;box-shadow:0 8px 30px #00000055}
+.note .handle{position:absolute;right:6px;top:6px;font-size:12px;color:#78350f;cursor:grab}
+
+footer{display:flex;gap:12px;align-items:center;justify-content:center;color:var(--muted);padding:8px;border-top:1px solid #1f2937;background:#0b1220}
+kbd{background:#111827;padding:2px 5px;border-radius:6px;border:1px solid #374151;color:#e5e7eb;font-size:12px}
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">Digital Whiteboard</div>
+    <span class="badge">HTML5 • Pointer Events • 離線可用</span>
+
+    <div class="toolbar">
+      <button class="btn tool" data-tool="pen" title="畫筆 (P)">✏️ 畫筆</button>
+      <button class="btn tool" data-tool="highlighter" title="螢光筆 (H)">🖍️ 螢光筆</button>
+      <button class="btn tool" data-tool="eraser" title="橡皮擦 (E)">🧽 橡皮擦</button>
+      <div class="sep"></div>
+      <button class="btn tool" data-tool="line" title="直線 (L)">📏 直線</button>
+      <button class="btn tool" data-tool="rect" title="矩形 (R)">▭ 矩形</button>
+      <button class="btn tool" data-tool="text" title="文字 (T)">🔤 文字</button>
+      <button class="btn tool" data-tool="laser" title="雷射筆 (Z)">🔴 雷射</button>
+      <div class="sep"></div>
+      <div class="picker">
+        <label>顏色</label>
+        <input type="color" id="color" value="#e5e7eb" class="color" />
+      </div>
+      <div class="picker">
+        <label>粗細</label>
+        <input type="range" id="size" min="1" max="60" value="6" />
+      </div>
+      <div class="picker">
+        <label><input type="checkbox" id="pressure" checked /> 壓力感應</label>
+      </div>
+      <div class="sep"></div>
+      <button class="btn" id="undo" title="復原 (Ctrl+Z)">↶ 復原</button>
+      <button class="btn" id="redo" title="重做 (Ctrl+Y)">↷ 重做</button>
+      <button class="btn" id="clear" title="清空看板">🗑️ 清空</button>
+      <button class="btn" id="save" title="匯出 PNG">💾 匯出</button>
+    </div>
+
+    <div class="right">
+      <button class="btn" id="fullscreen" title="全螢幕 (F)">⛶ 全螢幕</button>
+      <button class="btn" id="toggleGrid" title="切換格線 (G)"># 格線</button>
+    </div>
+  </div>
+
+  <div class="canvas-wrap">
+    <div id="grid"></div>
+    <canvas id="board"></canvas>
+    <div class="text-editor" id="textEditor">
+      <textarea id="textInput" placeholder="輸入文字…"></textarea>
+      <div class="actions">
+        <button class="btn" id="textOk">插入</button>
+        <button class="btn" id="textCancel">取消</button>
+      </div>
+    </div>
+    <div class="hint">快捷鍵：<kbd>P</kbd>筆 <kbd>H</kbd>螢光 <kbd>E</kbd>擦 <kbd>L</kbd>線 <kbd>R</kbd>矩形 <kbd>T</kbd>文字 <kbd>Z</kbd>雷射｜<kbd>Ctrl</kbd>+<kbd>Z</kbd> 復原 <kbd>Ctrl</kbd>+<kbd>Y</kbd> 重做｜<kbd>F</kbd> 全螢幕</div>
+    <div class="toast" id="toast">已匯出 PNG 檔</div>
+  </div>
+
+  <footer>
+    <div>畫筆會自動根據 <em>Pointer Events</em> 的 <code>pressure</code> 改變粗細（可關閉）。支援觸控/滑鼠/手寫筆。</div>
+  </footer>
+
+<script>
+/**
+ * Digital Whiteboard – 單檔版
+ * 功能：畫筆、螢光筆、橡皮擦、直線、矩形、文字、雷射筆、撤銷/重做、格線、匯出 PNG、全螢幕
+ * 實作：以向量操作記錄 history，重繪渲染，避免位圖快照造成高記憶體壓力。
+ */
+const $ = (s)=>document.querySelector(s);
+
+const canvas = $('#board');
+const ctx = canvas.getContext('2d');
+const grid = $('#grid');
+
+const tools = ['pen','highlighter','eraser','line','rect','text','laser'];
+let tool = 'pen';
+let color = $('#color').value;
+let size = +$('#size').value;
+let pressureEnabled = $('#pressure').checked;
+let drawing = false;
+let startPoint = null; // for line/rect
+let tempShape = null;  // preview frame
+let laserTrail = [];
+
+const history = []; // vector ops
+let redoStack = [];
+
+function resize(){
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const {clientWidth:w, clientHeight:h} = canvas.parentElement;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w+"px"; canvas.style.height = h+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  render();
+}
+window.addEventListener('resize', resize);
+
+function setActiveTool(t){
+  tool = t; $$('.tool').forEach(b=>b.classList.toggle('active', b.dataset.tool===t));
+}
+function $$(s){return Array.from(document.querySelectorAll(s))}
+
+// UI binds
+$$('.tool').forEach(b=>b.addEventListener('click',()=>setActiveTool(b.dataset.tool)));
+$('#color').addEventListener('input', e=>{color=e.target.value;render()});
+$('#size').addEventListener('input', e=>{size=+e.target.value});
+$('#pressure').addEventListener('change', e=>{pressureEnabled=e.target.checked});
+$('#undo').addEventListener('click', undo);
+$('#redo').addEventListener('click', redo);
+$('#clear').addEventListener('click', ()=>{history.length=0; redoStack.length=0; render()});
+$('#save').addEventListener('click', exportPNG);
+$('#fullscreen').addEventListener('click', toggleFullscreen);
+$('#toggleGrid').addEventListener('click', ()=>{grid.style.display = grid.style.display==='none' ? '' : 'none'});
+
+// Pointer Events
+canvas.addEventListener('pointerdown', onDown);
+canvas.addEventListener('pointermove', onMove);
+canvas.addEventListener('pointerup', onUp);
+canvas.addEventListener('pointercancel', onUp);
+canvas.addEventListener('pointerleave', onUp);
+canvas.addEventListener('contextmenu', e=>e.preventDefault());
+
+function getPos(e){
+  const r = canvas.getBoundingClientRect();
+  return {x: e.clientX - r.left, y: e.clientY - r.top, p: e.pressure || 0.5};
+}
+
+function onDown(e){
+  if(e.button===1) return; // ignore middle
+  canvas.setPointerCapture(e.pointerId);
+  const pos = getPos(e);
+  drawing = true; startPoint = pos; tempShape = null;
+  if(tool==='pen' || tool==='highlighter' || tool==='eraser'){
+    const stroke = {type: tool, color, size, points:[{x:pos.x,y:pos.y,p:pos.p}]};
+    history.push(stroke); redoStack.length=0; render();
+  } else if(tool==='laser') {
+    laserTrail.push({x:pos.x,y:pos.y,t:performance.now()});
+  } else if(tool==='text'){
+    openTextEditor(pos.x,pos.y);
+    drawing=false; // text via editor
+  }
+}
+
+function onMove(e){
+  const pos = getPos(e);
+  if(tool==='laser'){
+    laserTrail.push({x:pos.x,y:pos.y,t:performance.now()});
+    render();
+    return;
+  }
+  if(!drawing) return;
+  if(tool==='pen' || tool==='highlighter' || tool==='eraser'){
+    const stroke = history[history.length-1];
+    const pressure = pressureEnabled ? Math.max(0.2, pos.p) : 1;
+    stroke.points.push({x:pos.x,y:pos.y,p:pressure});
+    // 使用合併事件，提升平滑度
+    const coalesced = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+    for(const ce of coalesced){
+      const cp = getPos(ce);
+      stroke.points.push({x:cp.x,y:cp.y,p: pressureEnabled? Math.max(0.2, cp.p):1});
+    }
+    render();
+  } else if(tool==='line' || tool==='rect'){
+    tempShape = {type:tool, start:startPoint, end:pos, color, size};
+    render();
+  }
+}
+
+function onUp(){
+  if(!drawing) return;
+  drawing = false;
+  if(tempShape){
+    history.push(tempShape); redoStack.length=0; tempShape=null; render();
+  }
+}
+
+// Drawing
+function render(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // draw all ops
+  for(const op of history){
+    drawOp(op, ctx);
+  }
+  // preview temp
+  if(tempShape){ drawOp(tempShape, ctx, true); }
+  // laser trail (not persistent)
+  drawLaser();
+}
+
+function drawOp(op, c, preview=false){
+  if(op.type==='pen' || op.type==='highlighter' || op.type==='eraser'){
+    c.save();
+    c.lineJoin='round'; c.lineCap='round';
+    c.globalCompositeOperation = (op.type==='eraser')? 'destination-out':'source-over';
+    c.globalAlpha = (op.type==='highlighter')? 0.28 : 1;
+    c.strokeStyle = (op.type==='eraser')? '#000' : op.color;
+    c.beginPath();
+    for(let i=1;i<op.points.length;i++){
+      const a = op.points[i-1], b = op.points[i];
+      const w = (op.size) * (pressureEnabled ? (b.p||1) : 1);
+      c.lineWidth = Math.max(0.5, w);
+      c.moveTo(a.x,a.y); c.lineTo(b.x,b.y);
+    }
+    c.stroke();
+    c.restore();
+  }
+  if(op.type==='line'){
+    c.save(); c.strokeStyle = op.color; c.lineWidth = op.size; c.lineCap='round';
+    c.beginPath(); c.moveTo(op.start.x, op.start.y); c.lineTo(op.end.x, op.end.y); c.stroke(); c.restore();
+  }
+  if(op.type==='rect'){
+    c.save(); c.strokeStyle = op.color; c.lineWidth = op.size;
+    const x = Math.min(op.start.x, op.end.x);
+    const y = Math.min(op.start.y, op.end.y);
+    const w = Math.abs(op.start.x - op.end.x);
+    const h = Math.abs(op.start.y - op.end.y);
+    c.strokeRect(x,y,w,h); c.restore();
+  }
+  if(op.type==='text'){
+    c.save(); c.fillStyle = op.color; c.font = `${op.size||28}px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto`;
+    wrapText(c, op.text, op.x, op.y, 800, 1.35*(op.size||28));
+    c.restore();
+  }
+}
+
+function drawLaser(){
+  const now = performance.now();
+  const life = 600; // ms
+  laserTrail = laserTrail.filter(p=> now - p.t < life);
+  const c = ctx; c.save();
+  for(const p of laserTrail){
+    const k = 1 - (now - p.t)/life;
+    c.globalAlpha = Math.max(0, k);
+    c.fillStyle = '#ef4444';
+    c.beginPath(); c.arc(p.x,p.y,10*k,0,Math.PI*2); c.fill();
+  }
+  c.restore();
+  if(laserTrail.length) requestAnimationFrame(render);
+}
+
+// text editor
+const editor = $('#textEditor');
+const textInput = $('#textInput');
+$('#textOk').addEventListener('click', ()=>{
+  const text = textInput.value.trim();
+  if(text){
+    history.push({type:'text', text, x: editor.dataset.x|0, y: editor.dataset.y|0, color, size: Math.max(16, size)});
+    redoStack.length=0; render();
+  }
+  closeTextEditor();
+});
+$('#textCancel').addEventListener('click', closeTextEditor);
+
+function openTextEditor(x,y){
+  editor.style.left = x + 'px';
+  editor.style.top = y + 'px';
+  editor.dataset.x = x; editor.dataset.y = y;
+  editor.style.display = 'block';
+  textInput.value=''; textInput.focus();
+}
+function closeTextEditor(){ editor.style.display='none'; }
+
+// helpers
+function undo(){ if(history.length){ redoStack.push(history.pop()); render(); } }
+function redo(){ if(redoStack.length){ history.push(redoStack.pop()); render(); } }
+function toggleFullscreen(){ if(!document.fullscreenElement){ document.documentElement.requestFullscreen?.(); } else { document.exitFullscreen?.(); } }
+function exportPNG(){
+  // 將格線暫時隱藏，避免烙印在輸出
+  const wasHidden = grid.style.display==='none';
+  grid.style.display='none';
+  render();
+  requestAnimationFrame(()=>{
+    const a = document.createElement('a'); a.download='whiteboard.png';
+    a.href = canvas.toDataURL('image/png'); a.click();
+    grid.style.display = wasHidden? 'none' : '';
+    showToast('已匯出 PNG 檔'); render();
+  });
+}
+function showToast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1200); }
+
+function wrapText(c, text, x, y, maxWidth, lineHeight){
+  const words = text.split(/\s+/); let line=''; let yy=y;
+  for(let n=0;n<words.length;n++){
+    const test = line + (line?' ':'') + words[n];
+    const w = c.measureText(test).width;
+    if(w>maxWidth && n>0){ c.fillText(line, x, yy); line = words[n]; yy+=lineHeight; }
+    else line = test;
+  }
+  c.fillText(line, x, yy);
+}
+
+// keyboard shortcuts
+window.addEventListener('keydown', (e)=>{
+  if(e.ctrlKey && e.key.toLowerCase()==='z'){ e.preventDefault(); undo(); }
+  else if(e.ctrlKey && e.key.toLowerCase()==='y'){ e.preventDefault(); redo(); }
+  else if(e.key.toLowerCase()==='f'){ toggleFullscreen(); }
+  else {
+    const keyMap = {p:'pen', h:'highlighter', e:'eraser', l:'line', r:'rect', t:'text', z:'laser'};
+    const t = keyMap[e.key.toLowerCase()]; if(t){ setActiveTool(t); }
+  }
+});
+
+// init
+setActiveTool('pen');
+resize();
+
+</script>
+</body>
+</html>
