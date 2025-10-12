@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>超慢跑節拍器</title>
+<style>
+  :root{ --bg:#0b0c0f; --fg:#eaeff4; --muted:#b7c2cc; --card:#161a20; --accent:#4ea1ff; --ok:#1dd1a1; --warn:#fbc531; --hot:#ff8f3c; --danger:#ff4d4f; --ring:#ffffff33}
+  *{ box-sizing:border-box }
+  body{ margin:0; font-family:system-ui,-apple-system,"Noto Sans TC",Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--fg); background:linear-gradient(145deg,#0b0c0f,#0e1116 32%,#0b0c0f); }
+  .container{ max-width:1100px; margin:0 auto; padding:20px; }
+  h1{ font-size:clamp(24px,4vw,36px); margin:8px 0 6px }
+  .sub{ color:var(--muted); margin:0 0 16px; font-size:14px }
+  .grid{ display:grid; grid-template-columns:repeat(5,minmax(140px,1fr)); gap:12px }
+  @media (max-width:960px){ .grid{ grid-template-columns:repeat(3,1fr) } }
+  @media (max-width:640px){ .grid{ grid-template-columns:repeat(2,1fr) } }
+
+  /* 扁平彩色按鈕 */
+  .card{ background:var(--card); border:1px solid #ffffff12; padding:16px; border-radius:16px; cursor:pointer; position:relative; outline: none; }
+  .card:focus{ box-shadow:0 0 0 4px var(--ring) inset }
+  .card.preset{ border:none; box-shadow:none; color:#0a0f14; background:var(--btn-bg,#fff2); transition:transform .06s ease, filter .12s ease, opacity .12s ease; }
+  .card.preset:hover{ transform:translateY(-1px); filter:brightness(1.02) }
+  .card.preset:active{ transform:translateY(0) scale(.995) }
+  .tag{ font-size:12px; opacity:.9 }
+  .bpm{ font-weight:900; font-size:28px; margin:2px 0 4px; letter-spacing:1px }
+  .name{ font-size:14px; opacity:.95 }
+
+  .c-blue.preset{   --btn-bg:linear-gradient(180deg, #4ea1ff 0%, #78b8ff 100%); }
+  .c-green.preset{  --btn-bg:linear-gradient(180deg, #1dd1a1 0%, #4ce0b7 100%); }
+  .c-yellow.preset{ --btn-bg:linear-gradient(180deg, #fbc531 0%, #ffd562 100%); }
+  .c-orange.preset{ --btn-bg:linear-gradient(180deg, #ff8f3c 0%, #ffae70 100%); }
+  .c-red.preset{    --btn-bg:linear-gradient(180deg, #ff4d4f 0%, #ff7a7c 100%); }
+
+  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; vertical-align:middle; margin-right:6px; filter:contrast(1.05) }
+  .dot.blue{ background:#0a5ec7 }
+  .dot.green{ background:#0f8f73 }
+  .dot.yellow{ background:#c79a00 }
+  .dot.orange{ background:#c46814 }
+  .dot.red{ background:#c12628 }
+
+  .panel{ margin-top:16px; background:var(--card); border:1px solid #ffffff12; border-radius:20px; padding:16px }
+  .row{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between }
+  .left,.right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
+  .pill{ padding:8px 12px; border-radius:999px; background:#ffffff10; font-size:14px }
+  .btn{ border:1px solid #ffffff24; background:#ffffff08; color:var(--fg); padding:10px 14px; border-radius:12px; cursor:pointer; font-size:16px }
+  .btn[disabled]{ opacity:.45; cursor:not-allowed }
+  .btn.solid{ background:var(--accent); border-color:transparent; color:#001221; font-weight:700 }
+  .btn.green{ background:var(--ok); color:#012018 }
+  .btn.red{ background:var(--danger); color:#210103 }
+  .btn.ghost{ background:transparent }
+  .switch{ display:inline-flex; align-items:center; gap:8px; font-size:14px }
+  .switch input{ width:44px; height:24px }
+  .select{ color:black;background:#ffffff0f; border:1px solid #ffffff24; color:var(--fg); padding:8px 10px; border-radius:10px; font-size:14px }
+  .hr{ height:1px; background:#ffffff12; margin:12px 0 }
+
+  .stage{ display:grid; place-items:center; padding:24px; border-radius:16px; background:radial-gradient(1200px 400px at 50% -200px,var(--accent)15%,transparent), #0d1117; border:1px solid #ffffff10 }
+  .beat{ font-size:clamp(56px,12vw,120px); font-weight:900; letter-spacing:2px; text-shadow:0 6px 24px #000a; transition:transform .1s ease }
+  .ring{ width:min(420px,70vw); aspect-ratio:1; border-radius:50%; border:8px solid #ffffff14; position:relative; margin:8px auto 0; overflow:hidden }
+  .fill{ position:absolute; inset:0; transform-origin:center; scale:0.1; opacity:.9; border-radius:50%; transition:transform .06s ease, background .2s ease, opacity .2s ease }
+
+  .foot{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; color:var(--muted); font-size:12px; justify-content:space-between; margin-top:8px }
+  .kbd{ background:#000; border:1px solid #ffffff33; padding:2px 6px; border-radius:6px; font-family:ui-monospace,monospace }
+  .hint{ color:var(--muted) }
+
+  .hc body, .hc .panel, .hc .card{ filter:contrast(115%) }
+
+  /* 全螢幕展示模式 */
+  body.showcase{ background:#0b0c0f }
+  body.showcase .container{ max-width:none; padding:0 }
+  body.showcase h1,
+  body.showcase .sub,
+  body.showcase .grid,
+  body.showcase .panel .row,
+  body.showcase .foot{ display:none !important }
+  body.showcase .panel{ border:none; background:transparent; padding:0; border-radius:0 }
+  body.showcase .stage{
+    min-height:100svh; width:100%;
+    border:none; border-radius:0;
+    background:radial-gradient(1600px 600px at 50% -300px,var(--accent)18%,transparent), #0b0c0f;
+  }
+  .badge {
+    font-size: 12px;
+    padding: 4px 8px;
+    border: 1px solid #334155;
+    border-radius: 999px;
+    color: var(--muted);
+}
+.select { 
+  color-scheme: dark;
+  /* 也強化聚焦可視化 */
+  outline: none;
+}
+.select:focus {
+  box-shadow: 0 0 0 4px var(--ring);
+  border-color: #ffffff66;
+}
+.select option,
+.select optgroup {
+  background: #0b0c0f;        /* 與頁面一致的深色背景 */
+  color: #eaeff4;             /* 與 --fg 一致的前景色 */
+}
+.select option:checked,
+.select option:focus,
+.select option:hover {
+  background: #4ea1ff;        /* 用主題重點色當反白底 */
+  color: #001221;              /* 與你的 .btn.solid 同風格的深字色 */
+}
+@media (forced-colors: active) {
+  .select { 
+    forced-color-adjust: none;
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+  .select option { 
+    background: Canvas; 
+    color: CanvasText; 
+  }
+}
+.select { color: var(--fg); }
+</style>
+</head>
+<body>
+  <div class="container" id="app" tabindex="0" aria-label="超慢跑節拍器">
+    <h1>超慢跑節拍器	<span class="badge">Developed by DennisZ</span></h1>     
+
+    <p class="sub">選一個節奏開始：建議由 160–170 BPM 起步，熟悉後再提升。</p>
+
+
+    <!-- Preset Grid -->
+    <div class="grid" id="grid"></div>
+
+    <!-- Control / Stage -->
+    <div class="panel" style="margin-top:18px">
+      <div class="row">
+        <div class="left">
+          <span class="pill" id="labelPill">尚未選擇</span>
+          <span class="pill">BPM：<strong id="bpmText">-</strong></span>
+          <span class="pill">拍號：<strong id="meterText">2/4</strong></span>
+          <span class="pill">鼓勵每 <strong id="encText">60</strong> 秒</span>
+        </div>
+        <div class="right">
+          <label class="switch"><input type="checkbox" id="ttsToggle" checked/>啟用語音鼓勵</label>
+          <select id="voiceSel" class="select" title="選擇語音"></select>
+          <button class="btn" id="voiceTestBtn" title="試聽語音">試聽</button>
+          <button class="btn solid" id="startBtn">開始</button>
+          <button class="btn" id="pauseBtn" disabled>暫停</button>
+          <button class="btn red" id="stopBtn" disabled>結束</button>
+        </div>
+      </div>
+      <div class="hr"></div>
+
+      <div class="stage" id="stage" aria-live="polite">
+        <div class="beat" id="beatText">準備開始</div>
+        <div class="ring"><div class="fill" id="fill"></div></div>
+      </div>
+
+      <div class="foot">
+        <div>
+          TV 操作：
+          <span class="kbd">← →</span> 節拍切換、
+          <span class="kbd">Enter</span> 開始/暫停、
+          <span class="kbd">Back/Esc</span> 結束、
+          <span class="kbd">F</span> 全螢幕、
+          <span class="kbd">X</span> 展示模式
+        </div>
+        <div class="hint">第一次播放需點擊「開始」以啟用音訊</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/** ----- Presets / Theme ----- **/
+const PRESETS = [
+  { id:'p160', name:'入門', bpm:160, color:'#4ea1ff', tag:'🔵 160（入門）', class:'blue', accentVar:'--accent' },
+  { id:'p170', name:'舒壓', bpm:170, color:'#1dd1a1', tag:'🟢 170（舒壓）', class:'green' },
+  { id:'p180', name:'標準', bpm:180, color:'#fbc531', tag:'🟡 180（標準）', class:'yellow' },
+  { id:'p190', name:'進階', bpm:190, color:'#ff8f3c', tag:'🟠 190（進階）', class:'orange' },
+  { id:'p200', name:'挑戰', bpm:200, color:'#ff4d4f', tag:'🔴 200（挑戰）', class:'red' },
+];
+
+// 擴充鼓勵語句（多樣化：姿勢、呼吸、步頻、放鬆、專注）
+const ENCOURAGE_LINES = [
+  "很好，保持輕鬆步幅",
+  "穩住節奏，放鬆肩頸",
+  "做得好，專注腳下",
+  "呼吸順暢，腳步輕快",
+  "放鬆手臂，擺動自然",
+  "抬頭挺胸，視線向前",
+  "維持穩定步頻，不急不躁",
+  "吸氣共四拍，吐氣也四拍，找到節奏",
+  "身體微向前傾，核心穩定",
+  "步伐不用大，節奏優先",
+  "保持笑容，讓身體更放鬆",
+  "很好，持續穩住現在的速度",
+  "注意落地輕，身體更省力",
+  "你做得很棒，繼續保持！"
+];
+
+// 依強度提供不同類型鼓勵（對應需求：切換時給對應鼓勵）
+const MODE_ENC = {
+  low: [
+    "今天就用輕鬆的節奏暖身",
+    "慢慢來，找到自己的呼吸",
+    "輕鬆走，讓身體先醒來",
+  ],
+  mid: [
+    "節奏剛好，維持穩定最重要",
+    "專注腳步，讓力量平均分配",
+    "很好，就用這個速度前進",
+  ],
+  high: [
+    "挑戰開始，注意放鬆不憋氣",
+    "保持核心穩定，提起精神",
+    "加油！你正在突破自己",
+  ]
+};
+
+/** ----- State / DOM ----- **/
+const app = document.getElementById('app');
+const grid = document.getElementById('grid');
+const stage = document.getElementById('stage');
+const beatText = document.getElementById('beatText');
+const fill = document.getElementById('fill');
+const startBtn = document.getElementById('startBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const stopBtn = document.getElementById('stopBtn');
+const ttsToggle = document.getElementById('ttsToggle');
+const labelPill = document.getElementById('labelPill');
+const bpmText = document.getElementById('bpmText');
+const meterText = document.getElementById('meterText');
+const encText = document.getElementById('encText');
+const voiceSel = document.getElementById('voiceSel');
+const voiceTestBtn = document.getElementById('voiceTestBtn');
+
+const S = {
+  ctx:null, nextTime:0, playing:false,
+  lookahead: 0.1, scheduleAhead: 0.5,
+  bpm: 0, encSec: 60, lastEnc: 0,
+  current: null, // preset object
+  raf: 0,
+  voices: [], voice: null
+};
+
+/** ----- 工具：挑選鼓勵句（依 BPM 區間） ----- **/
+function pickModeEnc(bpm){
+  if(bpm < 175){
+    return MODE_ENC.low[Math.floor(Math.random()*MODE_ENC.low.length)];
+  } else if(bpm < 190){
+    return MODE_ENC.mid[Math.floor(Math.random()*MODE_ENC.mid.length)];
+  }
+  return MODE_ENC.high[Math.floor(Math.random()*MODE_ENC.high.length)];
+}
+
+/** ----- UI: build cards (扁平彩色按鈕) ----- **/
+function cardHTML(p){
+  const borderCls = `c-${p.class} preset`;
+  const dotCls = `dot ${p.class}`;
+  return `
+    <button class="card ${borderCls}" data-id="${p.id}" aria-label="${p.tag}">
+      <div class="tag"><span class="${dotCls}"></span>${p.tag}</div>
+      <div class="bpm">${p.bpm} BPM</div>
+      <div class="name">${p.name}</div>
+    </button>
+  `;
+}
+grid.innerHTML = PRESETS.map(cardHTML).join('');
+grid.querySelectorAll('.card').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const id = btn.getAttribute('data-id');
+    const p = PRESETS.find(x=>x.id===id);
+    selectPreset(p, true); // ✅ 切換時語音提醒
+    startBtn.click(); // 立即開始
+  });
+});
+
+/** ----- 語音 ----- **/
+function ensureCtx(){
+  if(!S.ctx){ S.ctx = new (window.AudioContext||window.webkitAudioContext)(); }
+  return S.ctx;
+}
+function speak(text){
+  if(!ttsToggle.checked) return;
+  if(!('speechSynthesis' in window)) return;
+  // 避免隊列堆積，先清空前一次尚未播放完的語音
+  try{ window.speechSynthesis.cancel(); }catch(e){}
+  const u = new SpeechSynthesisUtterance(text);
+  if(S.voice){ u.voice = S.voice; }
+  else{
+    const zh = S.voices.find(v=>/^zh/i.test(v.lang));
+    if(zh) u.voice = zh;
+  }
+  u.lang = (u.voice && u.voice.lang) ? u.voice.lang : 'zh-TW';
+  u.rate = 1.0;
+  window.speechSynthesis.speak(u);
+}
+
+// ✅ 切換時語音提醒（模式 + BPM + 對應鼓勵）
+function speakSwitch(p){
+  const msg = `切換到${p.name}模式，步伐每分鐘${p.bpm}下。${pickModeEnc(p.bpm)}`;
+  speak(msg);
+}
+
+/** ----- Select preset / apply theme ----- **/
+function selectPreset(p, announce=false){
+  S.current = p;
+  S.bpm = p.bpm;
+  document.documentElement.style.setProperty('--accent', p.color);
+  labelPill.textContent = p.tag;
+  bpmText.textContent = p.bpm;
+  meterText.textContent = p.bpm >= 180 ? '2/4' : '4/4';
+  encText.textContent = S.encSec = p.bpm >= 190 ? 40 : (p.bpm >= 180 ? 50 : 60);
+  if(announce) speakSwitch(p); // ✅ 在切換時播報
+}
+
+/** ----- Audio + Scheduler ----- **/
+function clickAt(t){
+  const o = S.ctx.createOscillator();
+  const g = S.ctx.createGain();
+  o.type = 'square';
+  o.frequency.value = (S.current?.bpm >= 190) ? 1100 : 880;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.35, t+0.001);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+0.03);
+  o.connect(g).connect(S.ctx.destination);
+  o.start(t); o.stop(t+0.05);
+}
+function scheduleUI(t, spb){
+  const delay = Math.max(0, (t - S.ctx.currentTime) * 1000);
+  setTimeout(()=>{
+    beatText.textContent = '●';
+    beatText.style.transform = 'scale(1.06)';
+    setTimeout(()=>{ beatText.textContent = '○'; beatText.style.transform = 'scale(1.0)'; }, 80);
+
+    fill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+    fill.style.transform = 'scale(1.0)';
+    fill.style.opacity = .95;
+    setTimeout(()=>{ fill.style.transform = 'scale(0.1)'; fill.style.opacity = .6; }, spb*900);
+  }, delay);
+}
+function scheduler(){
+  if(!S.ctx) return;
+  const spb = 60.0 / S.bpm;
+  while(S.nextTime < S.ctx.currentTime + S.scheduleAhead){
+    clickAt(S.nextTime);
+    scheduleUI(S.nextTime, spb);
+    S.nextTime += spb;
+  }
+  const now = S.ctx.currentTime;
+  if(now - S.lastEnc > S.encSec){
+    S.lastEnc = now;
+    // 練習進行中的鼓勵使用一般池（避免每次都播報模式）
+    speak(ENCOURAGE_LINES[Math.floor(Math.random()*ENCOURAGE_LINES.length)]);
+  }
+  S.raf = setTimeout(scheduler, S.lookahead*1000);
+}
+
+/** ----- Controls ----- **/
+startBtn.addEventListener('click', async ()=>{
+  if(!S.current) selectPreset(PRESETS[0]);
+  ensureCtx();
+  await S.ctx.resume();
+  if(S.playing) return;
+  S.playing = true;
+  S.lastEnc = S.ctx.currentTime;
+  S.nextTime = S.ctx.currentTime + 0.25;
+  startBtn.disabled = true; pauseBtn.disabled = false; stopBtn.disabled = false;
+  speak("開始囉，輕鬆踏步");
+  scheduler();
+});
+pauseBtn.addEventListener('click', async ()=>{
+  if(!S.playing || !S.ctx) return;
+  S.playing = false;
+  clearTimeout(S.raf);
+  await S.ctx.suspend();
+  startBtn.disabled = false; pauseBtn.disabled = true;
+  speak("暫停一下，調整呼吸");
+});
+stopBtn.addEventListener('click', async ()=>{
+  if(!S.ctx) return;
+  S.playing = false;
+  clearTimeout(S.raf);
+  await S.ctx.close(); S.ctx = null;
+  startBtn.disabled = false; pauseBtn.disabled = true; stopBtn.disabled = true;
+  beatText.textContent = "完成！做得很好";
+  fill.style.transform = 'scale(0.1)';
+});
+
+/** ----- 語音選擇（SpeechSynthesis voices） ----- **/
+function populateVoices(){
+  S.voices = window.speechSynthesis.getVoices?.() || [];
+  const preferZh = S.voices.filter(v=>/^zh/i.test(v.lang));
+  const list = preferZh.length ? preferZh : S.voices;
+  const saved = localStorage.getItem('metronome.voiceURI');
+  voiceSel.innerHTML = '';
+  list.forEach(v=>{
+    const opt = document.createElement('option');
+    opt.value = v.voiceURI;
+    opt.textContent = `${v.name} — ${v.lang}${v.default ? '（預設）' : ''}`;
+    voiceSel.appendChild(opt);
+  });
+  if(!list.length){
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = '（找不到可用語音）';
+    voiceSel.appendChild(opt);
+    voiceSel.disabled = true;
+  }else{
+    if(saved){
+      const v = S.voices.find(x=>x.voiceURI===saved);
+      if(v){ S.voice = v; voiceSel.value = saved; }
+    }else{
+      S.voice = list[0];
+      voiceSel.value = list[0].voiceURI;
+    }
+    voiceSel.disabled = false;
+  }
+}
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged = populateVoices;
+  setTimeout(populateVoices, 200);
+}
+voiceSel.addEventListener('change', ()=>{
+  const uri = voiceSel.value;
+  const v = S.voices.find(x=>x.voiceURI===uri);
+  S.voice = v || null;
+  localStorage.setItem('metronome.voiceURI', uri || '');
+});
+voiceTestBtn.addEventListener('click', ()=>{
+  speak("這是試聽。保持穩定節奏，準備開始。");
+});
+
+/** ----- Fullscreen / Showcase ----- **/
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    (app.requestFullscreen ? app.requestFullscreen({navigationUI:'hide'}) : document.documentElement.requestFullscreen?.());
+  }else{
+    document.exitFullscreen?.();
+  }
+}
+function toggleShowcase(){
+  document.body.classList.toggle('showcase');
+}
+
+/** ----- Keyboard (TV Friendly + F / X) ----- **/
+app.addEventListener('keydown', (e)=>{
+  const idx = S.current ? PRESETS.findIndex(x=>x.id===S.current.id) : 0;
+  if(e.key==='ArrowRight'){
+    const n = PRESETS[Math.min(PRESETS.length-1, idx+1)];
+    selectPreset(n, true); // ✅ 切換時語音提醒
+    if(S.playing){ /* smooth apply */ }
+  }
+  if(e.key==='ArrowLeft'){
+    const n = PRESETS[Math.max(0, idx-1)];
+    selectPreset(n, true); // ✅ 切換時語音提醒
+    if(S.playing){ /* smooth apply */ }
+  }
+  if(e.key==='Enter'){ if(!S.playing) startBtn.click(); else pauseBtn.click(); }
+  if(e.key==='Backspace' || e.key==='Escape'){ stopBtn.click(); }
+  if(e.key==='f' || e.key==='F'){ e.preventDefault(); toggleFullscreen(); }
+  if(e.key==='x' || e.key==='X'){ e.preventDefault(); toggleShowcase();}
+});
+app.focus();
+
+/** ----- Default Select ----- **/
+selectPreset(PRESETS[0]); // 初次載入不播報，等使用者切換時才播報
+</script>
+</body>
+</html>
