@@ -35,13 +35,15 @@
     .schedule-list { overflow-y: auto; flex-grow: 1; }
     .glass { backdrop-filter: blur(6px); background: rgba(15,23,42,.6); }
     .card { background: var(--panel); border: 1px solid rgba(148,163,184,.12); }
-    .btn { @apply inline-flex items-center justify-center rounded-lg font-bold transition-colors px-3 py-1 text-sm; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; font-weight:700; transition:background-color .15s ease,opacity .15s ease; padding:.25rem .75rem; font-size:.875rem; }
     .btn-sky { background: #0ea5e9; color: #0b1220; }
     .btn-sky:hover { background: #38bdf8; }
     .btn-teal { background: #14b8a6; color: #052e2b; }
     .btn-teal:hover { background: #2dd4bf; }
     .btn-gray { background: #334155; color: #e2e8f0; }
     .btn-gray:hover { background: #475569; }
+    .btn-rose { background: #f43f5e; color: #0b1220; }
+    .btn-rose:hover { background: #fb7185; }
     .ring-focus { outline: none; box-shadow: 0 0 0 3px rgba(34,211,238,.35); }
     .timeline-item[data-index][data-type="exam"] .text-sm,
     .timeline-item.exam .text-sm {
@@ -49,15 +51,13 @@
       font-weight: 700; /* 加粗 */
       color: var(--accent); /* sky-400 顏色 */
     }
-    
-    .timeline-item.exam.active .text-sm {
-      color: var(--bad); /* 當前考試項目時變紅 */
-    }
+    .timeline-item.exam.active .text-sm { color: var(--bad); }
     #schedule-timeline .timeline-item.exam .text-sm,
     #schedule-timeline .timeline-item[data-type="exam"] .text-sm {
-      font-size: 1.125rem; /* 相當於 Tailwind 的 text-lg */
-      font-weight: 800;    /* 更醒目 */
+      font-size: 1.125rem; font-weight: 800;
     }
+    /* Modal：不使用縮放動畫，僅以透明度過場 */
+    .modal { opacity: 1; }
   </style>
 </head>
 <body onload="init()">
@@ -67,20 +67,20 @@
   </div>
 
   <!-- 缺考 Base64 匯入 Modal -->
-  <div id="import-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+  <div id="import-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 modal">
     <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-md">
       <h3 class="text-xl font-bold text-red-300 mb-3">匯入缺考座號資料</h3>
       <p class="text-sm text-slate-300 mb-3">請將 Base64 編碼的資料貼入下方文字框：</p>
       <textarea id="import-data-textarea" class="w-full h-28 p-2 rounded-lg bg-slate-800/70 border border-slate-600 text-slate-100 focus:ring-focus" placeholder="貼上 Base64 資料..."></textarea>
       <div class="flex justify-end gap-2 mt-4">
         <button id="btn-import-cancel" class="btn btn-gray">取消</button>
-        <button id="btn-import-confirm" class="btn bg-rose-500 hover:bg-rose-400 text-slate-900">確認匯入</button>
+        <button id="btn-import-confirm" class="btn btn-rose">確認匯入</button>
       </div>
     </div>
   </div>
 
   <!-- 排程 CSV 匯入 Modal -->
-  <div id="schedule-import-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+  <div id="schedule-import-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 modal">
     <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-2xl">
       <h3 class="text-xl font-bold text-cyan-300 mb-3">匯入段考排程資料（CSV）</h3>
       <p class="text-sm text-slate-300 mb-2">請將 <strong>CSV 檔案的完整內容</strong> 貼入下方文字框（需包含標題列）。</p>
@@ -89,6 +89,32 @@
       <div class="flex justify-end gap-2 mt-4">
         <button id="btn-schedule-cancel" class="btn btn-gray">取消</button>
         <button id="btn-schedule-confirm" class="btn btn-teal">確認匯入並取代</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 應到人數設定 Modal -->
+  <div id="expected-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 modal">
+    <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-sm">
+      <h3 class="text-xl font-bold text-cyan-300 mb-3">設定應到人數</h3>
+      <label for="expected-input" class="text-sm text-slate-300">請輸入本次考試應到人數：</label>
+      <input id="expected-input" type="number" min="0" class="mt-2 w-full p-2 rounded-lg bg-slate-800/70 border border-slate-600 text-slate-100 focus:ring-focus" placeholder="例如：30" />
+      <div class="flex justify-end gap-2 mt-4">
+        <button id="btn-expected-cancel" class="btn btn-gray">取消</button>
+        <button id="btn-expected-confirm" class="btn btn-teal">確定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 缺考座號設定 Modal -->
+  <div id="absent-setup-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 modal">
+    <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-lg">
+      <h3 class="text-xl font-bold text-rose-300 mb-3">設定缺考座號</h3>
+      <p class="text-xs text-slate-300 mb-2">可用逗號、空格或換行分隔；僅數字會被保留並自動排序。</p>
+      <textarea id="absent-setup-textarea" class="w-full h-36 p-2 rounded-lg bg-slate-800/70 border border-rose-400/40 text-slate-100 focus:ring-focus" placeholder="例如：1, 5 12\n25"></textarea>
+      <div class="flex justify-end gap-2 mt-4">
+        <button id="btn-absent-setup-cancel" class="btn btn-gray">取消</button>
+        <button id="btn-absent-setup-confirm" class="btn btn-rose">確定</button>
       </div>
     </div>
   </div>
@@ -139,11 +165,12 @@
 
         <!-- 缺考區塊 -->
         <section class="card p-5 rounded-2xl border border-rose-400/30">
-          <div class="cursor-pointer flex justify-between items-center mb-3 p-2 rounded-md hover:bg-slate-800/50" id="toggle-absent">
-            <h2 class="text-2xl font-semibold text-rose-300 flex items-center">
-              缺考座號追蹤
-              <svg id="toggle-icon" class="w-6 h-6 ml-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </h2>
+          <div class="flex justify-between items-center mb-3 p-2 rounded-md">
+            <h2 class="text-2xl font-semibold text-rose-300 flex items-center">缺考座號追蹤</h2>
+            <div class="flex items-center gap-2">
+              <button id="btn-open-expected" class="btn btn-teal" title="設定應到人數">設定應到人數</button>
+              <button id="btn-open-absent" class="btn btn-rose" title="設定缺考座號">設定缺考座號</button>
+            </div>
           </div>
 
           <div class="grid grid-cols-3 gap-3 mb-4 text-center">
@@ -166,13 +193,20 @@
             <div id="absent-seat-display" class="text-lg font-extrabold text-rose-200">尚無缺考記錄。</div>
           </div>
 
-          <div id="absent-input-area" class="mt-4">
+          <!-- 原輸入區改為隱藏，由彈窗負責輸入 -->
+          <div id="absent-input-area" class="hidden mt-4">
             <p class="text-slate-300 mb-2 text-xs">請填寫缺考座號（可用逗號、空格或換行分隔）：</p>
             <textarea id="absent-seat-input" class="w-full p-2 rounded-lg bg-slate-800/70 border border-rose-400/40 text-slate-100 focus:ring-focus" placeholder="例如：1, 5, 12, 25"></textarea>
             <div class="flex justify-end gap-2 mt-2">
               <button id="btn-absent-export" class="btn bg-rose-500 hover:bg-rose-400 text-slate-900">匯出 (複製 Base64)</button>
               <button id="btn-absent-import" class="btn bg-rose-400/80 hover:bg-rose-400 text-slate-900">匯入 (彈窗貼上)</button>
             </div>
+          </div>
+
+          <!-- 保留匯入/匯出按鈕（不需顯示輸入框） -->
+          <div class="flex justify-end gap-2 mt-3">
+            <button id="btn-absent-export-2" class="btn bg-rose-500 hover:bg-rose-400 text-slate-900">匯出 (Base64)</button>
+            <button id="btn-absent-import-2" class="btn bg-rose-400/80 hover:bg-rose-400 text-slate-900">匯入 (彈窗)</button>
           </div>
         </section>
       </div>
@@ -198,8 +232,8 @@
 
   <script>
     // ===== 常量與狀態 =====
-    const EXPECTED_COUNT = 30;
-    let isAbsentInputVisible = true;
+    let expectedCount = Number(localStorage.getItem('expectedCount')) || 30;
+    let isAbsentInputVisible = false; // 由彈窗管理
 
     let initialSchedules = {
       'day1': {
@@ -258,13 +292,11 @@
     const afternoonScheduleEl = el('afternoon-schedule');
     const lunchBreakItemEl = el('lunch-break-item');
 
-    const absentInput = el('absent-seat-input');
+    const absentInput = el('absent-seat-input'); // 隱藏，僅供邏輯使用
     const absentDisplay = el('absent-seat-display');
-    const absentInputArea = el('absent-input-area');
     const absentCountEl = el('absent-count');
     const actualCountEl = el('actual-count');
     const expectedCountEl = el('expected-count');
-    const toggleIconEl = el('toggle-icon');
 
     const importDataTextarea = el('import-data-textarea');
     const importModal = el('import-modal');
@@ -283,15 +315,27 @@
     const btnFullscreen = el('btn-fullscreen');
     const pageTitleEl = el('page-title');
 
-    // 缺考按鈕
+    // 缺考相關按鈕
     const btnAbsentExport = el('btn-absent-export');
     const btnAbsentImport = el('btn-absent-import');
+    const btnAbsentExport2 = el('btn-absent-export-2');
+    const btnAbsentImport2 = el('btn-absent-import-2');
 
-    // Modal 按鈕
-    const btnImportCancel = el('btn-import-cancel');
-    const btnImportConfirm = el('btn-import-confirm');
-    const btnScheduleCancel = el('btn-schedule-cancel');
-    const btnScheduleConfirm = el('btn-schedule-confirm');
+    // 新增：彈窗開啟按鈕
+    const btnOpenExpected = el('btn-open-expected');
+    const btnOpenAbsent = el('btn-open-absent');
+
+    // 新增：應到人數設定 Modal 元件
+    const expectedModal = el('expected-modal');
+    const expectedInput = el('expected-input');
+    const btnExpectedCancel = el('btn-expected-cancel');
+    const btnExpectedConfirm = el('btn-expected-confirm');
+
+    // 新增：缺考設定 Modal 元件
+    const absentSetupModal = el('absent-setup-modal');
+    const absentSetupTextarea = el('absent-setup-textarea');
+    const btnAbsentSetupCancel = el('btn-absent-setup-cancel');
+    const btnAbsentSetupConfirm = el('btn-absent-setup-confirm');
 
     // ===== 工具函式 =====
     const parseTime = (timeStr) => {
@@ -313,7 +357,7 @@
       targetEl.innerHTML = '';
       schedule.forEach((item, idx) => {
         const originalIndex = startIndex + idx;
-        let colorClass = 'text-slate-200';
+        let colorClass = 'text-slate-2 00';
         let icon = '🏁';
         if (item.type === 'exam') { colorClass = 'text-sky-300 font-semibold'; icon = '📝'; }
         else if (item.type === 'study') { colorClass = 'text-violet-300'; icon = '📚'; }
@@ -394,25 +438,24 @@
       }
     }
 
-    function updateAbsentSeats() {
-      const raw = absentInput.value;
+    function computeAbsentFromRaw(raw) {
       const cleaned = raw.replace(/[,，\s\n]+/g, ' ').trim();
       const nums = cleaned.split(' ').map((s) => s.trim()).filter((s) => s && /^\d+$/.test(s)).map(Number).sort((a,b)=>a-b);
       const unique = [...new Set(nums)];
+      return unique;
+    }
+
+    function updateAbsentSeats() {
+      const raw = absentInput.value || '';
+      const unique = computeAbsentFromRaw(raw);
       const absentCount = unique.length;
-      const actual = EXPECTED_COUNT - absentCount;
+      const actual = Math.max(0, expectedCount - absentCount);
       absentDisplay.textContent = absentCount ? unique.join('、 ') : '尚無缺考記錄。';
-      expectedCountEl.textContent = EXPECTED_COUNT;
+      expectedCountEl.textContent = expectedCount;
       absentCountEl.textContent = absentCount;
       actualCountEl.textContent = actual;
       // 持久化
       localStorage.setItem('absentSeats', raw);
-    }
-
-    function toggleAbsentInput() {
-      isAbsentInputVisible = !isAbsentInputVisible;
-      if (isAbsentInputVisible) { absentInputArea.classList.remove('hidden'); toggleIconEl.classList.remove('rotate-180'); }
-      else { absentInputArea.classList.add('hidden'); toggleIconEl.classList.add('rotate-180'); }
     }
 
     function showStatusMessage(message, isError = false) {
@@ -424,18 +467,17 @@
       window.__statusTimer = setTimeout(() => {
         statusMessageEl.classList.add('opacity-0');
         statusMessageEl.style.pointerEvents = 'none';
-      }, 2500);
+      }, 2200);
     }
 
     // ===== 匯出/匯入：缺考 =====
     function exportAbsentSeats() {
-      const raw = absentInput.value;
+      const raw = absentInput.value || '';
       if (!raw.trim()) return showStatusMessage('沒有缺考座號可匯出。', true);
       const encoded = btoa(encodeURIComponent(raw));
       navigator.clipboard?.writeText(encoded).then(() => {
         showStatusMessage('缺考座號資料已編碼並複製到剪貼簿！');
       }).catch(() => {
-        // 後備方案
         const t = document.createElement('textarea');
         t.value = encoded; document.body.appendChild(t); t.select();
         const ok = document.execCommand('copy'); document.body.removeChild(t);
@@ -529,9 +571,40 @@
         const first = Object.keys(initialSchedules).sort()[0];
         loadSchedule(first);
         showStatusMessage(`排程匯入成功！已載入 ${Object.keys(initialSchedules).length} 天排程。`);
-        // 持久化（可選）
         localStorage.setItem('schedulesCSV', csv);
       } catch (e) { console.error(e); showStatusMessage(`排程匯入失敗：${e.message}`, true); }
+    }
+
+    // ===== 新增：彈窗流程 =====
+    function openExpectedModal() {
+      expectedModal.classList.remove('hidden');
+      expectedInput.value = String(expectedCount);
+      setTimeout(()=>expectedInput.select(),0);
+    }
+    function closeExpectedModal() { expectedModal.classList.add('hidden'); }
+    function confirmExpectedModal() {
+      const val = Number(expectedInput.value);
+      if (!Number.isFinite(val) || val < 0) { showStatusMessage('請輸入有效的人數（>= 0）。', true); return; }
+      expectedCount = Math.floor(val);
+      localStorage.setItem('expectedCount', String(expectedCount));
+      updateAbsentSeats();
+      closeExpectedModal();
+      showStatusMessage('已更新應到人數。');
+    }
+
+    function openAbsentSetupModal() {
+      absentSetupModal.classList.remove('hidden');
+      const raw = localStorage.getItem('absentSeats') || (absentInput?.value || '');
+      absentSetupTextarea.value = raw;
+      setTimeout(()=>absentSetupTextarea.focus(),0);
+    }
+    function closeAbsentSetupModal() { absentSetupModal.classList.add('hidden'); }
+    function confirmAbsentSetupModal() {
+      const raw = absentSetupTextarea.value || '';
+      absentInput.value = raw; // 保存原始字串（方便還原/匯出）
+      updateAbsentSeats();
+      closeAbsentSetupModal();
+      showStatusMessage('已更新缺考座號。');
     }
 
     // ===== 主更新 =====
@@ -565,7 +638,6 @@
         subjectProgressBarEl.style.width = pct + '%';
         subjectProgressTextEl.textContent = pct + '%';
 
-        // 漸層與色彩根據 type 調整
         if (currentItem.type === 'exam') hero.style.background = 'linear-gradient(145deg, rgba(14,165,233,.20), rgba(99,102,241,.18))';
         else if (currentItem.type === 'break') hero.style.background = 'linear-gradient(145deg, rgba(251,191,36,.20), rgba(34,197,94,.18))';
         else if (currentItem.type === 'study') hero.style.background = 'linear-gradient(145deg, rgba(167,139,250,.22), rgba(56,189,248,.18))';
@@ -586,9 +658,9 @@
     function init() {
       const savedSeats = localStorage.getItem('absentSeats');
       if (savedSeats) { absentInput.value = savedSeats; }
+      expectedCount = Number(localStorage.getItem('expectedCount')) || expectedCount;
       updateAbsentSeats();
 
-      // 若先前有儲存的 CSV（可選）
       const savedCSV = localStorage.getItem('schedulesCSV');
       if (savedCSV) {
         try { initialSchedules = parseCsv(savedCSV); } catch {}
@@ -600,21 +672,34 @@
       setInterval(updateDisplay, 1000);
 
       // 事件綁定
-      document.getElementById('toggle-absent').addEventListener('click', toggleAbsentInput);
-      absentInput.addEventListener('input', updateAbsentSeats);
-
       btnSample.addEventListener('click', downloadSampleCsv);
       btnExport.addEventListener('click', exportScheduleData);
       btnImport.addEventListener('click', openScheduleImport);
 
-      btnAbsentExport.addEventListener('click', exportAbsentSeats);
-      btnAbsentImport.addEventListener('click', openImportModal);
+      // 匯入/匯出（缺考）
+      btnAbsentExport?.addEventListener('click', exportAbsentSeats);
+      btnAbsentImport?.addEventListener('click', openImportModal);
+      btnAbsentExport2?.addEventListener('click', exportAbsentSeats);
+      btnAbsentImport2?.addEventListener('click', openImportModal);
 
-      btnImportCancel.addEventListener('click', closeImportModal);
-      btnImportConfirm.addEventListener('click', confirmImport);
+      // Base64 匯入 Modal
+      document.getElementById('btn-import-cancel').addEventListener('click', closeImportModal);
+      document.getElementById('btn-import-confirm').addEventListener('click', confirmImport);
 
-      btnScheduleCancel.addEventListener('click', closeScheduleImport);
-      btnScheduleConfirm.addEventListener('click', confirmScheduleImport);
+      // CSV 匯入 Modal
+      document.getElementById('btn-schedule-cancel').addEventListener('click', closeScheduleImport);
+      document.getElementById('btn-schedule-confirm').addEventListener('click', confirmScheduleImport);
+
+      // 彈窗：應到人數
+      btnOpenExpected.addEventListener('click', openExpectedModal);
+      btnExpectedCancel.addEventListener('click', closeExpectedModal);
+      btnExpectedConfirm.addEventListener('click', confirmExpectedModal);
+      expectedInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); confirmExpectedModal(); } });
+
+      // 彈窗：缺考座號
+      btnOpenAbsent.addEventListener('click', openAbsentSetupModal);
+      btnAbsentSetupCancel.addEventListener('click', closeAbsentSetupModal);
+      btnAbsentSetupConfirm.addEventListener('click', confirmAbsentSetupModal);
 
       // ===== 可編輯標題：載入與儲存 =====
       const savedTitle = localStorage.getItem('pageTitle');
@@ -640,11 +725,8 @@
       });
       document.addEventListener('fullscreenchange', syncFsBtn);
       syncFsBtn();
-    
     }
   </script>
   <footer class="fixed bottom-2 right-4 text-[12px] text-slate-400/60 select-none">Developed by <span class="font-semibold">DennisZ</span></footer>
 </body>
 </html>
-
-
