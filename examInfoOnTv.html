@@ -339,31 +339,71 @@
     const btnAbsentSetupCancel = el('btn-absent-setup-cancel');
     const btnAbsentSetupConfirm = el('btn-absent-setup-confirm');
 
+    // ===== 新增：展示層 DOM =====
+    const presentationOverlay = () => el('presentation-overlay');
+
     // ===== 工具函式 =====
     function updatePresentationView(){
+      // 同步主畫面基本資訊
       const subject = document.getElementById('current-subject')?.textContent || '—';
       const range = document.getElementById('subject-time-range')?.textContent || '';
       const raw = absentInput?.value || '';
       const list = computeAbsentFromRaw(raw);
       const absentCount = list.length;
       const actual = Math.max(0, expectedCount - absentCount);
-      document.getElementById('pres-subject').textContent = subject;
-      document.getElementById('pres-range').textContent = range;
-      document.getElementById('pres-expected').textContent = String(expectedCount);
-      document.getElementById('pres-absent-count').textContent = String(absentCount);
-      document.getElementById('pres-absent-list').textContent = list.length ? list.join('、 ') : '—';
-      document.getElementById('pres-actual').textContent = String(actual);
+      el('pres-subject').textContent = subject;
+      el('pres-range').textContent = range;
+      el('pres-expected').textContent = String(expectedCount);
+      el('pres-absent-count').textContent = String(absentCount);
+      el('pres-absent-list').textContent = list.length ? list.join('、 ') : '—';
+      el('pres-actual').textContent = String(actual);
+
+      // 目前時間
+      const now = new Date();
+      const fmt = { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false };
+      el('pres-now').textContent = now.toLocaleString('zh-TW', fmt);
+
+      // 進度與下一個 study/exam
+      let pct = 0, currentIndex = -1, currentItem = null, nextInfo = '—';
+      if (currentScheduleData && currentScheduleData.data) {
+        const schedule = currentScheduleData.data;
+        for (let i = 0; i < schedule.length; i++) {
+          const s = parseTime(schedule[i].start), e = parseTime(schedule[i].end);
+          if (within(now, s, e)) {
+            currentItem = schedule[i]; currentIndex = i;
+            pct = Math.min(100, Math.round(((now - s) / (e - s)) * 100));
+            break;
+          }
+        }
+        // 找下一個 study 或 exam
+        for (let j = currentIndex + 1; j < schedule.length; j++) {
+          if (schedule[j].type === 'study' || schedule[j].type === 'exam') {
+            nextInfo = `${schedule[j].start}　${schedule[j].name}`;
+            break;
+          }
+        }
+      }
+      const bar = el('pres-progress-bar');
+      const txt = el('pres-progress-text');
+      bar.style.width = pct + '%';
+      txt.textContent = pct + '%';
+      el('pres-next').textContent = nextInfo;
     }
+
     function openPresentation(){
       updatePresentationView();
-      document.getElementById('presentation-overlay').classList.remove('hidden');
+      presentationOverlay().classList.remove('hidden');
       // 嘗試進入全螢幕（需使用者手勢觸發）
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen?.().catch(()=>{});
       }
     }
     function closePresentation(){
-      document.getElementById('presentation-overlay').classList.add('hidden');
+      presentationOverlay().classList.add('hidden');
+      // 若在全螢幕中，同步退出（避免留在全螢幕）
+      if (document.fullscreenElement) {
+        document.exitFullscreen?.().catch(()=>{});
+      }
     }
     const parseTime = (timeStr) => {
       const [h, m] = timeStr.split(':').map(Number);
@@ -679,6 +719,11 @@
         subjectProgressTextEl.textContent = '0%';
         hero.style.background = 'linear-gradient(145deg, rgba(148,163,184,.12), rgba(100,116,139,.12))';
       }
+
+      // 同步展示層
+      if (!presentationOverlay().classList.contains('hidden')) {
+        updatePresentationView();
+      }
     }
 
     // ===== 初始化與事件綁定 =====
@@ -737,7 +782,7 @@
         localStorage.setItem('pageTitle', pageTitleEl.textContent.trim());
       });
 
-      // ===== 全螢幕切換 =====
+      // ===== 全螢幕切換（F）=====
       function syncFsBtn() {
         const isFs = !!document.fullscreenElement;
         btnFullscreen.setAttribute('aria-pressed', isFs ? 'true' : 'false');
@@ -755,10 +800,13 @@
       document.addEventListener('fullscreenchange', syncFsBtn);
       syncFsBtn();
 
-      // 鍵盤快捷鍵：F 切換全螢幕、Esc 關閉展示層
+      // 鍵盤快捷鍵：
+      // F：切換瀏覽器全螢幕
+      // X：切換「全畫面展示層」（同時嘗試進入/退出全螢幕）
+      // Esc：關閉展示層
       document.addEventListener('keydown', (e)=>{
         const tag = (e.target && e.target.tagName) || '';
-        const typing = ['INPUT','TEXTAREA'].includes(tag);
+        const typing = ['INPUT','TEXTAREA'].includes(tag) || (e.target && e.target.isContentEditable);
         if (!typing && (e.key === 'f' || e.key === 'F')) {
           e.preventDefault();
           if (!document.fullscreenElement) {
@@ -766,6 +814,11 @@
           } else {
             document.exitFullscreen?.().catch(()=>{});
           }
+        }
+        if (!typing && (e.key === 'x' || e.key === 'X')) {
+          e.preventDefault();
+          const hidden = presentationOverlay().classList.contains('hidden');
+          if (hidden) { openPresentation(); } else { closePresentation(); }
         }
         if (e.key === 'Escape') {
           closePresentation();
@@ -779,7 +832,14 @@
   <div id="presentation-overlay" class="hidden fixed inset-0 z-[60] bg-slate-950 text-slate-100">
     <div class="absolute inset-0 flex flex-col">
       <div class="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/70">
-        <div class="text-sm text-slate-300">按 F 進入/退出全螢幕，Esc 關閉</div>
+        <div class="text-sm text-slate-300">
+          <span class="mr-3">按 <span class="font-bold">X</span> 開啟/關閉展示</span>
+          <span class="mr-3">按 <span class="font-bold">F</span> 進入/退出全螢幕</span>
+          <span>按 <span class="font-bold">Esc</span> 關閉</span>
+        </div>
+        <div class="text-sm text-slate-300">
+          目前時間：<span id="pres-now" class="font-semibold text-cyan-300">--</span>
+        </div>
         <button id="btn-close-present" class="btn btn-gray">關閉</button>
       </div>
       <div class="flex-1 grid place-items-center p-6">
@@ -788,7 +848,14 @@
             <div class="text-xl text-sky-300 tracking-widest">目前進行考科</div>
             <div id="pres-subject" class="mt-2 text-6xl md:text-7xl font-black text-sky-300">—</div>
             <div id="pres-range" class="mt-2 text-2xl text-slate-300">—</div>
+            <!-- 展示層進度條 -->
+            <div class="w-full max-w-3xl mx-auto mt-6 bg-slate-800 rounded-full h-5 shadow-inner overflow-hidden">
+              <div id="pres-progress-bar" class="h-full rounded-full flex items-center justify-end pr-2 font-bold transition-all duration-700 bg-amber-400 text-slate-900" style="width:0%">
+                <span id="pres-progress-text" class="text-xs">0%</span>
+              </div>
+            </div>
           </div>
+
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-700">
               <div class="text-sm text-slate-400">應到人數</div>
@@ -803,6 +870,12 @@
               <div class="text-sm text-emerald-300">實到人數</div>
               <div id="pres-actual" class="text-5xl font-extrabold text-emerald-200">—</div>
             </div>
+          </div>
+
+          <!-- 下一個 study/exam 提示 -->
+          <div class="mt-8 p-4 rounded-2xl bg-slate-900/70 border border-slate-700">
+            <div class="text-sm text-slate-400">下一個 study / exam</div>
+            <div id="pres-next" class="text-2xl md:text-3xl font-bold text-sky-200 mt-1">—</div>
           </div>
         </div>
       </div>
