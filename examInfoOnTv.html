@@ -132,6 +132,7 @@
         <button id="btn-sample" class="btn btn-gray">下載 CSV 範例</button>
         <button id="btn-export" class="btn btn-teal">匯出排程 (CSV)</button>
         <button id="btn-import" class="btn btn-sky">匯入排程 (CSV)</button>
+        <button id="btn-present" class="btn btn-sky">全畫面展示</button>
       </div>
     </div>
 
@@ -310,6 +311,7 @@
     const btnSample = el('btn-sample');
     const btnExport = el('btn-export');
     const btnImport = el('btn-import');
+    const btnPresent = el('btn-present');
 
     // 全螢幕與可編輯標題
     const btnFullscreen = el('btn-fullscreen');
@@ -338,6 +340,31 @@
     const btnAbsentSetupConfirm = el('btn-absent-setup-confirm');
 
     // ===== 工具函式 =====
+    function updatePresentationView(){
+      const subject = document.getElementById('current-subject')?.textContent || '—';
+      const range = document.getElementById('subject-time-range')?.textContent || '';
+      const raw = absentInput?.value || '';
+      const list = computeAbsentFromRaw(raw);
+      const absentCount = list.length;
+      const actual = Math.max(0, expectedCount - absentCount);
+      document.getElementById('pres-subject').textContent = subject;
+      document.getElementById('pres-range').textContent = range;
+      document.getElementById('pres-expected').textContent = String(expectedCount);
+      document.getElementById('pres-absent-count').textContent = String(absentCount);
+      document.getElementById('pres-absent-list').textContent = list.length ? list.join('、 ') : '—';
+      document.getElementById('pres-actual').textContent = String(actual);
+    }
+    function openPresentation(){
+      updatePresentationView();
+      document.getElementById('presentation-overlay').classList.remove('hidden');
+      // 嘗試進入全螢幕（需使用者手勢觸發）
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.().catch(()=>{});
+      }
+    }
+    function closePresentation(){
+      document.getElementById('presentation-overlay').classList.add('hidden');
+    }
     const parseTime = (timeStr) => {
       const [h, m] = timeStr.split(':').map(Number);
       const d = new Date();
@@ -357,7 +384,7 @@
       targetEl.innerHTML = '';
       schedule.forEach((item, idx) => {
         const originalIndex = startIndex + idx;
-        let colorClass = 'text-slate-2 00';
+        let colorClass = 'text-slate-200';
         let icon = '🏁';
         if (item.type === 'exam') { colorClass = 'text-sky-300 font-semibold'; icon = '📝'; }
         else if (item.type === 'study') { colorClass = 'text-violet-300'; icon = '📚'; }
@@ -675,6 +702,8 @@
       btnSample.addEventListener('click', downloadSampleCsv);
       btnExport.addEventListener('click', exportScheduleData);
       btnImport.addEventListener('click', openScheduleImport);
+      btnPresent.addEventListener('click', openPresentation);
+      document.getElementById('btn-close-present').addEventListener('click', closePresentation);
 
       // 匯入/匯出（缺考）
       btnAbsentExport?.addEventListener('click', exportAbsentSeats);
@@ -725,8 +754,59 @@
       });
       document.addEventListener('fullscreenchange', syncFsBtn);
       syncFsBtn();
+
+      // 鍵盤快捷鍵：F 切換全螢幕、Esc 關閉展示層
+      document.addEventListener('keydown', (e)=>{
+        const tag = (e.target && e.target.tagName) || '';
+        const typing = ['INPUT','TEXTAREA'].includes(tag);
+        if (!typing && (e.key === 'f' || e.key === 'F')) {
+          e.preventDefault();
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen?.().catch(()=>{});
+          } else {
+            document.exitFullscreen?.().catch(()=>{});
+          }
+        }
+        if (e.key === 'Escape') {
+          closePresentation();
+        }
+      });
     }
   </script>
   <footer class="fixed bottom-2 right-4 text-[12px] text-slate-400/60 select-none">Developed by <span class="font-semibold">DennisZ</span></footer>
+
+  <!-- 全畫面展示覆蓋層 -->
+  <div id="presentation-overlay" class="hidden fixed inset-0 z-[60] bg-slate-950 text-slate-100">
+    <div class="absolute inset-0 flex flex-col">
+      <div class="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/70">
+        <div class="text-sm text-slate-300">按 F 進入/退出全螢幕，Esc 關閉</div>
+        <button id="btn-close-present" class="btn btn-gray">關閉</button>
+      </div>
+      <div class="flex-1 grid place-items-center p-6">
+        <div class="w-full max-w-5xl text-center">
+          <div class="mb-6">
+            <div class="text-xl text-sky-300 tracking-widest">目前進行考科</div>
+            <div id="pres-subject" class="mt-2 text-6xl md:text-7xl font-black text-sky-300">—</div>
+            <div id="pres-range" class="mt-2 text-2xl text-slate-300">—</div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-700">
+              <div class="text-sm text-slate-400">應到人數</div>
+              <div id="pres-expected" class="text-5xl font-extrabold">—</div>
+            </div>
+            <div class="p-4 rounded-2xl bg-rose-900/30 border border-rose-500/30">
+              <div class="text-sm text-rose-300">缺考人數 / 座號</div>
+              <div class="text-5xl font-extrabold text-rose-200"><span id="pres-absent-count">0</span></div>
+              <div id="pres-absent-list" class="mt-2 text-lg font-bold text-rose-200 break-words">—</div>
+            </div>
+            <div class="p-4 rounded-2xl bg-emerald-900/30 border border-emerald-500/30">
+              <div class="text-sm text-emerald-300">實到人數</div>
+              <div id="pres-actual" class="text-5xl font-extrabold text-emerald-200">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
