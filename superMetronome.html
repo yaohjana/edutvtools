@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>多功能節拍器 v2.1.0</title>
+  <meta name="theme-color" content="#f8fafc" />
+  <style>
+    :root {
+      --bg-from: #ffffff; --bg-to: #f1f5f9; --card: #ffffff; --text: #0f172a; --muted:#64748b; --border:#e2e8f0;
+      --p100:#e0f2fe; --p200:#bae6fd; --p600:#0284c7; --p700:#075985; --glow: rgba(14,165,233,.45);
+      --success: #16a34a; --danger:#dc2626;
+      --radius: 20px; --shadow: 0 8px 24px rgba(15,23,42,.06);
+    }
+    .theme-sky   { --bg-from:#f8fbff; --bg-to:#f0f9ff; --p100:#e0f2fe; --p200:#bae6fd; --p600:#0284c7; --p700:#075985; --glow:rgba(14,165,233,.55); }
+    .theme-emerald{ --bg-from:#f7fffb; --bg-to:#ecfdf5; --p100:#d1fae5; --p200:#a7f3d0; --p600:#059669; --p700:#065f46; --glow:rgba(16,185,129,.55); }
+    .theme-violet{ --bg-from:#fbfaff; --bg-to:#f5f3ff; --p100:#ede9fe; --p200:#ddd6fe; --p600:#7c3aed; --p700:#5b21b6; --glow:rgba(124,58,237,.55); }
+    .theme-rose  { --bg-from:#fff7f8; --bg-to:#fff1f2; --p100:#ffe4e6; --p200:#fecdd3; --p600:#e11d48; --p700:#9f1239; --glow:rgba(244,63,94,.55); }
+    .theme-amber { --bg-from:#fffbf2; --bg-to:#fff7ed; --p100:#fde68a; --p200:#fcd34d; --p600:#d97706; --p700:#92400e; --glow:rgba(245,158,11,.55); }
+    .theme-slate { --bg-from:#ffffff; --bg-to:#f1f5f9; --p100:#e2e8f0; --p200:#cbd5e1; --p600:#334155; --p700:#1e293b; --glow:rgba(51,65,85,.45); }
+    .theme-dark  { --bg-from:#0b1220; --bg-to:#0f172a; --card:#0b1220; --text:#9298a0; --muted:#93a3b8; --border:#1f2a44; --p100:#1e293b; --p200:#0ea5e9; --p600:#38bdf8; --p700:#7dd3fc; --glow:rgba(56,189,248,.35); }
+
+    * { box-sizing:border-box; }
+    html, body { height:100%; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Segoe UI,Roboto,Helvetica,Arial,"Noto Sans TC","PingFang TC",sans-serif; color:var(--text); background:linear-gradient(var(--bg-from), var(--bg-to)); }
+    .container { max-width:1120px; margin:0 auto; padding:16px; }
+
+    /* Header */
+    .header { position:sticky; top:0; z-index:10; backdrop-filter:saturate(180%) blur(10px); background:rgba(255,255,255,.6); border-bottom:1px solid var(--border); }
+    .theme-dark .header { background:rgba(15,23,42,.6); }
+    .header-inner { display:flex; align-items:center; justify-content:space-between; padding:16px 8px; }
+    .title { font-weight:800; font-size:22px; }
+    .version { color:var(--muted); font-size:14px; margin-left:6px; }
+    .hint { color:var(--muted); font-size:12px; }
+
+    .banner { display:none; margin: 0 8px 12px; padding: 10px 12px; background: #fff7ed; color:#9a6700; border:1px solid #ffedd5; border-radius: 12px; }
+    .banner.show { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .btn-banner { background:#9a6700; color:#fff; border:0; padding:8px 10px; border-radius: 10px; font-weight:600; }
+
+    /* Grid */
+    .grid { display:grid; gap:16px; grid-template-columns:1fr; align-items:start; }
+    @media (min-width:1024px){ .grid { grid-template-columns:1fr 1fr 1fr; } }
+
+    /* Card */
+    .card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; }
+    .card h2 { margin:0 0 12px; font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px; }
+
+    /* Controls */
+    .row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
+    .center{ text-align:center; }
+    .big-num{ font-size:56px; font-weight:800; letter-spacing:-1px; margin:6px 0 8px; }
+    input[type="range"]{ width:100%; }
+    .btn,.seg,.chip{ appearance:none; border:1px solid var(--border); background:#f8fafc; color:var(--text); border-radius:12px; padding:8px 12px; font-weight:600; cursor:pointer; }
+    .btn:hover{ background:#eef2f7; }
+    .btn-icon{ padding:8px; width:40px; height:40px; display:inline-grid; place-items:center; }
+    .btn-primary{ background:var(--text); color:#fff; border-color:transparent; }
+    .btn-green{ background:var(--success); color:#fff; border-color:transparent; }
+    .btn-red{ background:var(--danger); color:#fff; border-color:transparent; }
+    .seg-group{ background:#f1f5f9; border:1px solid var(--border); border-radius:12px; padding:4px; display:inline-flex; gap:4px; }
+    .seg{ background:transparent; border:none; padding:8px 12px; }
+    .seg.active{ background:#fff; box-shadow:var(--shadow); border:1px solid var(--border); }
+
+    .switch{ position:relative; width:46px; height:28px; background:#e5e7eb; border-radius:999px; border:1px solid var(--border); cursor:pointer; }
+    .switch::after{ content:""; position:absolute; top:2px; left:2px; width:24px; height:24px; background:#fff; border-radius:50%; box-shadow:0 2px 8px rgba(0,0,0,.12); transition:transform .2s ease; }
+    .switch.on{ background:#34d399; }
+    .switch.on::after{ transform:translateX(18px); }
+
+    .accent-grid{ display:grid; grid-template-columns:repeat(8,1fr); gap:8px; }
+    .accent{ aspect-ratio:1/1; border-radius:12px; border:1px solid var(--border); background:#f1f5f9; font-weight:700; }
+    .accent.on{ background:var(--p600); color:#fff; border-color:var(--p600); }
+    .beat-wrap{ position:relative; width:220px; height:220px; margin:8px auto; }
+    .beat-box{ position:absolute; inset:0; display:grid; place-items:center; border-radius:18px; background:linear-gradient(135deg, var(--p100), var(--p200)); border:1px solid var(--p200); box-shadow:0 12px 32px var(--glow); transform:scale(.96); transition: transform .18s ease;
+    }
+    .beat-num{ font-size:56px; font-weight:900; color:var(--p700); text-shadow:0 6px 18px var(--glow); }
+
+    /* 放大彈跳 + 旋轉 */
+    @keyframes popSpin{ 0%{ transform:scale(.92) rotate(0deg);} 40%{ transform:scale(1.15) rotate(-6deg);} 100%{ transform:scale(1) rotate(0deg);} }
+    /* 雙層波紋 */
+    @keyframes ringOut1{ 0%{ opacity:.35; transform:scale(.85);} 100%{ opacity:0; transform:scale(1.6);} }
+    @keyframes ringOut2{ 0%{ opacity:.3; transform:scale(.85);} 100%{ opacity:0; transform:scale(2);} }
+    /* 亮片條噴發 */
+    @keyframes spark{ 0%{ opacity:0; transform: translate(-50%,-50%) rotate(var(--rot)) scale(.6); } 40%{ opacity:1; } 100%{ opacity:0; transform: translate(-50%,-80%) rotate(calc(var(--rot) + 20deg)) scale(1.4);} }
+
+    .pop { animation: popSpin .28s ease; }
+    .ring1, .ring2{ position:absolute; inset:-10px; border-radius:20px; border:3px solid var(--p200); pointer-events:none; }
+    .ring1{ animation: ringOut1 .60s ease forwards; }
+    .ring2{ inset:-20px; border-width:2px; border-color:var(--p100); animation: ringOut2 .9s ease forwards; }
+
+    .spark{ position:absolute; left:50%; top:50%; width:4px; height:18px; background:var(--p700); border-radius:999px; pointer-events:none; transform-origin:0 -12px; animation: spark .5s ease forwards; }
+
+    .footer{ text-align:center; color:var(--muted); font-size:12px; padding:20px 8px 40px; }
+	.badge { font-size: 12px; padding: 4px 8px; border: 1px solid #334155; border-radius: 999px; color: var(--muted);}
+  </style>
+</head>
+<body class="theme-sky">
+  <div class="header">
+    <div class="container">
+      <div class="header-inner">
+        <div class="title">多功能節拍器 <span class="version">v2.1.0</span><span class="badge">Developed by DennisZ</span></div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label class="hint">主題</label>
+          <select id="themeSel" class="btn" style="padding:6px 10px;">
+            <option value="theme-sky">Sky</option>
+            <option value="theme-emerald">Emerald</option>
+            <option value="theme-violet">Violet</option>
+            <option value="theme-rose">Rose</option>
+            <option value="theme-amber">Amber</option>
+            <option value="theme-slate">Slate</option>
+            <option value="theme-dark">Dark</option>
+          </select>
+          <div class="hint">空白：開始/停止、T：Tap、↑/↓：BPM ±1</div>
+        </div>
+      </div>
+      <div id="banner" class="banner">
+        <span>請點擊「啟動音訊」或任一按鈕，解鎖裝置聲音（iOS 需互動）。</span>
+        <button id="btnUnlock" class="btn-banner">啟動音訊</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="grid">
+      <!-- Left: BPM -->
+      <section class="card">
+        <h2>速度 (BPM)</h2>
+        <div class="center">
+          <div id="bpmNum" class="big-num">100</div>
+          <input id="rangeBpm" type="range" min="20" max="400" value="100" />
+          <div style="display:flex; justify-content:center; gap:8px; margin-top:10px; flex-wrap:wrap;">
+            <button class="btn" data-bpm="60">60</button>
+            <button class="btn" data-bpm="90">90</button>
+            <button class="btn" data-bpm="120">120</button>
+            <button class="btn" data-bpm="160">160</button>
+            <button id="btnMinus5" class="btn">−5</button>
+            <button id="btnPlus5" class="btn">+5</button>
+            <button id="btnTap" class="btn btn-primary">Tap</button>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:14px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="hint">音量</span>
+            <input id="rangeVol" type="range" min="0" max="100" value="80" />
+            <span id="volVal" class="hint">80</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="hint">音色</span>
+            <div class="seg-group">
+              <button class="seg active" data-sound="Click">Click</button>
+              <button class="seg" data-sound="Wood">Wood</button>
+              <button class="seg" data-sound="Hat">Hat</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px; margin-top:14px;">
+          <span class="hint">震動</span>
+          <div id="vibeSwitch" class="switch on" role="switch" aria-checked="true" tabindex="0"></div>
+        </div>
+      </section>
+
+      <!-- Center: Visual & Meter -->
+      <section class="card">
+        <h2>視覺節拍</h2>
+        <div class="beat-wrap">
+          <div id="beatBox" class="beat-box"><div id="beatNum" class="beat-num">1</div></div>
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="hint">分子</div>
+            <div class="row">
+              <button id="numMinus" class="btn btn-icon">−</button>
+              <div id="numVal" style="font-size:22px; font-weight:800; width:44px; text-align:center;">4</div>
+              <button id="numPlus" class="btn btn-icon">＋</button>
+            </div>
+          </div>
+          <div>
+            <div class="hint">分母</div>
+            <select id="denSel" class="btn">
+              <option value="2">2</option>
+              <option value="4" selected>4</option>
+              <option value="8">8</option>
+              <option value="16">16</option>
+            </select>
+          </div>
+          <div>
+            <div class="hint">細分</div>
+            <select id="subSel" class="btn">
+              <option>Off</option>
+              <option>8th</option>
+              <option>Triplet</option>
+              <option>16th</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <div class="row"><span class="hint">Swing（僅 8th）</span><span id="swingVal" class="hint">0%</span></div>
+          <input id="swingRange" type="range" min="0" max="100" value="0" />
+        </div>
+
+        <div style="margin-top:14px;">
+          <div class="row">
+            <div class="hint">重音樣式（點擊切換）</div>
+            <button id="accReset" class="btn">重置</button>
+          </div>
+          <div id="accentGrid" class="accent-grid"></div>
+        </div>
+      </section>
+
+      <!-- Right: Transport & Presets -->
+      <section class="card">
+        <h2>播放 / Count-in / 練習計時</h2>
+        <div class="row">
+          <button id="btnStart" class="btn btn-green" style="flex:1; padding:14px 16px; font-size:18px;">開始</button>
+          <button id="btnStop" class="btn btn-red" style="flex:1; padding:14px 16px; font-size:18px; display:none;">停止</button>
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="hint">Count-in 小節數</div>
+            <div class="row">
+              <button id="cinMinus" class="btn btn-icon">−</button>
+              <div id="cinVal" style="font-weight:800; width:40px; text-align:center;">0</div>
+              <button id="cinPlus" class="btn btn-icon">＋</button>
+            </div>
+          </div>
+          <div>
+            <div class="hint">練習計時（分）</div>
+            <div class="row">
+              <button id="prMinus" class="btn btn-icon">−</button>
+              <div id="prVal" style="font-weight:800; width:40px; text-align:center;">0</div>
+              <button id="prPlus" class="btn btn-icon">＋</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:12px; margin-top:12px;">
+          <h2 style="margin-bottom:8px;">預設（本機）</h2>
+          <div class="row">
+            <button id="btnSave" class="btn btn-primary">儲存目前設定</button>
+            <button id="btnClear" class="btn">清空</button>
+          </div>
+          <ul id="presetList" class="list" style="max-height:260px; overflow:auto; margin:0; padding:0; list-style:none; display:grid; gap:8px;"></ul>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer"><span id="year"></span>多功能節拍器 v2.1.0</div>
+  </main>
+
+<script>
+(() => {
+  // ====== State ======
+  const state = {
+    version: '2.1.0', bpm: 100, numerator: 4, denominator: 4, subdiv: 'Off', swing: 0,
+    volume: 80, running: false, countInBars: 0, practiceMinutes: 0,
+    soundType: 'Click', vibration: true, accents: Array.from({length:4},(_,i)=>i===0), theme:'theme-sky'
+  };
+
+  // ====== Elements ======
+  const $ = (id)=>document.getElementById(id);
+  const bpmNum=$('bpmNum'), rangeBpm=$('rangeBpm');
+  const rangeVol=$('rangeVol'), volVal=$('volVal');
+  const btnTap=$('btnTap'), btnMinus5=$('btnMinus5'), btnPlus5=$('btnPlus5');
+  const beatBox=$('beatBox'), beatNum=$('beatNum');
+  const numMinus=$('numMinus'), numPlus=$('numPlus'), numVal=$('numVal');
+  const denSel=$('denSel'), subSel=$('subSel'), swingRange=$('swingRange'), swingVal=$('swingVal');
+  const accGrid=$('accentGrid'), accReset=$('accReset');
+  const btnStart=$('btnStart'), btnStop=$('btnStop');
+  const cinMinus=$('cinMinus'), cinPlus=$('cinPlus'), cinVal=$('cinVal');
+  const prMinus=$('prMinus'), prPlus=$('prPlus'), prVal=$('prVal');
+  const presetList=$('presetList'), btnSave=$('btnSave'), btnClear=$('btnClear');
+  const themeSel=$('themeSel');
+  const banner=$('banner'), btnUnlock=$('btnUnlock');
+  const soundButtons=Array.from(document.querySelectorAll('.seg[data-sound]'));
+  document.getElementById('year').textContent=new Date().getFullYear();
+
+  // ====== Audio ======
+  let audioCtx=null, masterGain=null; let nextNoteTime=0, currentBeat=0; let lookaheadId=null, stopTimerId=null; let countingInBeats=0;
+  const ensureAudio=async()=>{ if(!audioCtx){ const AC=window.AudioContext||window.webkitAudioContext; audioCtx=new AC(); masterGain=audioCtx.createGain(); masterGain.gain.value=state.volume/100; masterGain.connect(audioCtx.destination);} try{ if(audioCtx.state==='suspended') await audioCtx.resume(); }catch{} banner.classList.toggle('show', audioCtx.state!=='running'); };
+  const setVolume=(v)=>{ state.volume=v; volVal.textContent=v; if(masterGain) masterGain.gain.value=v/100; };
+  const secondsPerQuarter=()=>60/Math.max(20,Math.min(400,state.bpm)); const beatLength=()=>secondsPerQuarter()*(4/state.denominator); const subdivCount=()=>({Off:0,'8th':2,Triplet:3,'16th':4})[state.subdiv]||0;
+  const vibrate=(ms)=>{ try{ if(state.vibration && navigator.vibrate) navigator.vibrate(ms);}catch{} };
+
+  function scheduleClick(time,{accent=false,sub=false}={}){
+    const ctx=audioCtx; if(!ctx) return;
+    const base= state.soundType==='Hat' ? (accent?4500:3500) : state.soundType==='Wood' ? (accent?1200:800) : (accent?1600:1000);
+    if(state.soundType==='Hat'){
+      const noiseBuf=ctx.createBuffer(1, ctx.sampleRate*0.2, ctx.sampleRate); const data=noiseBuf.getChannelData(0); for(let i=0;i<data.length;i++) data[i]=Math.random()*2-1;
+      const noise=ctx.createBufferSource(); noise.buffer=noiseBuf;
+      const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=base;
+      const g=ctx.createGain(); g.gain.setValueAtTime(accent?0.9:(sub?0.25:0.55), time); g.gain.exponentialRampToValueAtTime(0.001, time+0.07);
+      noise.connect(bp).connect(g).connect(masterGain); noise.start(time); noise.stop(time+0.08);
+    } else {
+      const o1=ctx.createOscillator(), o2=ctx.createOscillator(); o1.type='sine'; o1.frequency.setValueAtTime(base, time); o2.type='square'; o2.frequency.setValueAtTime(base/2, time);
+      const g=ctx.createGain(); const v=accent?0.9:(sub?0.25:0.6); g.gain.setValueAtTime(v, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.06);
+      o1.connect(g); o2.connect(g); g.connect(masterGain); o1.start(time); o2.start(time); o1.stop(time+0.07); o2.stop(time+0.07);
+    }
+  }
+
+  function spawnBeatEffects(){
+    // 主拍彈跳
+    beatBox.classList.remove('pop'); void beatBox.offsetWidth; beatBox.classList.add('pop');
+    // 雙層波紋
+    const r1=document.createElement('span'); r1.className='ring1';
+    const r2=document.createElement('span'); r2.className='ring2';
+    beatBox.parentElement.appendChild(r1); beatBox.parentElement.appendChild(r2);
+    setTimeout(()=>{ r1.remove(); r2.remove(); }, 900);
+    // 亮片條
+    for(let i=0;i<10;i++){
+      const s=document.createElement('span'); s.className='spark'; s.style.setProperty('--rot', (i*36-90)+'deg');
+      beatBox.parentElement.appendChild(s); setTimeout(()=>s.remove(), 520);
+    }
+  }
+
+  function scheduler(){
+    const ctx=audioCtx; if(!ctx) return; const ahead=.1;
+    while(nextNoteTime < ctx.currentTime + ahead){
+      if(countingInBeats>0){
+        const isAccent=(currentBeat % state.numerator)===0; scheduleClick(nextNoteTime,{accent:isAccent}); if(isAccent) vibrate(20);
+        beatNum.textContent=(currentBeat % state.numerator)+1; currentBeat=(currentBeat+1)%state.numerator; nextNoteTime+=beatLength(); countingInBeats-=1;
+        continue;
+      }
+      const beatIndex=currentBeat % state.numerator; const accentNow=!!state.accents[beatIndex];
+      const subc=subdivCount();
+      if(!subc){ scheduleClick(nextNoteTime,{accent:accentNow}); }
+      else { const subInt=beatLength()/subc; for(let j=0;j<subc;j++){ let when=nextNoteTime + j*subInt; if(subc===2 && state.swing>0){ const s=state.swing/100; when = j===0 ? nextNoteTime : nextNoteTime + subInt*(1+s); } scheduleClick(when,{accent:j===0?accentNow:false, sub:j!==0}); } }
+      beatNum.textContent=beatIndex+1; if(accentNow){ vibrate(15); spawnBeatEffects(); }
+      currentBeat=(currentBeat+1)%state.numerator; nextNoteTime+=beatLength();
+    }
+  }
+
+  async function start(){ await ensureAudio(); if(!audioCtx) return; nextNoteTime=audioCtx.currentTime+0.05; currentBeat=0; beatNum.textContent=1; countingInBeats=Math.max(0,state.countInBars)*state.numerator; if(lookaheadId) clearInterval(lookaheadId); lookaheadId=setInterval(scheduler,25); if(stopTimerId) clearTimeout(stopTimerId); if(state.practiceMinutes>0) stopTimerId=setTimeout(stop, state.practiceMinutes*60*1000); state.running=true; updateTransportUI(); }
+  function stop(){ if(lookaheadId) clearInterval(lookaheadId); lookaheadId=null; if(stopTimerId) clearTimeout(stopTimerId); stopTimerId=null; state.running=false; updateTransportUI(); }
+  function updateTransportUI(){ btnStart.style.display = state.running ? 'none' : 'inline-block'; btnStop.style.display = state.running ? 'inline-block' : 'none'; }
+
+  // ====== UI Wiring ======
+  function renderBpm(){ bpmNum.textContent=state.bpm; rangeBpm.value=String(state.bpm); }
+  function renderAccents(){ accGrid.innerHTML=''; for(let i=0;i<state.numerator;i++){ const b=document.createElement('button'); b.className='btn accent'+(state.accents[i]?' on':''); b.textContent=String(i+1); b.addEventListener('click',()=>{ state.accents[i]=!state.accents[i]; renderAccents(); }); accGrid.appendChild(b);} }
+  function syncAll(){ renderBpm(); setVolume(state.volume); numVal.textContent=state.numerator; denSel.value=String(state.denominator); subSel.value=state.subdiv; swingRange.value=String(state.swing); swingVal.textContent=state.swing+'%';
+    soundButtons.forEach(b=>b.classList.toggle('active', b.dataset.sound===state.soundType));
+    document.body.className=state.theme; renderAccents(); updateTransportUI(); }
+
+  // Event bindings
+  rangeBpm.addEventListener('input', e=>{ state.bpm=parseInt(e.target.value); renderBpm(); });
+  document.querySelectorAll('[data-bpm]').forEach(btn=> btn.addEventListener('click', ()=>{ state.bpm=parseInt(btn.dataset.bpm); renderBpm(); }));
+  btnMinus5.addEventListener('click', ()=>{ state.bpm=Math.max(20,state.bpm-5); renderBpm(); });
+  btnPlus5.addEventListener('click', ()=>{ state.bpm=Math.min(400,state.bpm+5); renderBpm(); });
+
+  rangeVol.addEventListener('input', e=> setVolume(parseInt(e.target.value)));
+  soundButtons.forEach(b=> b.addEventListener('click', ()=>{ state.soundType=b.dataset.sound; soundButtons.forEach(x=>x.classList.toggle('active', x===b)); }));
+
+  const toggleVibe=()=>{ state.vibration=!state.vibration; const sw=$('vibeSwitch'); sw.classList.toggle('on', state.vibration); sw.setAttribute('aria-checked', String(state.vibration)); };
+  $('vibeSwitch').addEventListener('click', toggleVibe);
+  $('vibeSwitch').addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleVibe(); } });
+
+  numMinus.addEventListener('click', ()=>{ state.numerator=Math.max(1,state.numerator-1); state.accents=Array.from({length:state.numerator},(_,i)=> state.accents[i]??(i===0)); numVal.textContent=state.numerator; renderAccents(); });
+  numPlus.addEventListener('click', ()=>{ state.numerator=Math.min(12,state.numerator+1); state.accents=Array.from({length:state.numerator},(_,i)=> state.accents[i]??(i===0)); numVal.textContent=state.numerator; renderAccents(); });
+  denSel.addEventListener('change', e=> state.denominator=parseInt(e.target.value));
+  subSel.addEventListener('change', e=> state.subdiv=e.target.value);
+  swingRange.addEventListener('input', e=>{ state.swing=parseInt(e.target.value); swingVal.textContent=state.swing+'%'; });
+  accReset.addEventListener('click', ()=>{ state.accents=Array.from({length:state.numerator},(_,i)=>i===0); renderAccents(); });
+
+  btnStart.addEventListener('click', start);
+  btnStop.addEventListener('click', stop);
+  cinMinus.addEventListener('click', ()=>{ state.countInBars=Math.max(0,state.countInBars-1); cinVal.textContent=state.countInBars; });
+  cinPlus.addEventListener('click', ()=>{ state.countInBars=Math.min(8,state.countInBars+1); cinVal.textContent=state.countInBars; });
+  prMinus.addEventListener('click', ()=>{ state.practiceMinutes=Math.max(0,state.practiceMinutes-1); prVal.textContent=state.practiceMinutes; });
+  prPlus.addEventListener('click', ()=>{ state.practiceMinutes=Math.min(120,state.practiceMinutes+1); prVal.textContent=state.practiceMinutes; });
+
+  // 主題切換
+  themeSel.addEventListener('change', ()=>{ state.theme=themeSel.value; document.body.className=state.theme; });
+
+  // 預設
+  function renderPresets(){ const list=JSON.parse(localStorage.getItem('metronome_presets_v21')||'[]'); presetList.innerHTML=''; list.forEach(p=>{ const li=document.createElement('li'); li.className='item'; li.style.cssText='display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:10px;'; const left=document.createElement('div'); left.innerHTML=`<div style="font-weight:700;">${p.name}</div><div class="hint">${p.bpm} BPM • ${p.numerator}/${p.denominator} • ${p.subdiv}${p.swing?` • Swing ${p.swing}%`:''} • ${p.soundType} • ${p.theme.replace('theme-','')}</div>`; const right=document.createElement('div'); right.style.display='flex'; right.style.gap='8px'; const load=document.createElement('button'); load.className='btn btn-primary'; load.textContent='載入'; load.addEventListener('click',()=>{ Object.assign(state,p); syncAll(); }); const del=document.createElement('button'); del.className='btn'; del.textContent='刪除'; del.addEventListener('click',()=>{ const next=JSON.parse(localStorage.getItem('metronome_presets_v21')||'[]').filter(x=>x.id!==p.id); localStorage.setItem('metronome_presets_v21', JSON.stringify(next)); renderPresets(); }); right.append(load,del); li.append(left,right); presetList.appendChild(li); }); }
+  btnSave.addEventListener('click', ()=>{ const name=prompt('預設名稱：'); if(!name) return; const p={ id:String(Date.now()), name, bpm:state.bpm, numerator:state.numerator, denominator:state.denominator, subdiv:state.subdiv, swing:state.swing, volume:state.volume, soundType:state.soundType, theme:state.theme }; const list=JSON.parse(localStorage.getItem('metronome_presets_v21')||'[]'); list.unshift(p); while(list.length>20) list.pop(); localStorage.setItem('metronome_presets_v21', JSON.stringify(list)); renderPresets(); });
+  btnClear.addEventListener('click', ()=>{ if(confirm('清空所有預設？')){ localStorage.removeItem('metronome_presets_v21'); renderPresets(); }});
+
+  // Tap tempo
+  const taps=[]; function tap(){ const now=performance.now(); const last=taps[taps.length-1]; if(!last || now-last>2000){ taps.length=0; taps.push(now); return; } taps.push(now); if(taps.length>6) taps.shift(); const iv=[]; for(let i=1;i<taps.length;i++) iv.push(taps[i]-taps[i-1]); const avg=iv.reduce((a,b)=>a+b,0)/iv.length; state.bpm=Math.max(20,Math.min(400,Math.round(60000/avg))); renderBpm(); }
+  btnTap.addEventListener('click', tap);
+
+  // Shortcuts
+  window.addEventListener('keydown', e=>{ const t=e.target; if(t && (t.tagName==='INPUT'||t.tagName==='SELECT'||t.isContentEditable)) return; if(e.code==='Space'){ e.preventDefault(); state.running?stop():start(); } if(e.code==='ArrowUp'){ state.bpm=Math.min(400,state.bpm+1); renderBpm(); } if(e.code==='ArrowDown'){ state.bpm=Math.max(20,state.bpm-1); renderBpm(); } if(e.key && e.key.toLowerCase()==='t') tap(); });
+
+  // Unlock audio on any interaction
+  const unlock=()=>ensureAudio(); window.addEventListener('pointerdown', unlock); window.addEventListener('keydown', unlock); window.addEventListener('touchend', unlock); btnUnlock.addEventListener('click', unlock);
+
+  // Init
+  renderPresets(); syncAll(); ensureAudio();
+})();
+</script>
+</body>
+</html>
