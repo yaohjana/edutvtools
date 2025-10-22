@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>定期評量實時狀態揭示板(測試中)</title>
+  <title>定期評量實時狀態揭示板</title>
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script> tailwind.config = { darkMode: 'class' };</script>
@@ -96,6 +96,32 @@
     .clock-hud.docked .clock-time { font-size: 1.125rem; }
     .clock-hud.docked .clock-date { font-size: .75rem; }
     .clock-hud .clock-actions, .clock-hud .snap-tip { display: none !important; }
+	
+	@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&display=swap');
+
+	/* 讓數字固定字寬 + 友善 fallback */
+	.clock-time,
+	#pres-clock .clock-time {
+	  font-variant-numeric: tabular-nums lining-nums;
+	  font-feature-settings: "tnum","lnum";
+	  font-family: 'Inter', 'Roboto Mono', system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans TC', sans-serif;
+	  letter-spacing: .02em;
+	}
+
+	/* 保留版位：數字 2ch、冒號 1ch */
+	#hud-hh, #hud-mm, #hud-ss,
+	#pres-hh, #pres-mm, #pres-ss {
+	  display: inline-block;
+	  width: 2ch;
+	  text-align: center;
+	}
+
+	.clock-dot {
+	  display: inline-block;
+	  width: 1ch;
+	  text-align: center;
+	}
+
   </style>
 </head>
 <body onload="init()">
