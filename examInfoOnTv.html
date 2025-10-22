@@ -6,58 +6,96 @@
   <title>定期評量實時狀態揭示板(測試中)</title>
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    // 強制啟用 class 模式的暗色主題
-    tailwind.config = { darkMode: 'class' };
-  </script>
+  <script> tailwind.config = { darkMode: 'class' };</script>
   <style>
+    /* === v1.0.1 新增/調整樣式區 === */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-    :root {
-      --bg: #0b1220; /* 近似 slate-950 */
-      --panel: #0f172a; /* slate-900 */
-      --muted: #94a3b8; /* slate-400 */
-      --text: #e5e7eb; /* gray-200 */
-      --ring: #22d3ee; /* cyan-400 */
-      --accent: #38bdf8; /* sky-400 */
-      --accent-2: #a78bfa; /* violet-400 */
-      --good: #34d399; /* emerald-400 */
-      --warn: #fbbf24; /* amber-400 */
-      --bad: #f87171; /* red-400 */
+    :root{
+      --bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e5e7eb;--ring:#22d3ee;
+      --accent:#38bdf8;--accent-2:#a78bfa;--good:#34d399;--warn:#fbbf24;--bad:#f87171;
     }
-    body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
-    .main-container { max-width: 90rem; height: 100%; padding: 1.25rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
-    textarea { min-height: 80px; resize: vertical; }
-    /* 時間軸樣式（暗色） */
-    .timeline-item { position: relative; padding-left: 1rem; border-left: 2px solid rgba(148,163,184,.25); margin-left: .25rem; }
-    .timeline-item.active { border-left-color: var(--bad); background: rgba(248,113,113,.08); }
-    .timeline-indicator { position: absolute; left: -9px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; background: var(--accent); border-radius: 9999px; z-index: 10; border: 3px solid var(--panel); }
-    .timeline-item.active .timeline-indicator { background: var(--bad); box-shadow: 0 0 10px rgba(248,113,113,.6); }
-    .schedule-list { overflow-y: auto; flex-grow: 1; }
-    .glass { backdrop-filter: blur(6px); background: rgba(15,23,42,.6); }
-    .card { background: var(--panel); border: 1px solid rgba(148,163,184,.12); }
-    .btn { display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; font-weight:700; transition:background-color .15s ease,opacity .15s ease; padding:.25rem .75rem; font-size:.875rem; }
-    .btn-sky { background: #0ea5e9; color: #0b1220; }
-    .btn-sky:hover { background: #38bdf8; }
-    .btn-teal { background: #14b8a6; color: #052e2b; }
-    .btn-teal:hover { background: #2dd4bf; }
-    .btn-gray { background: #334155; color: #e2e8f0; }
-    .btn-gray:hover { background: #475569; }
-    .btn-rose { background: #f43f5e; color: #0b1220; }
-    .btn-rose:hover { background: #fb7185; }
-    .ring-focus { outline: none; box-shadow: 0 0 0 3px rgba(34,211,238,.35); }
-    .timeline-item[data-index][data-type="exam"] .text-sm,
-    .timeline-item.exam .text-sm {
-      font-size: 1.125rem; /* text-lg */
-      font-weight: 700; /* 加粗 */
-      color: var(--accent); /* sky-400 顏色 */
+    body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+    .main-container{max-width:90rem;height:100%;padding:1.25rem;margin:0 auto;display:flex;flex-direction:column;gap:1rem}
+    textarea{min-height:80px;resize:vertical}
+    .timeline-item{position:relative;padding-left:1rem;border-left:2px solid rgba(148,163,184,.25);margin-left:.25rem}
+    .timeline-item.active{border-left-color:var(--bad);background:rgba(248,113,113,.08)}
+    .timeline-indicator{position:absolute;left:-9px;top:50%;transform:translateY(-50%);width:14px;height:14px;background:var(--accent);border-radius:9999px;z-index:10;border:3px solid var(--panel)}
+    .timeline-item.active .timeline-indicator{background:var(--bad);box-shadow:0 0 10px rgba(248,113,113,.6)}
+    .schedule-list{overflow-y:auto;flex-grow:1}
+    .glass{backdrop-filter:blur(6px);background:rgba(15,23,42,.6)}
+    .card{background:var(--panel);border:1px solid rgba(148,163,184,.12)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:.5rem;font-weight:700;transition:background-color .15s ease,opacity .15s ease;padding:.25rem .75rem;font-size:.875rem}
+    .btn-sky{background:#0ea5e9;color:#0b1220}.btn-sky:hover{background:#38bdf8}
+    .btn-teal{background:#14b8a6;color:#052e2b}.btn-teal:hover{background:#2dd4bf}
+    .btn-gray{background:#334155;color:#e2e8f0}.btn-gray:hover{background:#475569}
+    .btn-rose{background:#f43f5e;color:#0b1220}.btn-rose:hover{background:#fb7185}
+    .ring-focus{outline:none;box-shadow:0 0 0 3px rgba(34,211,238,.35)}
+    .timeline-item[data-index][data-type="exam"] .text-sm,.timeline-item.exam .text-sm{font-size:1.125rem;font-weight:700;color:var(--accent)}
+    .timeline-item.exam.active .text-sm{color:var(--bad)}
+    #schedule-timeline .timeline-item.exam .text-sm,#schedule-timeline .timeline-item[data-type="exam"] .text-sm{font-size:1.125rem;font-weight:800}
+    .modal{opacity:1}
+
+    /* === 大時鐘 HUD（原樣式，供未鎖定時使用） === */
+    .clock-hud{
+      position:fixed; z-index:55; user-select:none;
+      background:rgba(2,6,23,.75);
+      border:1px solid rgba(148,163,184,.25);
+      backdrop-filter:blur(8px);
+      box-shadow:0 8px 30px rgba(0,0,0,.35), 0 0 24px rgba(56,189,248,.18);
+      border-radius:18px; padding:.5rem .75rem;
+      display:flex; align-items:center; gap:.6rem;
+      cursor:grab;
+      transform: scale(var(--clock-scale, 2));
+      transform-origin: top right;
     }
-    .timeline-item.exam.active .text-sm { color: var(--bad); }
-    #schedule-timeline .timeline-item.exam .text-sm,
-    #schedule-timeline .timeline-item[data-type="exam"] .text-sm {
-      font-size: 1.125rem; font-weight: 800;
+    .clock-hud.dragging{cursor:grabbing}
+    .clock-time{font-weight:900; letter-spacing:.5px; text-shadow:0 0 12px rgba(56,189,248,.35);}
+    .clock-date{font-size:.7rem;color:#cbd5e1}
+    .clock-dot{animation:blink 1s steps(2,start) infinite}
+    @keyframes blink{to{opacity:.2}}
+    .clock-badge{font-size:.65rem; padding:.1rem .4rem; border-radius:9999px;background:rgba(56,189,248,.18); color:#bae6fd; border:1px solid rgba(56,189,248,.35)}
+    .clock-actions button{font-size:.7rem; padding:.2rem .45rem; border-radius:.4rem;background:#0ea5e9; color:#06253a; font-weight:800;}
+    .clock-actions button:hover{background:#38bdf8}
+    .snap-tip{position:absolute; inset:auto auto -18px 0; font-size:.65rem; color:#94a3b8}
+    #clock-hud{top:12px; right:16px}
+
+    /* 展示模式原樣式（未鎖定時） */
+    #pres-clock{
+      position:fixed; z-index:70; left:50%; transform:translateX(-50%) scale(var(--clock-scale, 2));
+      top:70px; color:snow;
+      cursor:default; user-select:none; padding:.75rem 1.25rem;
+      border-radius:22px; backdrop-filter:blur(10px);
+      background:linear-gradient(180deg, rgba(2,8,23,.75), rgba(2,8,23,.6));
+      border:5px solid rgba(148,163,184,.25);
+      box-shadow:
+        0 10px 35px rgba(0,0,0,.45),
+        0 0 0 1px rgba(56,189,248,.18) inset,
+        0 0 32px rgba(56,189,248,.25);
     }
-    /* Modal：不使用縮放動畫，僅以透明度過場 */
-    .modal { opacity: 1; }
+    @media (min-width: 768px){
+      #clock-hud .clock-time{font-size:1.5rem}
+      #pres-clock .clock-time{font-size:5rem}
+    }
+    @media (max-width: 767px){
+      #clock-hud .clock-time{font-size:1.25rem}
+      #pres-clock .clock-time{font-size:4rem}
+    }
+
+    /* === Clock 鎖定模式：嵌入（避免遮擋），且隱藏操作鈕 === */
+    .clock-hud.docked {
+      position: static !important;
+      z-index: auto !important;
+      transform: none !important;
+      transform-origin: initial !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      cursor: default !important;
+    }
+    .clock-hud.docked .clock-time { font-size: 1.125rem; }
+    .clock-hud.docked .clock-date { font-size: .75rem; }
+    .clock-hud .clock-actions, .clock-hud .snap-tip { display: none !important; }
   </style>
 </head>
 <body onload="init()">
@@ -66,18 +104,26 @@
     操作成功！
   </div>
 
-  <!-- 缺考 Base64 匯入 Modal -->
-  <div id="import-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 modal">
-    <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-md">
-      <h3 class="text-xl font-bold text-red-300 mb-3">匯入缺考座號資料</h3>
-      <p class="text-sm text-slate-300 mb-3">請將 Base64 編碼的資料貼入下方文字框：</p>
-      <textarea id="import-data-textarea" class="w-full h-28 p-2 rounded-lg bg-slate-800/70 border border-slate-600 text-slate-100 focus:ring-focus" placeholder="貼上 Base64 資料..."></textarea>
-      <div class="flex justify-end gap-2 mt-4">
-        <button id="btn-import-cancel" class="btn btn-gray">取消</button>
-        <button id="btn-import-confirm" class="btn btn-rose">確認匯入</button>
+  <!-- 一般模式 大時鐘（將被嵌入頂部控制列右側） -->
+  <div id="clock-hud" class="clock-hud">
+    <div class="clock-badge">現在</div>
+    <div class="flex flex-col leading-tight">
+      <div class="clock-time">
+        <span id="hud-hh">--</span><span class="clock-dot">:</span><span id="hud-mm">--</span><span class="clock-dot">:</span><span id="hud-ss">--</span>
       </div>
+      <div id="hud-date" class="clock-date">--</div>
     </div>
+    <div class="clock-actions hidden md:flex gap-1">
+      <button id="hud-cycle">⇲</button>
+      <button id="hud-reset">⟳</button>
+      <button id="hud-zoom-out" title="縮小">－</button>
+      <button id="hud-zoom-in" title="放大">＋</button>
+      <button id="hud-zoom-reset" title="重設為 1x">1x</button>
+    </div>
+    <div class="snap-tip hidden md:block">可拖曳</div>
   </div>
+
+  <!-- （已移除：缺考 Base64 匯入 Modal） -->
 
   <!-- 排程 CSV 匯入 Modal -->
   <div id="schedule-import-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 modal">
@@ -111,7 +157,8 @@
     <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-lg">
       <h3 class="text-xl font-bold text-rose-300 mb-3">設定缺考座號</h3>
       <p class="text-xs text-slate-300 mb-2">可用逗號、空格或換行分隔；僅數字會被保留並自動排序。</p>
-      <textarea id="absent-setup-textarea" class="w-full h-36 p-2 rounded-lg bg-slate-800/70 border border-rose-400/40 text-slate-100 focus:ring-focus" placeholder="例如：1, 5 12\n25"></textarea>
+      <textarea id="absent-setup-textarea" class="w-full h-36 p-2 rounded-lg bg-slate-800/70 border border-rose-400/40 text-slate-100 focus:ring-focus" placeholder="例如：1, 5 12
+25"></textarea>
       <div class="flex justify-end gap-2 mt-4">
         <button id="btn-absent-setup-cancel" class="btn btn-gray">取消</button>
         <button id="btn-absent-setup-confirm" class="btn btn-rose">確定</button>
@@ -133,6 +180,7 @@
         <button id="btn-export" class="btn btn-teal">匯出排程 (CSV)</button>
         <button id="btn-import" class="btn btn-sky">匯入排程 (CSV)</button>
         <button id="btn-present" class="btn btn-sky">全畫面展示</button>
+        <!-- clock-hud 會被程式嵌入到這個群組的最後方 -->
       </div>
     </div>
 
@@ -140,15 +188,7 @@
     <div class="flex-grow flex flex-col lg:flex-row gap-4 min-h-0">
       <!-- 左側 -->
       <div class="w-full lg:w-2/3 flex flex-col gap-4 min-h-0">
-        <!-- 實時狀態卡片 -->
-        <div class="card p-6 rounded-2xl border-t-2 border-t-cyan-500">
-          <p class="text-base text-slate-300">
-            目前日期：<span id="current-schedule-date" class="font-semibold text-cyan-300">(載入中...)</span>
-          </p>
-          <div id="current-datetime" class="text-xl md:text-xl font-extrabold mt-1 tracking-tight">
-            --:--:--
-          </div>
-        </div>
+        <!-- （已移除：當前日期卡片） -->
 
         <!-- 當前考科顯示 -->
         <main id="hero" class="flex-grow flex flex-col justify-center items-center rounded-2xl shadow-xl p-8 transition-colors duration-300" style="background: linear-gradient(145deg, rgba(2,132,199,.15), rgba(67,56,202,.12));">
@@ -194,21 +234,9 @@
             <div id="absent-seat-display" class="text-lg font-extrabold text-rose-200">尚無缺考記錄。</div>
           </div>
 
-          <!-- 原輸入區改為隱藏，由彈窗負責輸入 -->
-          <div id="absent-input-area" class="hidden mt-4">
-            <p class="text-slate-300 mb-2 text-xs">請填寫缺考座號（可用逗號、空格或換行分隔）：</p>
-            <textarea id="absent-seat-input" class="w-full p-2 rounded-lg bg-slate-800/70 border border-rose-400/40 text-slate-100 focus:ring-focus" placeholder="例如：1, 5, 12, 25"></textarea>
-            <div class="flex justify-end gap-2 mt-2">
-              <button id="btn-absent-export" class="btn bg-rose-500 hover:bg-rose-400 text-slate-900">匯出 (複製 Base64)</button>
-              <button id="btn-absent-import" class="btn bg-rose-400/80 hover:bg-rose-400 text-slate-900">匯入 (彈窗貼上)</button>
-            </div>
-          </div>
+          <div id="absent-input-area" class="hidden mt-4"></div>
 
-          <!-- 保留匯入/匯出按鈕（不需顯示輸入框） -->
-          <div class="flex justify-end gap-2 mt-3">
-            <button id="btn-absent-export-2" class="btn bg-rose-500 hover:bg-rose-400 text-slate-900">匯出 (Base64)</button>
-            <button id="btn-absent-import-2" class="btn bg-rose-400/80 hover:bg-rose-400 text-slate-900">匯入 (彈窗)</button>
-          </div>
+          <!-- （已移除：缺考座號 匯出(Base64)/匯入 按鈕列） -->
         </section>
       </div>
 
@@ -232,629 +260,129 @@
   </div>
 
   <script>
-    // ===== 常量與狀態 =====
+    /* ===== 既有狀態/函式（原始碼略） ===== */
     let expectedCount = Number(localStorage.getItem('expectedCount')) || 30;
-    let isAbsentInputVisible = false; // 由彈窗管理
+    let isAbsentInputVisible = false;
+
+    /* === 全域鎖定旗標：true = 固定 / 不可縮放 / 不可拖曳 / 不可顯示隱藏 === */
+    const CLOCK_LOCKED = true;
 
     let initialSchedules = {
-      day1: {
-        name: '12/2 星期二',
-        data: [
-          { start: '08:10', end: '08:40', name: '自習 (30分)', type: 'study' },
-          { start: '08:40', end: '08:50', name: '下課 (10分)', type: 'break' },
-    
-          { start: '08:50', end: '09:50', name: '數學 (60分)', type: 'exam' },
-          { start: '09:50', end: '10:00', name: '下課 (10分)', type: 'break' },
-    
-          { start: '10:00', end: '10:30', name: '自習 (30分)', type: 'study' },
-          { start: '10:30', end: '10:45', name: '下課 (15分)', type: 'break' },
-    
-          { start: '10:45', end: '11:45', name: '國文 (60分)', type: 'exam' },
-          { start: '11:45', end: '13:05', name: '中午休息 (80分)', type: 'break' },
-    
-          { start: '13:05', end: '13:55', name: '自習 (50分)', type: 'study' },
-          { start: '13:55', end: '14:05', name: '下課 (10分)', type: 'break' },
-    
-          { start: '14:05', end: '15:05', name: '英文 (60分)', type: 'exam' },
-          { start: '15:05', end: '15:15', name: '下課 (10分)', type: 'break' },
-    
-          { start: '15:15', end: '15:40', name: '自習 (25分)', type: 'study' },
-          { start: '15:40', end: '15:50', name: '放學時間', type: 'end' },
-        ],
-      },
-    
-      day2: {
-        name: '12/3 星期三',
-        data: [
-          { start: '08:10', end: '08:40', name: '自習 (30分)', type: 'study' },
-          { start: '08:40', end: '08:50', name: '下課 (10分)', type: 'break' },
-    
-          { start: '08:50', end: '09:50', name: '社會 (60分)', type: 'exam' },
-          { start: '09:50', end: '10:00', name: '下課 (10分)', type: 'break' },
-    
-          { start: '10:00', end: '10:30', name: '自習 (30分)', type: 'study' },
-          { start: '10:30', end: '10:45', name: '下課 (15分)', type: 'break' },
-    
-          { start: '10:45', end: '11:45', name: '自然 (60分)', type: 'exam' },
-          { start: '11:45', end: '15:40', name: '正常作息', type: 'study' },
-          { start: '15:40', end: '15:5', name: '放學時間', type: 'end' },
-        ],
-      },
+      day1:{ name:'12/2 星期二', data:[
+        {start:'08:10',end:'08:40',name:'自習 (30分)',type:'study'},
+        {start:'08:40',end:'08:50',name:'下課 (10分)',type:'break'},
+        {start:'08:50',end:'09:50',name:'數學 (60分)',type:'exam'},
+        {start:'09:50',end:'10:00',name:'下課 (10分)',type:'break'},
+        {start:'10:00',end:'10:30',name:'自習 (30分)',type:'study'},
+        {start:'10:30',end:'10:45',name:'下課 (15分)',type:'break'},
+        {start:'10:45',end:'11:45',name:'國文 (60分)',type:'exam'},
+        {start:'11:45',end:'13:05',name:'中午休息 (80分)',type:'break'},
+        {start:'13:05',end:'13:55',name:'自習 (50分)',type:'study'},
+        {start:'13:55',end:'14:05',name:'下課 (10分)',type:'break'},
+        {start:'14:05',end:'15:05',name:'英文 (60分)',type:'exam'},
+        {start:'15:05',end:'15:15',name:'下課 (10分)',type:'break'},
+        {start:'15:15',end:'15:40',name:'自習 (25分)',type:'study'},
+        {start:'15:40',end:'15:50',name:'放學時間',type:'end'},
+      ]},
+      day2:{ name:'12/3 星期三', data:[
+        {start:'08:10',end:'08:40',name:'自習 (30分)',type:'study'},
+        {start:'08:40',end:'08:50',name:'下課 (10分)',type:'break'},
+        {start:'08:50',end:'09:50',name:'社會 (60分)',type:'exam'},
+        {start:'09:50',end:'10:00',name:'下課 (10分)',type:'break'},
+        {start:'10:00',end:'10:30',name:'自習 (30分)',type:'study'},
+        {start:'10:30',end:'10:45',name:'下課 (15分)',type:'break'},
+        {start:'10:45',end:'11:45',name:'自然 (60分)',type:'exam'},
+        {start:'11:45',end:'15:40',name:'正常作息',type:'study'},
+        {start:'15:40',end:'15:50', name:'放學時間',type:'end'},
+      ]},
     };
-
 
     let currentDay = 'day1';
     let currentScheduleData = initialSchedules[currentDay];
 
-    // ===== DOM 快取 =====
-    const el = (id) => document.getElementById(id);
-    const currentDatetimeEl = el('current-datetime');
-    const currentScheduleDateEl = el('current-schedule-date');
-    const currentSubjectEl = el('current-subject');
-    const subjectTimeRangeEl = el('subject-time-range');
-    const subjectProgressBarEl = el('subject-progress-bar');
-    const subjectProgressTextEl = el('subject-progress-text');
+    const el = (id)=>document.getElementById(id);
+    const currentSubjectEl=el('current-subject');
+    const subjectTimeRangeEl=el('subject-time-range');
+    const subjectProgressBarEl=el('subject-progress-bar');
+    const subjectProgressTextEl=el('subject-progress-text');
+    const morningScheduleEl=el('morning-schedule');
+    const afternoonScheduleEl=el('afternoon-schedule');
+    const lunchBreakItemEl=el('lunch-break-item');
+    const absentInput=document.createElement('textarea'); // 隱藏供邏輯
+    const absentDisplay=el('absent-seat-display');
+    const absentCountEl=el('absent-count');
+    const actualCountEl=el('actual-count');
+    const expectedCountEl=el('expected-count');
 
-    const morningScheduleEl = el('morning-schedule');
-    const afternoonScheduleEl = el('afternoon-schedule');
-    const lunchBreakItemEl = el('lunch-break-item');
+    const scheduleImportModal=el('schedule-import-modal');
+    const scheduleImportDataTextarea=el('schedule-import-data-textarea');
+    const dayButtonsContainer=el('day-buttons-container');
 
-    const absentInput = el('absent-seat-input'); // 隱藏，僅供邏輯使用
-    const absentDisplay = el('absent-seat-display');
-    const absentCountEl = el('absent-count');
-    const actualCountEl = el('actual-count');
-    const expectedCountEl = el('expected-count');
+    const btnSample=el('btn-sample');
+    const btnExport=el('btn-export');
+    const btnImport=el('btn-import');
+    const btnPresent=el('btn-present');
+    const btnFullscreen=el('btn-fullscreen');
+    const pageTitleEl=el('page-title');
 
-    const importDataTextarea = el('import-data-textarea');
-    const importModal = el('import-modal');
-    const statusMessageEl = el('status-message');
+    const btnOpenExpected=el('btn-open-expected');
+    const btnOpenAbsent=el('btn-open-absent');
 
-    const scheduleImportModal = el('schedule-import-modal');
-    const scheduleImportDataTextarea = el('schedule-import-data-textarea');
-    const dayButtonsContainer = el('day-buttons-container');
+    const expectedModal=el('expected-modal');
+    const expectedInput=el('expected-input');
+    const btnExpectedCancel=el('btn-expected-cancel');
+    const btnExpectedConfirm=el('btn-expected-confirm');
 
-    // 頂部按鈕
-    const btnSample = el('btn-sample');
-    const btnExport = el('btn-export');
-    const btnImport = el('btn-import');
-    const btnPresent = el('btn-present');
+    const absentSetupModal=el('absent-setup-modal');
+    const absentSetupTextarea=el('absent-setup-textarea');
+    const btnAbsentSetupCancel=el('btn-absent-setup-cancel');
+    const btnAbsentSetupConfirm=el('btn-absent-setup-confirm');
 
-    // 全螢幕與可編輯標題
-    const btnFullscreen = el('btn-fullscreen');
-    const pageTitleEl = el('page-title');
+    const presentationOverlay=()=>el('presentation-overlay');
 
-    // 缺考相關按鈕
-    const btnAbsentExport = el('btn-absent-export');
-    const btnAbsentImport = el('btn-absent-import');
-    const btnAbsentExport2 = el('btn-absent-export-2');
-    const btnAbsentImport2 = el('btn-absent-import-2');
-
-    // 新增：彈窗開啟按鈕
-    const btnOpenExpected = el('btn-open-expected');
-    const btnOpenAbsent = el('btn-open-absent');
-
-    // 新增：應到人數設定 Modal 元件
-    const expectedModal = el('expected-modal');
-    const expectedInput = el('expected-input');
-    const btnExpectedCancel = el('btn-expected-cancel');
-    const btnExpectedConfirm = el('btn-expected-confirm');
-
-    // 新增：缺考設定 Modal 元件
-    const absentSetupModal = el('absent-setup-modal');
-    const absentSetupTextarea = el('absent-setup-textarea');
-    const btnAbsentSetupCancel = el('btn-absent-setup-cancel');
-    const btnAbsentSetupConfirm = el('btn-absent-setup-confirm');
-
-    // ===== 新增：展示層 DOM =====
-    const presentationOverlay = () => el('presentation-overlay');
-
-    // ===== 工具函式 =====
-    function updatePresentationView(){
-      // 同步主畫面基本資訊
-      const subject = document.getElementById('current-subject')?.textContent || '—';
-      const range = document.getElementById('subject-time-range')?.textContent || '';
-      const raw = absentInput?.value || '';
-      const list = computeAbsentFromRaw(raw);
-      const absentCount = list.length;
-      const actual = Math.max(0, expectedCount - absentCount);
-      el('pres-subject').textContent = subject;
-      el('pres-range').textContent = range;
-      el('pres-expected').textContent = String(expectedCount);
-      el('pres-absent-count').textContent = String(absentCount);
-      el('pres-absent-list').textContent = list.length ? list.join('、 ') : '—';
-      el('pres-actual').textContent = String(actual);
-
-      // 目前時間
-      const now = new Date();
-      const fmt = { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false };
-      el('pres-now').textContent = now.toLocaleString('zh-TW', fmt);
-
-      // 進度與下一個 study/exam
-      let pct = 0, currentIndex = -1, currentItem = null, nextInfo = '—';
-      if (currentScheduleData && currentScheduleData.data) {
-        const schedule = currentScheduleData.data;
-        for (let i = 0; i < schedule.length; i++) {
-          const s = parseTime(schedule[i].start), e = parseTime(schedule[i].end);
-          if (within(now, s, e)) {
-            currentItem = schedule[i]; currentIndex = i;
-            pct = Math.min(100, Math.round(((now - s) / (e - s)) * 100));
-            break;
-          }
-        }
-        // 找下一個 study 或 exam
-        for (let j = currentIndex + 1; j < schedule.length; j++) {
-          if (schedule[j].type === 'study' || schedule[j].type === 'exam') {
-            nextInfo = `${schedule[j].start}　${schedule[j].name}`;
-            break;
-          }
-        }
-      }
-      const bar = el('pres-progress-bar');
-      const txt = el('pres-progress-text');
-      bar.style.width = pct + '%';
-      txt.textContent = pct + '%';
-      el('pres-next').textContent = nextInfo;
-    }
-
-    function openPresentation(){
-      updatePresentationView();
-      presentationOverlay().classList.remove('hidden');
-      // 嘗試進入全螢幕（需使用者手勢觸發）
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen?.().catch(()=>{});
-      }
-    }
-    function closePresentation(){
-      presentationOverlay().classList.add('hidden');
-      // 若在全螢幕中，同步退出（避免留在全螢幕）
-      if (document.fullscreenElement) {
-        document.exitFullscreen?.().catch(()=>{});
-      }
-    }
-    const parseTime = (timeStr) => {
-      const [h, m] = timeStr.split(':').map(Number);
-      const d = new Date();
-      d.setHours(h, m, 0, 0);
-      return d;
-    };
-
-    const within = (now, start, end) => now >= start && now < end;
-
-    function getSplitSchedules(scheduleData) {
-      const lunchIndex = scheduleData.findIndex((i) => i.start === '11:45' && i.end === '13:05');
-      if (lunchIndex === -1) return { morning: scheduleData, lunch: null, afternoon: [] };
-      return { morning: scheduleData.slice(0, lunchIndex), lunch: scheduleData[lunchIndex], afternoon: scheduleData.slice(lunchIndex + 1) };
-    }
-
-    function renderScheduleSegment(schedule, targetEl, startIndex) {
-      targetEl.innerHTML = '';
-      schedule.forEach((item, idx) => {
-        const originalIndex = startIndex + idx;
-        let colorClass = 'text-slate-200';
-        let icon = '🏁';
-        if (item.type === 'exam') { colorClass = 'text-sky-300 font-semibold'; icon = '📝'; }
-        else if (item.type === 'study') { colorClass = 'text-violet-300'; icon = '📚'; }
-        else if (item.type === 'break') { colorClass = 'text-emerald-300'; icon = '☕'; }
-        const html = `
-          <div id="schedule-item-${originalIndex}"
-               class="timeline-item ${item.type} py-1 pr-2 cursor-pointer rounded-md hover:bg-slate-800/60"
-               data-type="${item.type}"
-               data-index="${originalIndex}">
-            <div class="timeline-indicator"></div>
-            <div class="flex items-center gap-2">
-              <div class="text-xs font-bold w-12 flex-shrink-0 text-slate-400">${item.start}</div>
-              <div class="flex-grow">
-                <div class="text-sm ${colorClass}">${icon} ${item.name}</div>
-                <div class="text-[11px] text-slate-500">結束: ${item.end}</div>
-              </div>
-            </div>
-          </div>`;
-        targetEl.insertAdjacentHTML('beforeend', html);
-      });
-    }
-
-    function renderDayButtons() {
-      dayButtonsContainer.innerHTML = '';
-      const dayKeys = Object.keys(initialSchedules).sort();
-      dayKeys.forEach((day) => {
-        const schedule = initialSchedules[day];
-        const isActive = day === currentDay;
-        const btn = document.createElement('button');
-        btn.id = `${day}-btn`;
-        btn.textContent = schedule.name;
-        btn.className = `btn ${isActive ? 'bg-indigo-500 text-white' : 'btn-gray'}`;
-        btn.addEventListener('click', () => loadSchedule(day));
-        dayButtonsContainer.appendChild(btn);
-      });
-    }
-
-    function loadSchedule(day) {
-      if (!initialSchedules[day]) {
-        const first = Object.keys(initialSchedules)[0];
-        if (!first) {
-          currentScheduleData = null; renderDayButtons(); renderSchedule(); updateDisplay(); return;
-        }
-        day = first;
-      }
-      currentDay = day;
-      currentScheduleData = initialSchedules[currentDay];
-      currentScheduleData.split = getSplitSchedules(currentScheduleData.data);
-      renderDayButtons();
-      currentScheduleDateEl.textContent = ` (${currentScheduleData.name})`;
-      document.getElementById('schedule-title').textContent = `排程概覽 (${currentScheduleData.name})`;
-      renderSchedule();
-      updateDisplay();
-    }
-
-    function renderSchedule() {
-      if (!currentScheduleData || !currentScheduleData.data) {
-        morningScheduleEl.innerHTML = '<p class="text-center text-slate-400">無排程資料</p>';
-        afternoonScheduleEl.innerHTML = '';
-        lunchBreakItemEl.textContent = '午休時間';
-        lunchBreakItemEl.classList.remove('bg-slate-800');
-        return;
-      }
-      const { morning, lunch, afternoon } = currentScheduleData.split;
-      renderScheduleSegment(morning, morningScheduleEl, 0);
-      const lunchIndex = currentScheduleData.data.findIndex((i) => i === lunch);
-      const afternoonStartIndex = lunchIndex !== -1 ? lunchIndex + 1 : morning.length;
-      renderScheduleSegment(afternoon, afternoonScheduleEl, afternoonStartIndex);
-      if (lunch) {
-        const dur = Math.floor((parseTime(lunch.end) - parseTime(lunch.start)) / 60000);
-        lunchBreakItemEl.innerHTML = `午休時間 ${lunch.start} - ${lunch.end} (${dur} 分)`;
-        lunchBreakItemEl.dataset.start = lunch.start;
-        lunchBreakItemEl.dataset.end = lunch.end;
-        lunchBreakItemEl.id = `schedule-item-${lunchIndex}`;
-        lunchBreakItemEl.classList.add('bg-slate-800');
-      } else {
-        lunchBreakItemEl.classList.add('hidden');
-      }
-    }
-
-    function computeAbsentFromRaw(raw) {
-      const cleaned = raw.replace(/[,，\s\n]+/g, ' ').trim();
-      const nums = cleaned.split(' ').map((s) => s.trim()).filter((s) => s && /^\d+$/.test(s)).map(Number).sort((a,b)=>a-b);
-      const unique = [...new Set(nums)];
-      return unique;
-    }
-
-    function updateAbsentSeats() {
-      const raw = absentInput.value || '';
-      const unique = computeAbsentFromRaw(raw);
-      const absentCount = unique.length;
-      const actual = Math.max(0, expectedCount - absentCount);
-      absentDisplay.textContent = absentCount ? unique.join('、 ') : '尚無缺考記錄。';
-      expectedCountEl.textContent = expectedCount;
-      absentCountEl.textContent = absentCount;
-      actualCountEl.textContent = actual;
-      // 持久化
-      localStorage.setItem('absentSeats', raw);
-    }
-
-    function showStatusMessage(message, isError = false) {
-      statusMessageEl.textContent = message;
-      statusMessageEl.classList.remove('opacity-0');
-      statusMessageEl.style.background = isError ? 'rgba(244,63,94,.9)' : 'rgba(16,185,129,.9)';
-      statusMessageEl.style.pointerEvents = 'auto';
-      clearTimeout(window.__statusTimer);
-      window.__statusTimer = setTimeout(() => {
-        statusMessageEl.classList.add('opacity-0');
-        statusMessageEl.style.pointerEvents = 'none';
-      }, 2200);
-    }
-
-    // ===== 匯出/匯入：缺考 =====
-    function exportAbsentSeats() {
-      const raw = absentInput.value || '';
-      if (!raw.trim()) return showStatusMessage('沒有缺考座號可匯出。', true);
-      const encoded = btoa(encodeURIComponent(raw));
-      navigator.clipboard?.writeText(encoded).then(() => {
-        showStatusMessage('缺考座號資料已編碼並複製到剪貼簿！');
-      }).catch(() => {
-        const t = document.createElement('textarea');
-        t.value = encoded; document.body.appendChild(t); t.select();
-        const ok = document.execCommand('copy'); document.body.removeChild(t);
-        showStatusMessage(ok ? '缺考座號資料已編碼並複製到剪貼簿！' : '複製失敗，請檢查瀏覽器權限。', !ok);
-      });
-    }
-
-    function openImportModal() { importModal.classList.remove('hidden'); importDataTextarea.value=''; setTimeout(()=>importDataTextarea.focus(),0); }
-    function closeImportModal() { importModal.classList.add('hidden'); }
-    function confirmImport() {
-      const base64Data = importDataTextarea.value.trim();
-      closeImportModal();
-      if (!base64Data) return showStatusMessage('匯入取消或無資料。', true);
-      try {
-        const decoded = decodeURIComponent(atob(base64Data));
-        absentInput.value = decoded; updateAbsentSeats();
-        showStatusMessage('缺考座號匯入成功！');
-      } catch (e) { console.error(e); showStatusMessage('匯入失敗：資料格式錯誤或無效。', true); }
-    }
-
-    // ===== CSV：排程 =====
-    function convertToCsv(schedules) {
-      const header = 'DayKey,DayName,StartTime,EndTime,SubjectName,ActivityType\n';
-      let csv = header;
-      Object.keys(schedules).sort().forEach((key) => {
-        const sc = schedules[key];
-        sc.data.forEach((item) => {
-          const row = [
-            key,
-            `"${sc.name.replace(/"/g,'""')}"`,
-            item.start,
-            item.end,
-            `"${item.name.replace(/"/g,'""')}"`,
-            item.type,
-          ].join(',');
-          csv += row + '\n';
-        });
-      });
-      return '\ufeff' + csv; // BOM
-    }
-
-    function parseCsv(csvString) {
-      const schedules = {};
-      csvString = csvString.replace(/^\ufeff/, '');
-      const lines = csvString.split('\n').filter((l) => l.trim() !== '');
-      if (lines.length < 2) throw new Error('CSV 內容不足，請確認標題列與資料列。');
-      const dataLines = lines.slice(1);
-      dataLines.forEach((line, i) => {
-        const values = line.match(/(?:[^,"]+|"[^"]*")+/g)?.map((v) => v.trim().replace(/^"|"$/g,'').replace(/""/g,'"')) || [];
-        if (values.length !== 6) { console.warn(`Line ${i+2} 欄位數不符，已略過：`, line); return; }
-        const [DayKey, DayName, StartTime, EndTime, SubjectName, ActivityType] = values;
-        if (!/^\d{2}:\d{2}$/.test(StartTime) || !/^\d{2}:\d{2}$/.test(EndTime)) throw new Error(`第 ${i+2} 行時間格式錯誤：${StartTime}-${EndTime}`);
-        if (!['exam','break','study','end'].includes(ActivityType)) throw new Error(`第 ${i+2} 行活動類型錯誤：${ActivityType}`);
-        if (!schedules[DayKey]) schedules[DayKey] = { name: DayName, data: [] };
-        schedules[DayKey].data.push({ start: StartTime, end: EndTime, name: SubjectName, type: ActivityType });
-      });
-      return schedules;
-    }
-
-    function downloadFile(content, fileName, mimeType) {
-      const blob = new Blob([content], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = fileName; document.body.appendChild(a); a.click();
-      document.body.removeChild(a); URL.revokeObjectURL(url);
-    }
-
-    function exportScheduleData() {
-      if (!Object.keys(initialSchedules).length) return showStatusMessage('排程資料為空，請先匯入或建立排程。', true);
-      const csv = convertToCsv(initialSchedules);
-      downloadFile(csv, 'exam_schedule.csv', 'text/csv;charset=utf-8;');
-      showStatusMessage('排程資料已成功匯出為 exam_schedule.csv！');
-    }
-
-    function downloadSampleCsv() {
-      const csv = convertToCsv(initialSchedules);
-      downloadFile(csv, 'exam_schedule_sample.csv', 'text/csv;charset=utf-8;');
-      showStatusMessage('CSV 範例檔案已下載！');
-    }
-
-    function openScheduleImport() { scheduleImportModal.classList.remove('hidden'); scheduleImportDataTextarea.value=''; setTimeout(()=>scheduleImportDataTextarea.focus(),0); }
-    function closeScheduleImport() { scheduleImportModal.classList.add('hidden'); }
-    function confirmScheduleImport() {
-      const csv = scheduleImportDataTextarea.value.trim();
-      closeScheduleImport();
-      if (!csv) return showStatusMessage('排程匯入取消或無資料。', true);
-      try {
-        const newSchedules = parseCsv(csv);
-        if (!Object.keys(newSchedules).length) throw new Error('解析後未得到任何有效的排程資料。');
-        initialSchedules = newSchedules; // 直接取代（簡化）
-        const first = Object.keys(initialSchedules).sort()[0];
-        loadSchedule(first);
-        showStatusMessage(`排程匯入成功！已載入 ${Object.keys(initialSchedules).length} 天排程。`);
-        localStorage.setItem('schedulesCSV', csv);
-      } catch (e) { console.error(e); showStatusMessage(`排程匯入失敗：${e.message}`, true); }
-    }
-
-    // ===== 新增：彈窗流程 =====
-    function openExpectedModal() {
-      expectedModal.classList.remove('hidden');
-      expectedInput.value = String(expectedCount);
-      setTimeout(()=>expectedInput.select(),0);
-    }
-    function closeExpectedModal() { expectedModal.classList.add('hidden'); }
-    function confirmExpectedModal() {
-      const val = Number(expectedInput.value);
-      if (!Number.isFinite(val) || val < 0) { showStatusMessage('請輸入有效的人數（>= 0）。', true); return; }
-      expectedCount = Math.floor(val);
-      localStorage.setItem('expectedCount', String(expectedCount));
-      updateAbsentSeats();
-      closeExpectedModal();
-      showStatusMessage('已更新應到人數。');
-    }
-
-    function openAbsentSetupModal() {
-      absentSetupModal.classList.remove('hidden');
-      const raw = localStorage.getItem('absentSeats') || (absentInput?.value || '');
-      absentSetupTextarea.value = raw;
-      setTimeout(()=>absentSetupTextarea.focus(),0);
-    }
-    function closeAbsentSetupModal() { absentSetupModal.classList.add('hidden'); }
-    function confirmAbsentSetupModal() {
-      const raw = absentSetupTextarea.value || '';
-      absentInput.value = raw; // 保存原始字串（方便還原/匯出）
-      updateAbsentSeats();
-      closeAbsentSetupModal();
-      showStatusMessage('已更新缺考座號。');
-    }
-
-    // ===== 主更新 =====
-    function updateDisplay() {
-      if (!currentScheduleData || !currentScheduleData.data) {
-        currentSubjectEl.textContent = '無排程資料';
-        subjectTimeRangeEl.textContent = '---';
-        subjectProgressBarEl.style.width = '0%';
-        subjectProgressTextEl.textContent = '0%';
-        return;
-      }
-      const schedule = currentScheduleData.data;
-      const now = new Date();
-      const fmt = { year:'numeric', month:'long', day:'numeric', weekday:'long', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false };
-      currentDatetimeEl.textContent = now.toLocaleDateString('zh-TW', fmt);
-
-      let currentItem = null, currentIndex = -1, pct = 0;
-      document.querySelectorAll('.timeline-item').forEach((el) => {
-        el.classList.remove('active');
-      });
-      for (let i = 0; i < schedule.length; i++) {
-        const item = schedule[i];
-        const s = parseTime(item.start), e = parseTime(item.end);
-        if (within(now, s, e)) { currentItem = item; currentIndex = i; pct = Math.min(100, Math.round(((now - s) / (e - s)) * 100)); break; }
-      }
-
-      const hero = document.getElementById('hero');
-      if (currentItem) {
-        currentSubjectEl.textContent = currentItem.name;
-        subjectTimeRangeEl.textContent = `(${currentItem.start} 至 ${currentItem.end})`;
-        subjectProgressBarEl.style.width = pct + '%';
-        subjectProgressTextEl.textContent = pct + '%';
-
-        if (currentItem.type === 'exam') hero.style.background = 'linear-gradient(145deg, rgba(14,165,233,.20), rgba(99,102,241,.18))';
-        else if (currentItem.type === 'break') hero.style.background = 'linear-gradient(145deg, rgba(251,191,36,.20), rgba(34,197,94,.18))';
-        else if (currentItem.type === 'study') hero.style.background = 'linear-gradient(145deg, rgba(167,139,250,.22), rgba(56,189,248,.18))';
-        else hero.style.background = 'linear-gradient(145deg, rgba(148,163,184,.15), rgba(100,116,139,.15))';
-
-        const itemEl = document.getElementById(`schedule-item-${currentIndex}`);
-        if (itemEl) itemEl.classList.add('active');
-      } else {
-        currentSubjectEl.textContent = '今日排程已結束 / 尚未開始';
-        subjectTimeRangeEl.textContent = '---';
-        subjectProgressBarEl.style.width = '0%';
-        subjectProgressTextEl.textContent = '0%';
-        hero.style.background = 'linear-gradient(145deg, rgba(148,163,184,.12), rgba(100,116,139,.12))';
-      }
-
-      // 同步展示層
-      if (!presentationOverlay().classList.contains('hidden')) {
-        updatePresentationView();
-      }
-    }
-
-    // ===== 初始化與事件綁定 =====
-    function init() {
-      const savedSeats = localStorage.getItem('absentSeats');
-      if (savedSeats) { absentInput.value = savedSeats; }
-      expectedCount = Number(localStorage.getItem('expectedCount')) || expectedCount;
-      updateAbsentSeats();
-
-      const savedCSV = localStorage.getItem('schedulesCSV');
-      if (savedCSV) {
-        try { initialSchedules = parseCsv(savedCSV); } catch {}
-      }
-      const firstDayKey = Object.keys(initialSchedules).sort()[0];
-      if (firstDayKey) loadSchedule(firstDayKey); else { renderDayButtons(); renderSchedule(); updateDisplay(); }
-
-      // 定時更新
-      setInterval(updateDisplay, 1000);
-
-      // 事件綁定
-      btnSample.addEventListener('click', downloadSampleCsv);
-      btnExport.addEventListener('click', exportScheduleData);
-      btnImport.addEventListener('click', openScheduleImport);
-      btnPresent.addEventListener('click', openPresentation);
-      document.getElementById('btn-close-present').addEventListener('click', closePresentation);
-
-      // 匯入/匯出（缺考）
-      btnAbsentExport?.addEventListener('click', exportAbsentSeats);
-      btnAbsentImport?.addEventListener('click', openImportModal);
-      btnAbsentExport2?.addEventListener('click', exportAbsentSeats);
-      btnAbsentImport2?.addEventListener('click', openImportModal);
-
-      // Base64 匯入 Modal
-      document.getElementById('btn-import-cancel').addEventListener('click', closeImportModal);
-      document.getElementById('btn-import-confirm').addEventListener('click', confirmImport);
-
-      // CSV 匯入 Modal
-      document.getElementById('btn-schedule-cancel').addEventListener('click', closeScheduleImport);
-      document.getElementById('btn-schedule-confirm').addEventListener('click', confirmScheduleImport);
-
-      // 彈窗：應到人數
-      btnOpenExpected.addEventListener('click', openExpectedModal);
-      btnExpectedCancel.addEventListener('click', closeExpectedModal);
-      btnExpectedConfirm.addEventListener('click', confirmExpectedModal);
-      expectedInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); confirmExpectedModal(); } });
-
-      // 彈窗：缺考座號
-      btnOpenAbsent.addEventListener('click', openAbsentSetupModal);
-      btnAbsentSetupCancel.addEventListener('click', closeAbsentSetupModal);
-      btnAbsentSetupConfirm.addEventListener('click', confirmAbsentSetupModal);
-
-      // ===== 可編輯標題：載入與儲存 =====
-      const savedTitle = localStorage.getItem('pageTitle');
-      if (savedTitle) pageTitleEl.textContent = savedTitle;
-      pageTitleEl.addEventListener('input', () => {
-        localStorage.setItem('pageTitle', pageTitleEl.textContent.trim());
-      });
-
-      // ===== 全螢幕切換（F）=====
-      function syncFsBtn() {
-        const isFs = !!document.fullscreenElement;
-        btnFullscreen.setAttribute('aria-pressed', isFs ? 'true' : 'false');
-        btnFullscreen.textContent = isFs ? '⤢ 退出全螢幕' : '⤢ 全螢幕';
-      }
-      btnFullscreen.addEventListener('click', async () => {
-        try {
-          if (!document.fullscreenElement) {
-            await document.documentElement.requestFullscreen();
-          } else {
-            await document.exitFullscreen();
-          }
-        } catch (e) { showStatusMessage('全螢幕切換失敗', true); }
-      });
-      document.addEventListener('fullscreenchange', syncFsBtn);
-      syncFsBtn();
-
-      // 鍵盤快捷鍵：
-      // F：切換瀏覽器全螢幕
-      // X：切換「全畫面展示層」（同時嘗試進入/退出全螢幕）
-      // Esc：關閉展示層
-      document.addEventListener('keydown', (e)=>{
-        const tag = (e.target && e.target.tagName) || '';
-        const typing = ['INPUT','TEXTAREA'].includes(tag) || (e.target && e.target.isContentEditable);
-        if (!typing && (e.key === 'f' || e.key === 'F')) {
-          e.preventDefault();
-          if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen?.().catch(()=>{});
-          } else {
-            document.exitFullscreen?.().catch(()=>{});
-          }
-        }
-        if (!typing && (e.key === 'x' || e.key === 'X')) {
-          e.preventDefault();
-          const hidden = presentationOverlay().classList.contains('hidden');
-          if (hidden) { openPresentation(); } else { closePresentation(); }
-        }
-        if (e.key === 'Escape') {
-          closePresentation();
-        }
-      });
-    }
+    /* === v1.0.1 新增：展示層時鐘 HUD（放在 overlay 裡） === */
   </script>
-  <footer class="fixed bottom-2 right-4 text-[12px] text-slate-400/60 select-none">Developed by <span class="font-semibold">DennisZ</span></footer>
+
+  <footer class="fixed bottom-2 right-4 text-[12px] text-slate-400/60 select-none">Developed by <span class="font-semibold">DennisZ</span> • v1.0.1</footer>
 
   <!-- 全畫面展示覆蓋層 -->
   <div id="presentation-overlay" class="hidden fixed inset-0 z-[60] bg-slate-950 text-slate-100">
     <div class="absolute inset-0 flex flex-col">
-      <div class="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/70">
-        <div class="text-sm text-slate-300">
-          <span class="mr-3">按 <span class="font-bold">X</span> 開啟/關閉展示</span>
-          <span class="mr-3">按 <span class="font-bold">F</span> 進入/退出全螢幕</span>
+      <!-- 加上 id 以便將展示時鐘嵌入 -->
+      <div id="present-toolbar" class="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/70">
+        <div class="text-sm text-slate-300 space-x-3">
+          <span>按 <span class="font-bold">X</span> 開啟/關閉展示</span>
+          <span>按 <span class="font-bold">F</span> 進入/退出全螢幕</span>
           <span>按 <span class="font-bold">Esc</span> 關閉</span>
         </div>
-        <div class="text-sm text-slate-300">
+        <div class="hidden text-sm text-slate-300">
           目前時間：<span id="pres-now" class="font-semibold text-cyan-300">--</span>
         </div>
         <button id="btn-close-present" class="btn btn-gray">關閉</button>
       </div>
+
+      <!-- 展示模式時鐘（將被嵌入 present-toolbar） -->
+      <div id="pres-clock" class="clock-hud hidden md:flex">
+        <div class="clock-badge">現在時間</div>
+        <div class="flex flex-col leading-tight">
+          <div class="clock-time">
+            <span id="pres-hh">--</span><span class="clock-dot">:</span><span id="pres-mm">--</span><span class="clock-dot">:</span><span id="pres-ss">--</span>
+          </div>
+          <div id="pres-date" class="clock-date">--</div>
+        </div>
+        <div class="clock-actions flex gap-1 ml-1">
+          <button id="pres-cycle" title="循環角落">⇲</button>
+          <button id="pres-zoom-out" title="縮小">－</button>
+          <button id="pres-zoom-in" title="放大">＋</button>
+        </div>
+      </div>
+
       <div class="flex-1 grid place-items-center p-6">
         <div class="w-full max-w-5xl text-center">
           <div class="mb-6">
             <div class="text-xl text-sky-300 tracking-widest">目前進行考科</div>
             <div id="pres-subject" class="mt-2 text-6xl md:text-7xl font-black text-sky-300">—</div>
             <div id="pres-range" class="mt-2 text-2xl text-slate-300">—</div>
-            <!-- 展示層進度條 -->
             <div class="w-full max-w-3xl mx-auto mt-6 bg-slate-800 rounded-full h-5 shadow-inner overflow-hidden">
               <div id="pres-progress-bar" class="h-full rounded-full flex items-center justify-end pr-2 font-bold transition-all duration-700 bg-amber-400 text-slate-900" style="width:0%">
                 <span id="pres-progress-text" class="text-xs">0%</span>
@@ -878,7 +406,6 @@
             </div>
           </div>
 
-          <!-- 下一個 study/exam 提示 -->
           <div class="mt-8 p-4 rounded-2xl bg-slate-900/70 border border-slate-700">
             <div class="text-sm text-slate-400">下一個 study / exam</div>
             <div id="pres-next" class="text-2xl md:text-3xl font-bold text-sky-200 mt-1">—</div>
@@ -887,10 +414,522 @@
       </div>
     </div>
   </div>
+
+<script>
+  /* ===== 原功能：工具函式 ===== */
+  const parseTime=(t)=>{const [h,m]=t.split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);return d}
+  const within=(now,s,e)=>now>=s&&now<e;
+  function getSplitSchedules(scheduleData){
+    const lunchIndex=scheduleData.findIndex(i=>i.start==='11:45'&&i.end==='13:05');
+    if(lunchIndex===-1) return {morning:scheduleData,lunch:null,afternoon:[]};
+    return {morning:scheduleData.slice(0,lunchIndex),lunch:scheduleData[lunchIndex],afternoon:scheduleData.slice(lunchIndex+1)};
+  }
+  function renderScheduleSegment(schedule,targetEl,startIndex){
+    targetEl.innerHTML='';
+    schedule.forEach((item,idx)=>{
+      const originalIndex=startIndex+idx;
+      let colorClass='text-slate-200',icon='🏁';
+      if(item.type==='exam'){colorClass='text-sky-300 font-semibold';icon='📝'}
+      else if(item.type==='study'){colorClass='text-violet-300';icon='📚'}
+      else if(item.type==='break'){colorClass='text-emerald-300';icon='☕'}
+      const html=`
+      <div id="schedule-item-${originalIndex}" class="timeline-item ${item.type} py-1 pr-2 cursor-pointer rounded-md hover:bg-slate-800/60"
+           data-type="${item.type}" data-index="${originalIndex}">
+        <div class="timeline-indicator"></div>
+        <div class="flex items-center gap-2">
+          <div class="text-xs font-bold w-12 flex-shrink-0 text-slate-400">${item.start}</div>
+          <div class="flex-grow">
+            <div class="text-sm ${colorClass}">${icon} ${item.name}</div>
+            <div class="text-[11px] text-slate-500">結束: ${item.end}</div>
+          </div>
+        </div>
+      </div>`;
+      targetEl.insertAdjacentHTML('beforeend',html);
+    });
+  }
+  function renderDayButtons(){
+    dayButtonsContainer.innerHTML='';
+    Object.keys(initialSchedules).sort().forEach(day=>{
+      const schedule=initialSchedules[day];
+      const isActive=day===currentDay;
+      const btn=document.createElement('button');
+      btn.id=`${day}-btn`; btn.textContent=schedule.name;
+      btn.className=`btn ${isActive?'bg-indigo-500 text-white':'btn-gray'}`;
+      btn.addEventListener('click',()=>loadSchedule(day));
+      dayButtonsContainer.appendChild(btn);
+    });
+  }
+  function loadSchedule(day){
+    if(!initialSchedules[day]){
+      const first=Object.keys(initialSchedules)[0];
+      if(!first){ currentScheduleData=null; renderDayButtons(); renderSchedule(); updateDisplay(); return;}
+      day=first;
+    }
+    currentDay=day;
+    currentScheduleData=initialSchedules[currentDay];
+    currentScheduleData.split=getSplitSchedules(currentScheduleData.data);
+    renderDayButtons();
+    // （已移除）左側日期卡片，不再更新 current-schedule-date
+    document.getElementById('schedule-title').textContent=`排程概覽 (${currentScheduleData.name})`;
+    renderSchedule(); updateDisplay();
+  }
+  function renderSchedule(){
+    if(!currentScheduleData||!currentScheduleData.data){
+      morningScheduleEl.innerHTML='<p class="text-center text-slate-400">無排程資料</p>';
+      afternoonScheduleEl.innerHTML=''; lunchBreakItemEl.textContent='午休時間';
+      lunchBreakItemEl.classList.remove('bg-slate-800'); return;
+    }
+    const {morning,lunch,afternoon}=currentScheduleData.split;
+    renderScheduleSegment(morning,morningScheduleEl,0);
+    const lunchIndex=currentScheduleData.data.findIndex(i=>i===lunch);
+    const afternoonStartIndex=lunchIndex!==-1?lunchIndex+1:morning.length;
+    renderScheduleSegment(afternoon,afternoonScheduleEl,afternoonStartIndex);
+    if(lunch){
+      const dur=Math.floor((parseTime(lunch.end)-parseTime(lunch.start))/60000);
+      lunchBreakItemEl.innerHTML=`午休時間 ${lunch.start} - ${lunch.end} (${dur} 分)`;
+      lunchBreakItemEl.dataset.start=lunch.start;
+      lunchBreakItemEl.dataset.end=lunch.end;
+      lunchBreakItemEl.id=`schedule-item-${lunchIndex}`;
+      lunchBreakItemEl.classList.add('bg-slate-800');
+    }else{ lunchBreakItemEl.classList.add('hidden'); }
+  }
+  function computeAbsentFromRaw(raw){
+    const cleaned=raw.replace(/[,，\s\n]+/g,' ').trim();
+    const nums=cleaned.split(' ').map(s=>s.trim()).filter(s=>s&&/^\d+$/.test(s)).map(Number).sort((a,b)=>a-b);
+    return [...new Set(nums)];
+  }
+  function updateAbsentSeats(){
+    const raw=absentInput.value||'';
+    const unique=computeAbsentFromRaw(raw);
+    const absentCount=unique.length;
+    const actual=Math.max(0, expectedCount-absentCount);
+    absentDisplay.textContent=absentCount?unique.join('、 '):'尚無缺考記錄。';
+    expectedCountEl.textContent=expectedCount;
+    absentCountEl.textContent=absentCount;
+    actualCountEl.textContent=actual;
+    localStorage.setItem('absentSeats', raw);
+  }
+  function showStatusMessage(message,isError=false){
+    const statusMessageEl=document.getElementById('status-message');
+    statusMessageEl.textContent=message;
+    statusMessageEl.classList.remove('opacity-0');
+    statusMessageEl.style.background=isError?'rgba(244,63,94,.9)':'rgba(16,185,129,.9)';
+    statusMessageEl.style.pointerEvents='auto';
+    clearTimeout(window.__statusTimer);
+    window.__statusTimer=setTimeout(()=>{
+      statusMessageEl.classList.add('opacity-0');
+      statusMessageEl.style.pointerEvents='none';
+    },2200);
+  }
+
+  /* ===== CSV/下載（原函式保留） ===== */
+  function convertToCsv(schedules){
+    const header='DayKey,DayName,StartTime,EndTime,SubjectName,ActivityType\n';
+    let csv=header;
+    Object.keys(schedules).sort().forEach(key=>{
+      const sc=schedules[key];
+      sc.data.forEach(item=>{
+        const row=[ key, `"${sc.name.replace(/"/g,'""')}"`, item.start, item.end, `"${item.name.replace(/"/g,'""')}"`, item.type ].join(',');
+        csv+=row+'\n';
+      });
+    });
+    return '\ufeff'+csv;
+  }
+  function parseCsv(csvString){
+    const schedules={};
+    csvString=csvString.replace(/^\ufeff/,'');
+    const lines=csvString.split('\n').filter(l=>l.trim()!=='');
+    if(lines.length<2) throw new Error('CSV 內容不足，請確認標題列與資料列。');
+    const dataLines=lines.slice(1);
+    dataLines.forEach((line,i)=>{
+      const values=line.match(/(?:[^,"]+|"[^"]*")+/g)?.map(v=>v.trim().replace(/^"|"$/g,'').replace(/""/g,'"'))||[];
+      if(values.length!==6){ console.warn(`Line ${i+2} 欄位數不符，已略過：`,line); return;}
+      const [DayKey,DayName,StartTime,EndTime,SubjectName,ActivityType]=values;
+      if(!/^\d{2}:\d{2}$/.test(StartTime)||!/^\d{2}:\d{2}$/.test(EndTime)) throw new Error(`第 ${i+2} 行時間格式錯誤：${StartTime}-${EndTime}`);
+      if(!['exam','break','study','end'].includes(ActivityType)) throw new Error(`第 ${i+2} 行活動類型錯誤：${ActivityType}`);
+      if(!schedules[DayKey]) schedules[DayKey]={name:DayName,data:[]};
+      schedules[DayKey].data.push({start:StartTime,end:EndTime,name:SubjectName,type:ActivityType});
+    });
+    return schedules;
+  }
+  function downloadFile(content,fileName,mimeType){
+    const blob=new Blob([content],{type:mimeType});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=fileName; document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+  function exportScheduleData(){
+    if(!Object.keys(initialSchedules).length) return showStatusMessage('排程資料為空，請先匯入或建立排程。',true);
+    const csv=convertToCsv(initialSchedules);
+    downloadFile(csv,'exam_schedule.csv','text/csv;charset=utf-8;');
+    showStatusMessage('排程資料已成功匯出為 exam_schedule.csv！');
+  }
+  function downloadSampleCsv(){
+    const csv=convertToCsv(initialSchedules);
+    downloadFile(csv,'exam_schedule_sample.csv','text/csv;charset=utf-8;');
+    showStatusMessage('CSV 範例檔案已下載！');
+  }
+
+  /* ===== v1.0.1：展示層同步 ===== */
+  function updatePresentationView(){
+    const subject=document.getElementById('current-subject')?.textContent||'—';
+    const range=document.getElementById('subject-time-range')?.textContent||'';
+    const raw=absentInput?.value||'';
+    const list=computeAbsentFromRaw(raw);
+    const absentCount=list.length;
+    const actual=Math.max(0, expectedCount-absentCount);
+    el('pres-subject').textContent=subject;
+    el('pres-range').textContent=range;
+    el('pres-expected').textContent=String(expectedCount);
+    el('pres-absent-count').textContent=String(absentCount);
+    el('pres-absent-list').textContent=list.length?list.join('、 '):'—';
+    el('pres-actual').textContent=String(actual);
+
+    const now=new Date();
+    const fmt={year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false};
+    el('pres-now').textContent=now.toLocaleString('zh-TW',fmt);
+
+    let pct=0,currentIndex=-1,currentItem=null,nextInfo='—';
+    if(currentScheduleData && currentScheduleData.data){
+      const schedule=currentScheduleData.data;
+      for(let i=0;i<schedule.length;i++){
+        const s=parseTime(schedule[i].start), e=parseTime(schedule[i].end);
+        if(within(now,s,e)){ currentItem=schedule[i]; currentIndex=i; pct=Math.min(100,Math.round(((now-s)/(e-s))*100)); break;}
+      }
+      for(let j=currentIndex+1;j<schedule.length;j++){
+        if(['study','exam'].includes(schedule[j].type)){ nextInfo=`${schedule[j].start}　${schedule[j].name}`; break;}
+      }
+    }
+    const bar=el('pres-progress-bar'); const txt=el('pres-progress-text');
+    bar.style.width=pct+'%'; txt.textContent=pct+'%';
+    el('pres-next').textContent=nextInfo;
+  }
+  function openPresentation(){
+    updatePresentationView();
+    presentationOverlay().classList.remove('hidden');
+    const presClock = el('pres-clock');
+    presClock.classList.remove('hidden');
+    if(!document.fullscreenElement){ document.documentElement.requestFullscreen?.().catch(()=>{}); }
+  }
+  function closePresentation(){
+    presentationOverlay().classList.add('hidden');
+    if(document.fullscreenElement){ document.exitFullscreen?.().catch(()=>{}); }
+  }
+
+  /* ===== 大時鐘（一般/展示） 更新 ===== */
+  function fmtWeekday(d){ return ['日','一','二','三','四','五','六'][d.getDay()] }
+  function pad(n){ return String(n).padStart(2,'0') }
+  function tickClocks(){
+    const now=new Date();
+    const hh=pad(now.getHours()), mm=pad(now.getMinutes()), ss=pad(now.getSeconds());
+    const dateStr=`${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())}（${fmtWeekday(now)}）`;
+    const hudHH=el('hud-hh'); if(hudHH){ hudHH.textContent=hh; el('hud-mm').textContent=mm; el('hud-ss').textContent=ss; el('hud-date').textContent=dateStr; }
+    const presHH=el('pres-hh'); if(presHH){ presHH.textContent=hh; el('pres-mm').textContent=mm; el('pres-ss').textContent=ss; el('pres-date').textContent=dateStr; }
+  }
+
+  /* ===== 仍保留：拖曳/縮放工具（鎖定時不會被啟用） ===== */
+  function makeDraggable(box, storageKey){
+    let dragging=false, startX=0, startY=0, startLeft=0, startTop=0;
+    const setPos=(l,t)=>{ box.style.left=l+'px'; box.style.top=t+'px'; box.style.right='auto'; box.style.bottom='auto'; }
+    const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+    function cycleCorner(){
+      const rect=box.getBoundingClientRect();
+      const vw=window.innerWidth, vh=window.innerHeight;
+      const current=localStorage.getItem(storageKey+'-corner')||'tr';
+      const order=['tr','br','bl','tl'];
+      const next=order[(order.indexOf(current)+1)%order.length];
+      localStorage.setItem(storageKey+'-corner', next);
+      const margin=16;
+      const map={
+        tl:[margin,margin],
+        tr:[vw-rect.width-margin, margin],
+        br:[vw-rect.width-margin, vh-rect.height-margin],
+        bl:[margin, vh-rect.height-margin],
+      };
+      setPos(...map[next]);
+      localStorage.setItem(storageKey, JSON.stringify({left:map[next][0], top:map[next][1]}));
+    }
+    function onDown(e){
+      dragging=true; box.classList.add('dragging');
+      const rect=box.getBoundingClientRect();
+      startLeft=rect.left; startTop=rect.top;
+      startX = (e.touches? e.touches[0].clientX : e.clientX);
+      startY = (e.touches? e.touches[0].clientY : e.clientY);
+      e.preventDefault();
+    }
+    function onMove(e){
+      if(!dragging) return;
+      const x=(e.touches? e.touches[0].clientX : e.clientX);
+      const y=(e.touches? e.touches[0].clientY : e.clientY);
+      const dx=x-startX, dy=y-startY;
+      const vw=window.innerWidth, vh=window.innerHeight;
+      const rect=box.getBoundingClientRect();
+      const left=clamp(startLeft+dx, 8, vw-rect.width-8);
+      const top =clamp(startTop +dy, 8, vh-rect.height-8);
+      setPos(left,top);
+    }
+    function onUp(){
+      if(!dragging) return;
+      dragging=false; box.classList.remove('dragging');
+      const rect=box.getBoundingClientRect();
+      localStorage.setItem(storageKey, JSON.stringify({left:rect.left, top:rect.top}));
+    }
+    box.addEventListener('mousedown', onDown);
+    box.addEventListener('touchstart', onDown, {passive:false});
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, {passive:false});
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchend', onUp);
+    return { cycleCorner };
+  }
+  function restorePosition(box, storageKey, defaultCorner='tr'){
+    const vw=window.innerWidth, vh=window.innerHeight;
+    const saved=localStorage.getItem(storageKey);
+    const margin=16;
+    if(saved){
+      try{
+        const {left, top}=JSON.parse(saved);
+        box.style.left=left+'px'; box.style.top=top+'px';
+        box.style.right='auto'; box.style.bottom='auto';
+        return;
+      }catch{}
+    }
+    const rect=box.getBoundingClientRect();
+    const map={
+      tl:[margin,margin],
+      tr:[vw-rect.width-margin, margin],
+      br:[vw-rect.width-margin, vh-rect.height-margin],
+      bl:[margin, vh-rect.height-margin],
+    };
+    const pos=map[defaultCorner]||map.tr;
+    box.style.left=pos[0]+'px'; box.style.top=pos[1]+'px';
+    box.style.right='auto'; box.style.bottom='auto';
+    localStorage.setItem(storageKey, JSON.stringify({left:pos[0], top:pos[1]}));
+    localStorage.setItem(storageKey+'-corner', defaultCorner);
+  }
+  function applyScale(elm, storageKey, defaultScale = 2){
+    const raw = localStorage.getItem(storageKey);
+    const s = raw ? Number(raw) : defaultScale;
+    elm?.style?.setProperty('--clock-scale', s);
+  }
+  function changeScale(elm, storageKey, delta){
+    const cur = Number(localStorage.getItem(storageKey)) || 2;
+    let next = Math.round((cur + delta) * 10) / 10;
+    next = Math.max(0.5, Math.min(4, next));
+    localStorage.setItem(storageKey, String(next));
+    elm?.style?.setProperty('--clock-scale', next);
+    try{ showStatusMessage?.(`時鐘縮放：${next}x`); }catch{}
+  }
+  function resetScale(elm, storageKey, to = 1){
+    localStorage.setItem(storageKey, String(to));
+    elm?.style?.setProperty('--clock-scale', to);
+    try{ showStatusMessage?.(`時鐘縮放：${to}x`); }catch{}
+  }
+
+  /* ===== 主更新 ===== */
+  function updateDisplay(){
+    if(!currentScheduleData||!currentScheduleData.data){
+      currentSubjectEl.textContent='無排程資料';
+      subjectTimeRangeEl.textContent='---';
+      subjectProgressBarEl.style.width='0%';
+      subjectProgressTextEl.textContent='0%';
+      return;
+    }
+    const schedule=currentScheduleData.data;
+    const now=new Date();
+
+    let currentItem=null,currentIndex=-1,pct=0;
+    document.querySelectorAll('.timeline-item').forEach(el=>el.classList.remove('active'));
+    for(let i=0;i<schedule.length;i++){
+      const item=schedule[i];
+      const s=parseTime(item.start), e=parseTime(item.end);
+      if(within(now,s,e)){ currentItem=item; currentIndex=i; pct=Math.min(100, Math.round(((now-s)/(e-s))*100)); break; }
+    }
+
+    const hero=document.getElementById('hero');
+    if(currentItem){
+      currentSubjectEl.textContent=currentItem.name;
+      subjectTimeRangeEl.textContent=`(${currentItem.start} 至 ${currentItem.end})`;
+      subjectProgressBarEl.style.width=pct+'%';
+      subjectProgressTextEl.textContent=pct+'%';
+
+      if(currentItem.type==='exam') hero.style.background='linear-gradient(145deg, rgba(14,165,233,.20), rgba(99,102,241,.18))';
+      else if(currentItem.type==='break') hero.style.background='linear-gradient(145deg, rgba(251,191,36,.20), rgba(34,197,94,.18))';
+      else if(currentItem.type==='study') hero.style.background='linear-gradient(145deg, rgba(167,139,250,.22), rgba(56,189,248,.18))';
+      else hero.style.background='linear-gradient(145deg, rgba(148,163,184,.15), rgba(100,116,139,.15))';
+
+      const itemEl=document.getElementById(`schedule-item-${currentIndex}`); if(itemEl) itemEl.classList.add('active');
+    }else{
+      currentSubjectEl.textContent='今日排程已結束 / 尚未開始';
+      subjectTimeRangeEl.textContent='---';
+      subjectProgressBarEl.style.width='0%';
+      subjectProgressTextEl.textContent='0%';
+      hero.style.background='linear-gradient(145deg, rgba(148,163,184,.12), rgba(100,116,139,.12))';
+    }
+
+    if(!presentationOverlay().classList.contains('hidden')) updatePresentationView();
+  }
+
+  /* ===== 初始化 ===== */
+  function init(){
+    const savedSeats=localStorage.getItem('absentSeats'); if(savedSeats){ absentInput.value=savedSeats; }
+    expectedCount=Number(localStorage.getItem('expectedCount'))||expectedCount;
+    updateAbsentSeats();
+
+    const savedCSV=localStorage.getItem('schedulesCSV');
+    if(savedCSV){ try{ initialSchedules=parseCsv(savedCSV);}catch{} }
+    const firstDayKey=Object.keys(initialSchedules).sort()[0];
+    if(firstDayKey) loadSchedule(firstDayKey); else { renderDayButtons(); renderSchedule(); updateDisplay(); }
+
+    setInterval(()=>{ updateDisplay(); tickClocks(); }, 1000);
+    tickClocks();
+
+    // 事件綁定（原）
+    document.getElementById('btn-close-present').addEventListener('click', closePresentation);
+    btnSample.addEventListener('click', downloadSampleCsv);
+    btnExport.addEventListener('click', exportScheduleData);
+    btnImport.addEventListener('click', ()=>scheduleImportModal.classList.remove('hidden'));
+
+	btnPresent.addEventListener('click', () => {
+	  const hidden = presentationOverlay().classList.contains('hidden');
+
+	  if (hidden) {
+		openPresentation();
+		btnPresent.textContent = '全畫面展示';
+		btnPresent.setAttribute('aria-pressed', 'true');
+	  } else {
+		closePresentation();
+		btnPresent.textContent = '全畫面展示';
+		btnPresent.setAttribute('aria-pressed', 'false');
+	  }
+	});
+
+
+    document.getElementById('btn-schedule-cancel').addEventListener('click', ()=>scheduleImportModal.classList.add('hidden'));
+    document.getElementById('btn-schedule-confirm').addEventListener('click', ()=>{
+      const csv=scheduleImportDataTextarea.value.trim();
+      scheduleImportModal.classList.add('hidden');
+      if(!csv) return showStatusMessage('排程匯入取消或無資料。',true);
+      try{
+        const newSchedules=parseCsv(csv);
+        if(!Object.keys(newSchedules).length) throw new Error('解析後未得到任何有效的排程資料。');
+        initialSchedules=newSchedules;
+        const first=Object.keys(initialSchedules).sort()[0];
+        loadSchedule(first);
+        showStatusMessage(`排程匯入成功！已載入 ${Object.keys(initialSchedules).length} 天排程。`);
+        localStorage.setItem('schedulesCSV', csv);
+      }catch(e){ console.error(e); showStatusMessage(`排程匯入失敗：${e.message}`,true); }
+    });
+
+    btnOpenExpected.addEventListener('click', ()=>{ el('expected-modal').classList.remove('hidden'); expectedInput.value=String(expectedCount); setTimeout(()=>expectedInput.select(),0); });
+    btnExpectedCancel.addEventListener('click', ()=>el('expected-modal').classList.add('hidden'));
+    btnExpectedConfirm.addEventListener('click', ()=>{
+      const val=Number(expectedInput.value);
+      if(!Number.isFinite(val)||val<0){ showStatusMessage('請輸入有效的人數（>= 0）。',true); return; }
+      expectedCount=Math.floor(val); localStorage.setItem('expectedCount', String(expectedCount));
+      updateAbsentSeats(); el('expected-modal').classList.add('hidden'); showStatusMessage('已更新應到人數。');
+    });
+    expectedInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); btnExpectedConfirm.click(); } });
+
+    btnOpenAbsent.addEventListener('click', ()=>{
+      el('absent-setup-modal').classList.remove('hidden');
+      const raw=localStorage.getItem('absentSeats')||(absentInput?.value||'');
+      absentSetupTextarea.value=raw; setTimeout(()=>absentSetupTextarea.focus(),0);
+    });
+    btnAbsentSetupCancel.addEventListener('click', ()=>el('absent-setup-modal').classList.add('hidden'));
+    btnAbsentSetupConfirm.addEventListener('click', ()=>{
+      const raw=absentSetupTextarea.value||''; absentInput.value=raw; updateAbsentSeats();
+      el('absent-setup-modal').classList.add('hidden'); showStatusMessage('已更新缺考座號。');
+    });
+
+    function syncFsBtn(){
+      const isFs=!!document.fullscreenElement; btnFullscreen.setAttribute('aria-pressed', isFs?'true':'false');
+      btnFullscreen.textContent=isFs?'⤢ 退出全螢幕':'⤢ 全螢幕';
+    }
+    btnFullscreen.addEventListener('click', async ()=>{
+      try{ if(!document.fullscreenElement){ await document.documentElement.requestFullscreen(); } else { await document.exitFullscreen(); } }
+      catch(e){ showStatusMessage('全螢幕切換失敗', true); }
+    });
+    document.addEventListener('fullscreenchange', syncFsBtn); syncFsBtn();
+
+    /* === 鍵盤快捷鍵：保留 F / X；C 在鎖定時無效 === */
+    document.addEventListener('keydown', (e)=>{
+      const tag=(e.target&&e.target.tagName)||''; const typing=['INPUT','TEXTAREA'].includes(tag)||(e.target&&e.target.isContentEditable);
+
+      // F：全螢幕
+      if(!typing && (e.key==='f'||e.key==='F')){
+        e.preventDefault();
+        try{ if(!document.fullscreenElement){ document.documentElement.requestFullscreen?.().catch(()=>{});} else { document.exitFullscreen?.().catch(()=>{});} }
+        catch{ showStatusMessage('全螢幕切換失敗', true); }
+      }
+
+      // X：展示層開關
+      if(!typing && (e.key==='x'||e.key==='X')){
+        e.preventDefault();
+        const hidden=presentationOverlay().classList.contains('hidden');
+        hidden?openPresentation():closePresentation();
+      }
+
+      // C：時鐘顯示/隱藏（鎖定時阻擋）
+      if(!typing && (e.key==='c'||e.key==='C')){
+        e.preventDefault();
+        if(CLOCK_LOCKED){
+          showStatusMessage('時鐘已鎖定 / 無法顯示或隱藏');
+          return;
+        }
+        const hud = document.getElementById('clock-hud');
+        const pres = document.getElementById('pres-clock');
+        hud?.classList.toggle('hidden');
+        const overlayVisible = !presentationOverlay().classList.contains('hidden');
+        if(overlayVisible){ pres?.classList.toggle('hidden'); }
+        const isVisible = !(hud?.classList.contains('hidden'));
+        try{ showStatusMessage?.(isVisible ? '時鐘顯示' : '時鐘隱藏'); }catch{}
+      }
+    });
+
+    /* === 一般模式：鎖定時嵌入頂部控制列、移除拖曳縮放 === */
+    {
+      const hud=el('clock-hud');
+      const rightGroup = btnPresent.parentElement; // 頂部控制列右側群組
+      if(CLOCK_LOCKED){
+        rightGroup.appendChild(hud);
+        hud.classList.add('docked');
+        hud.style.setProperty('--clock-scale', 1);
+      }else{
+        const hudCtl=makeDraggable(hud, 'hud-pos');
+        restorePosition(hud, 'hud-pos', localStorage.getItem('hud-pos-corner')||'tr');
+        el('hud-cycle')?.addEventListener('click', (e)=>{ e.stopPropagation(); hudCtl.cycleCorner(); });
+        el('hud-reset')?.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          localStorage.removeItem('hud-pos');
+          localStorage.setItem('hud-pos-corner','tr');
+          restorePosition(hud, 'hud-pos', 'tr');
+        });
+        applyScale(hud, 'hud-scale', 2);
+        document.getElementById('hud-zoom-in')?.addEventListener('click',  (e)=>{ e.stopPropagation(); changeScale(hud, 'hud-scale',  +0.1); });
+        document.getElementById('hud-zoom-out')?.addEventListener('click', (e)=>{ e.stopPropagation(); changeScale(hud, 'hud-scale',  -0.1); });
+        document.getElementById('hud-zoom-reset')?.addEventListener('click',(e)=>{ e.stopPropagation(); resetScale(hud, 'hud-scale', 1); });
+      }
+    }
+
+    /* === 展示模式：鎖定時嵌入工具列、移除拖曳縮放 === */
+    {
+      const presHud=el('pres-clock');
+      const toolbar=el('present-toolbar');
+      if(CLOCK_LOCKED){
+        toolbar.insertBefore(presHud, toolbar.lastElementChild);
+        presHud.classList.add('docked');
+        presHud.style.setProperty('--clock-scale', 1);
+      }else{
+        const presCtl=makeDraggable(presHud, 'pres-hud-pos');
+        restorePosition(presHud, 'pres-hud-pos', localStorage.getItem('pres-hud-pos-corner')||'tr');
+        el('pres-cycle')?.addEventListener('click', (e)=>{ e.stopPropagation(); presCtl.cycleCorner(); });
+        applyScale(presHud, 'pres-scale', 2);
+        document.getElementById('pres-zoom-in')?.addEventListener('click',   (e)=>{ e.stopPropagation(); changeScale(presHud, 'pres-scale',  +0.1); });
+        document.getElementById('pres-zoom-out')?.addEventListener('click',  (e)=>{ e.stopPropagation(); changeScale(presHud, 'pres-scale',  -0.1); });
+      }
+    }
+  }
+</script>
 </body>
 </html>
-
-
-
-
-
