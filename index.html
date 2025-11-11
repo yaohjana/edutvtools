@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduTV 工具箱</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg-gradient: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        --card-bg: rgba(255, 255, 255, 0.12);
+        --card-border: rgba(255, 255, 255, 0.25);
+        --text-main: #f3f7fa;
+        --text-secondary: #cfe3f0;
+        --accent: #4fd1c5;
+        --accent-strong: #2bc4ad;
+        --shadow: 0 25px 45px rgba(15, 25, 35, 0.35);
+        --glass-blur: blur(20px);
+        --max-width: min(1200px, 90vw);
+        font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-gradient);
+        color: var(--text-main);
+      }
+
+      main {
+        width: 100%;
+        max-width: var(--max-width);
+        padding: clamp(2rem, 4vw, 4rem);
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: clamp(2rem, 4vw, 3rem);
+      }
+
+      h1 {
+        font-size: clamp(2.5rem, 4vw, 3.5rem);
+        margin-bottom: 0.75rem;
+        letter-spacing: 0.08em;
+      }
+
+      p.lead {
+        margin: 0 auto;
+        max-width: 720px;
+        font-size: clamp(1rem, 2.2vw, 1.25rem);
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      section.grid {
+        display: grid;
+        gap: clamp(1.5rem, 3vw, 2.5rem);
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+
+      article.tool-card {
+        position: relative;
+        padding: clamp(1.5rem, 3vw, 2.25rem);
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        backdrop-filter: var(--glass-blur);
+        box-shadow: var(--shadow);
+        transition: transform 220ms ease, border-color 220ms ease,
+          box-shadow 220ms ease;
+        overflow: hidden;
+      }
+
+      article.tool-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at top right,
+          rgba(79, 209, 197, 0.35),
+          transparent 55%
+        );
+        opacity: 0;
+        transition: opacity 220ms ease;
+        pointer-events: none;
+      }
+
+      article.tool-card:hover,
+      article.tool-card:focus-within {
+        transform: translateY(-8px);
+        border-color: rgba(79, 209, 197, 0.7);
+        box-shadow: 0 30px 60px rgba(23, 43, 60, 0.55);
+      }
+
+      article.tool-card:hover::before,
+      article.tool-card:focus-within::before {
+        opacity: 1;
+      }
+
+      h2.tool-title {
+        font-size: clamp(1.4rem, 2.8vw, 1.75rem);
+        margin: 0 0 0.75rem;
+      }
+
+      p.tool-desc {
+        margin: 0 0 1.5rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        min-height: 4.8em;
+      }
+
+      a.tool-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.85rem 1.4rem;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        color: #0c1b21;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-decoration: none;
+        transition: box-shadow 220ms ease, transform 220ms ease;
+      }
+
+      a.tool-link svg {
+        width: 1.1em;
+        height: 1.1em;
+        fill: currentColor;
+      }
+
+      a.tool-link:hover,
+      a.tool-link:focus-visible {
+        box-shadow: 0 12px 25px rgba(43, 196, 173, 0.35);
+        transform: translateY(-2px);
+      }
+
+      footer {
+        margin-top: clamp(2rem, 4vw, 3rem);
+        text-align: center;
+        font-size: 0.95rem;
+        color: rgba(243, 247, 250, 0.75);
+      }
+
+      footer a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      @media (max-width: 600px) {
+        article.tool-card {
+          padding: 1.5rem;
+        }
+        p.tool-desc {
+          min-height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>EduTV 工具箱</h1>
+        <p class="lead">
+          精選一系列為教室大螢幕打造的小工具，協助老師在課堂上快速展示資訊、互動與節奏。點擊下方按鈕，即刻開啟專屬場景。
+        </p>
+      </header>
+      <section class="grid">
+        <article class="tool-card">
+          <h2 class="tool-title">公告資訊板</h2>
+          <p class="tool-desc">
+            在大螢幕上展示考試時程、教室公告與注意事項，支援醒目排版，確保學生一目了然。
+          </p>
+          <a class="tool-link" href="examInfoOnTv.html" target="_blank" rel="noopener">
+            <span>開啟工具</span>
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
+            </svg>
+          </a>
+        </article>
+        <article class="tool-card">
+          <h2 class="tool-title">互動白板</h2>
+          <p class="tool-desc">
+            免粉筆的互動白板，支援繪圖與註記，讓教學重點隨寫隨顯，適合快速講解與討論。
+          </p>
+          <a class="tool-link" href="whiteBoard.html" target="_blank" rel="noopener">
+            <span>開啟工具</span>
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
+            </svg>
+          </a>
+        </article>
+        <article class="tool-card">
+          <h2 class="tool-title">跑步節奏器</h2>
+          <p class="tool-desc">
+            為慢跑課程準備的節奏器，可自訂節拍與提示，協助學生維持穩定步伐與呼吸節奏。
+          </p>
+          <a class="tool-link" href="SlowJoggingMetronome.html" target="_blank" rel="noopener">
+            <span>開啟工具</span>
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
+            </svg>
+          </a>
+        </article>
+        <article class="tool-card">
+          <h2 class="tool-title">進階節奏器</h2>
+          <p class="tool-desc">
+            多功能節拍工具，提供更多音色與節奏選項，適合音樂課或需要精準步調的團隊活動。
+          </p>
+          <a class="tool-link" href="superMetronome.html" target="_blank" rel="noopener">
+            <span>開啟工具</span>
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
+            </svg>
+          </a>
+        </article>
+        <article class="tool-card">
+          <h2 class="tool-title">番茄鐘助理</h2>
+          <p class="tool-desc">
+            使用番茄工作法來安排專注與休息時段，支援倒數提示，協助課堂活動掌握節奏。
+          </p>
+          <a class="tool-link" href="PomodoroTimer.html" target="_blank" rel="noopener">
+            <span>開啟工具</span>
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
+            </svg>
+          </a>
+        </article>
+        <article class="tool-card">
+          <h2 class="tool-title">隨機點名器</h2>
+          <p class="tool-desc">
+            公平隨機選出學生或小組，具備視覺與音效效果，讓課堂互動更活潑有趣。
+          </p>
+          <a class="tool-link" href="random-picker/index.html" target="_blank" rel="noopener">
+            <span>開啟工具</span>
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
+            </svg>
+          </a>
+        </article>
+      </section>
+      <footer>
+        <span>由 EduTV Tools 精心打造，陪你一起創造活力滿滿的課堂。</span>
+      </footer>
+    </main>
+  </body>
+</html>
+
