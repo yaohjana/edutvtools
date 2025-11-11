@@ -56,6 +56,38 @@
         color: var(--text-muted);
       }
 
+      .view-tabs {
+        display: inline-flex;
+        align-self: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(15, 23, 42, 0.35);
+      }
+
+      .view-tabs button {
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        font: inherit;
+        padding: 0.65rem 1.4rem;
+        cursor: pointer;
+        transition: background 180ms ease, color 180ms ease;
+      }
+
+      .view-tabs button.active {
+        background: rgba(56, 189, 248, 0.2);
+        color: var(--text-main);
+      }
+
+      .view-pane {
+        display: none;
+      }
+
+      .view-pane.active {
+        display: block;
+      }
+
       .layout {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -78,6 +110,11 @@
       }
 
       .scene-grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .panel.voice-panel {
         display: grid;
         gap: 1rem;
       }
@@ -257,6 +294,29 @@
         text-transform: uppercase;
       }
 
+      .voice-options {
+        display: grid;
+        gap: 0.8rem;
+        width: 100%;
+      }
+
+      .voice-options select {
+        border-radius: 16px;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        background: rgba(15, 23, 42, 0.45);
+        color: inherit;
+        font: inherit;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .view-note {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin-top: -0.4rem;
+      }
+
       .ambient-overlay {
         position: absolute;
         inset: 0;
@@ -268,6 +328,51 @@
 
       .ambient-overlay.active {
         opacity: 0.7;
+      }
+
+      .info-button {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        border: none;
+        border-radius: 999px;
+        padding: 0.45rem 0.85rem;
+        background: rgba(15, 23, 42, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+        transition: background 180ms ease, transform 180ms ease;
+        letter-spacing: 0.08em;
+      }
+
+      .info-button:hover,
+      .info-button:focus-visible {
+        background: rgba(56, 189, 248, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .info-panel {
+        position: absolute;
+        top: 60px;
+        right: 16px;
+        width: clamp(220px, 30vw, 320px);
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.32);
+        border-radius: 16px;
+        padding: 1rem 1.2rem;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        box-shadow: 0 20px 40px rgba(8, 23, 53, 0.55);
+        backdrop-filter: blur(10px);
+        display: none;
+        z-index: 5;
+        text-align: left;
+      }
+
+      .info-panel.active {
+        display: block;
       }
 
       @media (max-width: 720px) {
@@ -286,68 +391,98 @@
         <h1>教室氛圍控制</h1>
         <p>一鍵切換場景、音景與視覺節奏，讓教室立即進入專注或放鬆狀態。</p>
       </header>
-      <div class="layout">
-        <section class="panel">
-          <h2>選擇場景</h2>
-          <div class="scene-grid" id="sceneGrid"></div>
-        </section>
-        <section class="panel">
-          <h2>音景 & 視覺</h2>
-          <div class="ambience-controls">
+      <div class="view-tabs">
+        <button type="button" class="active" data-view="control">設定面板</button>
+        <button type="button" data-view="display">顯示畫面</button>
+      </div>
+      <div class="view-pane control-view active">
+        <div class="layout">
+          <section class="panel">
+            <h2>選擇場景</h2>
+            <div class="scene-grid" id="sceneGrid"></div>
+          </section>
+          <section class="panel">
+            <h2>音景 & 視覺</h2>
+            <div class="ambience-controls">
+              <div class="toggle-row">
+                <div>
+                  <h3>白噪音</h3>
+                  <p>適合專注與自習，柔和屏蔽環境雜音。</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" data-sound="white" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <h3>柔和棕噪</h3>
+                  <p>低頻暖調讓人放鬆，適合緩和或討論情境。</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" data-sound="brown" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <h3>節奏鐘聲</h3>
+                  <p>每隔 60 秒輕柔鐘聲，提醒保持節奏或呼吸。</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" data-sound="chime" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="visual-controls">
+              <div class="slider-range">
+                <label for="brightnessRange">背景亮度</label>
+                <input type="range" id="brightnessRange" min="50" max="120" value="100" />
+              </div>
+              <div class="slider-range">
+                <label for="overlayRange">光暈強度</label>
+                <input type="range" id="overlayRange" min="0" max="100" value="40" />
+              </div>
+            </div>
+          </section>
+          <section class="panel voice-panel">
+            <h2>語音引導</h2>
             <div class="toggle-row">
               <div>
-                <h3>白噪音</h3>
-                <p>適合專注與自習，柔和屏蔽環境雜音。</p>
+                <h3>語音啟用</h3>
+                <p>開啟後會讀出場景與呼吸節奏提示。</p>
               </div>
               <label class="switch">
-                <input type="checkbox" data-sound="white" />
+                <input type="checkbox" id="voiceToggle" />
                 <span class="slider"></span>
               </label>
             </div>
-            <div class="toggle-row">
-              <div>
-                <h3>柔和棕噪</h3>
-                <p>低頻暖調讓人放鬆，適合緩和或討論情境。</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" data-sound="brown" />
-                <span class="slider"></span>
-              </label>
+            <div class="voice-options">
+              <label for="voiceSelect">語音選擇</label>
+              <select id="voiceSelect" disabled>
+                <option value="">載入語音中…</option>
+              </select>
+              <p class="view-note">選擇語音後，可切換至「顯示畫面」投影給全班。</p>
             </div>
-            <div class="toggle-row">
-              <div>
-                <h3>節奏鐘聲</h3>
-                <p>每隔 60 秒輕柔鐘聲，提醒保持節奏或呼吸。</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" data-sound="chime" />
-                <span class="slider"></span>
-              </label>
-            </div>
-          </div>
-          <div class="visual-controls">
-            <div class="slider-range">
-              <label for="brightnessRange">背景亮度</label>
-              <input type="range" id="brightnessRange" min="50" max="120" value="100" />
-            </div>
-            <div class="slider-range">
-              <label for="overlayRange">光暈強度</label>
-              <input type="range" id="overlayRange" min="0" max="100" value="40" />
+          </section>
+        </div>
+      </div>
+      <div class="view-pane display-view">
+        <section class="panel scene-preview" id="scenePreview">
+          <div class="ambient-overlay" id="ambientOverlay"></div>
+          <button type="button" class="info-button" id="infoButton">INFO</button>
+          <div class="info-panel" id="infoPanel"></div>
+          <div class="preview-message">
+            <h3 id="previewTitle">專注模式</h3>
+            <p id="previewDescription">沉浸於靜謐藍調，讓思緒進入專心學習的節奏。</p>
+            <div class="breathing-guide" id="breathingGuide">
+              <strong>深呼吸節奏：4-4-4</strong>
+              <div class="breathing-circle" id="breathingCircle">吸氣</div>
             </div>
           </div>
         </section>
       </div>
-      <section class="panel scene-preview" id="scenePreview">
-        <div class="ambient-overlay" id="ambientOverlay"></div>
-        <div class="preview-message">
-          <h3 id="previewTitle">專注模式</h3>
-          <p id="previewDescription">沉浸於靜謐藍調，讓思緒進入專心學習的節奏。</p>
-          <div class="breathing-guide" id="breathingGuide">
-            <strong>深呼吸節奏：4-4-4</strong>
-            <div class="breathing-circle" id="breathingCircle">吸氣</div>
-          </div>
-        </div>
-      </section>
     </main>
     <script>
       (() => {
@@ -357,31 +492,61 @@
             title: "專注模式",
             description: "沉浸於靜謐藍調，讓思緒進入專心學習的節奏。",
             gradient: "linear-gradient(135deg, #0f172a, #1e3a8a 60%, #0284c7)",
-            breathing: { pattern: [4, 4, 4], cues: ["吸氣", "停留", "呼氣"], label: "深呼吸節奏：4-4-4" },
+            breathing: {
+              pattern: [4, 4, 4],
+              cues: ["吸氣", "停留", "穩定吐氣"],
+              label: "深呼吸節奏：4-4-4",
+              info: "專注模式以等長呼吸維持大腦含氧穩定：4 秒吸氣、4 秒停留、4 秒吐氣，適合考前暖身與安靜自習。",
+              intro: "維持均衡呼吸，讓注意力逐步聚焦。",
+              animation: "breath",
+            },
           },
           {
             id: "relax",
             title: "放鬆伸展",
             description: "綠意流動，搭配緩慢節奏，適合活動筋骨與補充能量。",
             gradient: "linear-gradient(135deg, #022c22, #0f766e 60%, #14b8a6)",
-            breathing: { pattern: [4, 6, 6], cues: ["吸氣", "停留", "呼氣"], label: "放鬆呼吸：4-6-6" },
+            breathing: {
+              pattern: [4, 2, 6],
+              cues: ["吸氣", "停留", "慢慢吐氣"],
+              label: "放鬆呼吸：4-2-6",
+              info: "短暫停留搭配 6 秒吐氣，促進副交感神經放鬆，建議搭配肩頸伸展與肢體舒展活動。",
+              intro: "跟著節奏緩慢吐氣，讓身體逐步鬆開。",
+              animation: "breath",
+            },
           },
           {
             id: "discussion",
             title: "討論交流",
             description: "暖色燈光點燃靈感，鼓勵小組互動與分享。",
             gradient: "linear-gradient(135deg, #3f0a22, #b91c1c 55%, #f97316)",
-            breathing: { pattern: [2, 0, 2], cues: ["啟動", "自由討論", "換手"], label: "討論節奏：2-0-2", isTimer: true },
+            breathing: {
+              pattern: [120, 60, 20],
+              cues: ["啟動討論", "整理重點", "換手分享"],
+              label: "討論節奏：120-60-20",
+              info: "一輪 120 秒自由討論、60 秒統整重點、20 秒換手分享，確保每位成員輪流發言並留下關鍵收斂。",
+              intro: "把握兩分鐘討論，再一分鐘整理重點，最後二十秒換手分享。",
+              animation: "sequence",
+            },
           },
           {
             id: "calm",
             title: "靜心冥想",
             description: "紫羅蘭光暈包覆全班，帶來安定與沈澱的氣息。",
             gradient: "linear-gradient(135deg, #1f0a3a, #5b21b6 60%, #7c3aed)",
-            breathing: { pattern: [5, 5, 8], cues: ["吸氣", "停留", "慢慢呼氣"], label: "靜心呼吸：5-5-8" },
+            breathing: {
+              pattern: [5, 5, 8],
+              cues: ["吸氣", "停留", "慢慢吐氣"],
+              label: "靜心呼吸：5-5-8",
+              info: "延長吐氣至 8 秒有助降低心率與焦躁，適合段考後或收課前的紓壓沉澱。",
+              intro: "延長吐氣，讓心跳慢慢放緩。",
+              animation: "breath",
+            },
           },
         ];
 
+        const viewTabs = document.querySelectorAll(".view-tabs button");
+        const viewPanes = document.querySelectorAll(".view-pane");
         const sceneGrid = document.getElementById("sceneGrid");
         const previewTitle = document.getElementById("previewTitle");
         const previewDescription = document.getElementById("previewDescription");
@@ -391,10 +556,27 @@
         const ambientOverlay = document.getElementById("ambientOverlay");
         const brightnessRange = document.getElementById("brightnessRange");
         const overlayRange = document.getElementById("overlayRange");
-        const soundSwitches = document.querySelectorAll(".switch input");
+        const soundSwitches = document.querySelectorAll('.switch input[data-sound]');
+        const voiceToggle = document.getElementById("voiceToggle");
+        const voiceSelect = document.getElementById("voiceSelect");
+        const infoButton = document.getElementById("infoButton");
+        const infoPanel = document.getElementById("infoPanel");
 
         let currentScene = scenes[0];
-        let breathingInterval = null;
+        let breathingTimeout = null;
+        let voiceEnabled = false;
+        let availableVoices = [];
+        let selectedVoice = null;
+
+        viewTabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            const targetView = tab.dataset.view;
+            viewTabs.forEach((btn) => btn.classList.toggle("active", btn === tab));
+            viewPanes.forEach((pane) => {
+              pane.classList.toggle("active", pane.classList.contains(`${targetView}-view`));
+            });
+          });
+        });
 
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         let whiteNoiseNode = null;
@@ -474,45 +656,118 @@
           }
         }
 
+        function loadVoices() {
+          availableVoices = speechSynthesis
+            .getVoices()
+            .filter((voice) => ["zh", "en", "ja"].some((lang) => voice.lang.toLowerCase().startsWith(lang)));
+          if (!availableVoices.length) {
+            voiceSelect.innerHTML = '<option value="">暫無可用語音</option>';
+            return;
+          }
+          voiceSelect.innerHTML = availableVoices
+            .map((voice) => `<option value="${voice.name}">${voice.name} (${voice.lang})</option>`)
+            .join("");
+          selectedVoice = availableVoices.find((voice) => voice.default) ?? availableVoices[0];
+          voiceSelect.value = selectedVoice?.name ?? "";
+        }
+
+        if ("speechSynthesis" in window) {
+          speechSynthesis.onvoiceschanged = loadVoices;
+          loadVoices();
+        } else {
+          voiceSelect.innerHTML = '<option value="">此瀏覽器不支援語音合成</option>';
+          voiceSelect.disabled = true;
+          voiceToggle.disabled = true;
+        }
+
+        function speak(text) {
+          if (!voiceEnabled || !text || !("speechSynthesis" in window)) return;
+          if (speechSynthesis.speaking) {
+            speechSynthesis.cancel();
+          }
+          const utterance = new SpeechSynthesisUtterance(text);
+          const voice = availableVoices.find((v) => v.name === selectedVoice?.name);
+          if (voice) {
+            utterance.voice = voice;
+          }
+          utterance.rate = 1;
+          utterance.pitch = 1;
+          speechSynthesis.speak(utterance);
+        }
+
         function clearBreathing() {
-          if (breathingInterval) {
-            clearInterval(breathingInterval);
-            breathingInterval = null;
+          if (breathingTimeout) {
+            clearTimeout(breathingTimeout);
+            breathingTimeout = null;
           }
         }
 
         function startBreathingGuide(scene) {
           clearBreathing();
-          const { pattern, cues, label, isTimer } = scene.breathing;
+          const { pattern, cues, label, intro, animation = "breath" } = scene.breathing;
           breathingGuide.querySelector("strong").textContent = label;
 
-          if (isTimer) {
-            breathingCircle.textContent = cues[0];
-            let index = 0;
-            breathingInterval = setInterval(() => {
-              index = (index + 1) % cues.length;
-              breathingCircle.textContent = cues[index];
-            }, pattern[0] * 1000);
-            return;
+          let stage = 0;
+          const minScale = 0.88;
+          const maxScale = 1.12;
+          let currentScale = animation === "breath" ? minScale : 1;
+          breathingCircle.style.transform = `scale(${currentScale})`;
+
+          if (voiceEnabled) {
+            speak(`${scene.title}。${scene.description}`);
+            if (intro) speak(intro);
+            speak(label);
           }
 
-          let stage = 0;
-          breathingCircle.textContent = cues[stage];
-          breathingCircle.animate([{ transform: "scale(0.9)" }, { transform: "scale(1.1)" }], {
-            duration: pattern[stage] * 1000,
-            easing: "ease-in-out",
-            fill: "forwards",
-          });
+          const runStage = () => {
+            const duration = Math.max(1, pattern[stage]) * 1000;
+            const cueText = cues[stage];
+            breathingCircle.textContent = cueText;
 
-          breathingInterval = setInterval(() => {
-            stage = (stage + 1) % pattern.length;
-            breathingCircle.textContent = cues[stage];
-            breathingCircle.animate([{ transform: "scale(0.9)" }, { transform: "scale(1.1)" }], {
-              duration: Math.max(1, pattern[stage]) * 1000,
+            let keyframes;
+
+            if (animation === "breath") {
+              if (/吸/.test(cueText)) {
+                keyframes = [
+                  { transform: `scale(${currentScale.toFixed(3)})` },
+                  { transform: `scale(${maxScale})` },
+                ];
+                currentScale = maxScale;
+              } else if (/吐|呼/.test(cueText)) {
+                keyframes = [
+                  { transform: `scale(${currentScale.toFixed(3)})` },
+                  { transform: `scale(${minScale})` },
+                ];
+                currentScale = minScale;
+              } else {
+                keyframes = [
+                  { transform: `scale(${currentScale.toFixed(3)})` },
+                  { transform: `scale(${currentScale.toFixed(3)})` },
+                ];
+              }
+            } else {
+              keyframes = [
+                { transform: "scale(1)" },
+                { transform: "scale(1.05)" },
+                { transform: "scale(1)" },
+              ];
+            }
+
+            breathingCircle.animate(keyframes, {
+              duration,
               easing: "ease-in-out",
               fill: "forwards",
             });
-          }, pattern[stage] * 1000);
+
+            if (voiceEnabled) {
+              speak(cueText);
+            }
+
+            stage = (stage + 1) % pattern.length;
+            breathingTimeout = setTimeout(runStage, duration);
+          };
+
+          runStage();
         }
 
         function applyScene(scene) {
@@ -520,6 +775,8 @@
           document.body.style.background = scene.gradient;
           previewTitle.textContent = scene.title;
           previewDescription.textContent = scene.description;
+          infoPanel.textContent = scene.breathing.info || "";
+          infoPanel.classList.remove("active");
           startBreathingGuide(scene);
           sceneGrid.querySelectorAll(".scene-button").forEach((btn) => {
             btn.classList.toggle("active", btn.dataset.scene === scene.id);
@@ -571,8 +828,41 @@
           });
         });
 
+        voiceToggle.addEventListener("change", async (event) => {
+          voiceEnabled = event.target.checked;
+          voiceSelect.disabled = !voiceEnabled;
+          if (voiceEnabled) {
+            if ("speechSynthesis" in window && audioContext.state === "suspended") {
+              await audioContext.resume();
+            }
+            speak("語音引導已啟動");
+          } else if ("speechSynthesis" in window) {
+            speechSynthesis.cancel();
+          }
+        });
+
+        voiceSelect.addEventListener("change", () => {
+          const chosen = availableVoices.find((voice) => voice.name === voiceSelect.value);
+          if (chosen) {
+            selectedVoice = chosen;
+            if (voiceEnabled) {
+              speak(`已切換為 ${chosen.name}`);
+            }
+          }
+        });
+
+        infoButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          infoPanel.classList.toggle("active");
+        });
+
+        document.addEventListener("click", (event) => {
+          if (!infoPanel.contains(event.target) && event.target !== infoButton) {
+            infoPanel.classList.remove("active");
+          }
+        });
+
         applyScene(currentScene);
-        startBreathingGuide(currentScene);
       })();
     </script>
   </body>
