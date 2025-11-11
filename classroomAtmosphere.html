@@ -392,8 +392,8 @@
         <p>一鍵切換場景、音景與視覺節奏，讓教室立即進入專注或放鬆狀態。</p>
       </header>
       <div class="view-tabs">
-        <button type="button" class="active" data-view="control">設定面板</button>
-        <button type="button" data-view="display">顯示畫面</button>
+        <button type="button" class="active" data-view="control">設定面板 (S)</button>
+        <button type="button" data-view="display">顯示畫面 (F)</button>
       </div>
       <div class="view-pane control-view active">
         <div class="layout">
@@ -568,13 +568,42 @@
         let availableVoices = [];
         let selectedVoice = null;
 
+        async function exitFullscreen() {
+          if (document.fullscreenElement) {
+            try {
+              await document.exitFullscreen();
+            } catch (error) {
+              console.warn("Exit fullscreen failed:", error);
+            }
+          }
+        }
+
+        async function enterFullscreen() {
+          if (!document.fullscreenElement) {
+            try {
+              await document.documentElement.requestFullscreen();
+            } catch (error) {
+              console.warn("Enter fullscreen failed:", error);
+            }
+          }
+        }
+
+        async function setActiveView(targetView, { fullscreen } = {}) {
+          viewTabs.forEach((btn) => btn.classList.toggle("active", btn.dataset.view === targetView));
+          viewPanes.forEach((pane) => {
+            pane.classList.toggle("active", pane.classList.contains(`${targetView}-view`));
+          });
+
+          if (fullscreen === true) {
+            await enterFullscreen();
+          } else if (fullscreen === false) {
+            await exitFullscreen();
+          }
+        }
+
         viewTabs.forEach((tab) => {
           tab.addEventListener("click", () => {
-            const targetView = tab.dataset.view;
-            viewTabs.forEach((btn) => btn.classList.toggle("active", btn === tab));
-            viewPanes.forEach((pane) => {
-              pane.classList.toggle("active", pane.classList.contains(`${targetView}-view`));
-            });
+            setActiveView(tab.dataset.view);
           });
         });
 
@@ -862,7 +891,22 @@
           }
         });
 
+        document.addEventListener("keydown", async (event) => {
+          if (event.defaultPrevented) return;
+          const targetTag = event.target.tagName;
+          if (["INPUT", "TEXTAREA", "SELECT"].includes(targetTag)) return;
+
+          if (event.key === "s" || event.key === "S") {
+            event.preventDefault();
+            await setActiveView("control", { fullscreen: false });
+          } else if (event.key === "f" || event.key === "F") {
+            event.preventDefault();
+            await setActiveView("display", { fullscreen: true });
+          }
+        });
+
         applyScene(currentScene);
+        setActiveView("control");
       })();
     </script>
   </body>
