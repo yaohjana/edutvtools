@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>學習進度牆 | EduTV Tools</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg-1: #04100f;
+        --bg-2: #0b211d;
+        --bg-3: #144738;
+        --card-bg: rgba(125, 255, 214, 0.08);
+        --card-border: rgba(125, 255, 214, 0.3);
+        --accent: #34d399;
+        --accent-strong: #2dd4bf;
+        --accent-muted: rgba(45, 212, 191, 0.2);
+        --text-main: #ecfdf5;
+        --text-muted: rgba(236, 253, 245, 0.8);
+        --warning: #fbbf24;
+        --danger: #fb7185;
+        --shadow: 0 28px 60px rgba(4, 48, 38, 0.55);
+        font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: clamp(1.5rem, 4vw, 3.5rem);
+        background:
+          radial-gradient(circle at top left, rgba(52, 211, 153, 0.3), transparent 55%),
+          radial-gradient(circle at bottom right, rgba(125, 211, 252, 0.25), transparent 45%),
+          linear-gradient(140deg, var(--bg-1), var(--bg-2) 60%, var(--bg-3));
+        color: var(--text-main);
+      }
+
+      main {
+        width: min(1200px, 100%);
+        display: grid;
+        gap: clamp(1.5rem, 3vw, 2.4rem);
+      }
+
+      header {
+        text-align: center;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: clamp(2.5rem, 4.5vw, 3.6rem);
+        letter-spacing: 0.14em;
+      }
+
+      header p {
+        margin-top: 0.6rem;
+        font-size: clamp(1rem, 2.2vw, 1.3rem);
+        color: var(--text-muted);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: clamp(1.4rem, 2.8vw, 2.2rem);
+      }
+
+      section.card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 26px;
+        padding: clamp(1.8rem, 3.1vw, 2.35rem);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      section.card h2 {
+        margin: 0 0 1.1rem;
+        font-size: clamp(1.6rem, 3vw, 2rem);
+        letter-spacing: 0.08em;
+      }
+
+      form {
+        display: grid;
+        gap: 1rem;
+      }
+
+      label span {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: 14px;
+        border: 1px solid rgba(125, 255, 214, 0.35);
+        background: rgba(8, 44, 35, 0.55);
+        color: inherit;
+        font: inherit;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 110px;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: 2px solid rgba(45, 212, 191, 0.35);
+        outline-offset: 2px;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.85rem;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 0.85rem 1.7rem;
+        font: inherit;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }
+
+      button.primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        color: #01251c;
+      }
+
+      button.secondary {
+        background: rgba(125, 255, 214, 0.16);
+        color: var(--text-main);
+      }
+
+      button.warning {
+        background: linear-gradient(135deg, var(--warning), #f97316);
+        color: #2f1600;
+      }
+
+      button:hover,
+      button:focus-visible {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 26px rgba(45, 212, 191, 0.25);
+      }
+
+      .board-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+      }
+
+      .stats-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: space-between;
+        margin-bottom: 1.2rem;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+
+      .progress-grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .card-item {
+        border-radius: 22px;
+        padding: 1.4rem 1.6rem;
+        background: rgba(18, 83, 66, 0.3);
+        border: 1px solid rgba(45, 212, 191, 0.28);
+        display: grid;
+        gap: 0.8rem;
+      }
+
+      .card-item header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+      }
+
+      .badge {
+        border-radius: 999px;
+        padding: 0.35rem 0.85rem;
+        font-size: 0.9rem;
+        background: rgba(52, 211, 153, 0.2);
+        border: 1px solid rgba(52, 211, 153, 0.4);
+      }
+
+      .status {
+        border-radius: 999px;
+        padding: 0.4rem 0.95rem;
+        font-size: 0.92rem;
+        border: 1px solid rgba(236, 253, 245, 0.35);
+        background: rgba(236, 253, 245, 0.1);
+      }
+
+      .status.complete {
+        border-color: rgba(52, 211, 153, 0.65);
+        background: rgba(52, 211, 153, 0.18);
+      }
+
+      .status.behind {
+        border-color: rgba(251, 113, 133, 0.65);
+        background: rgba(251, 113, 133, 0.16);
+      }
+
+      .progress-track {
+        width: 100%;
+        height: 14px;
+        border-radius: 999px;
+        background: rgba(52, 211, 153, 0.16);
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+        transition: width 220ms ease;
+      }
+
+      .notes {
+        color: rgba(236, 253, 245, 0.7);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
+
+      .inline-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+      }
+
+      .inline-controls input[type="range"] {
+        width: 160px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 1.6rem;
+        border-radius: 18px;
+        background: rgba(18, 83, 66, 0.28);
+        border: 1px dashed rgba(45, 212, 191, 0.28);
+        color: rgba(236, 253, 245, 0.65);
+        font-size: 1.05rem;
+      }
+
+      @media (max-width: 720px) {
+        .board-controls button {
+          flex: 1 1 100%;
+        }
+        .stats-bar {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .inline-controls {
+          width: 100%;
+        }
+        .inline-controls input[type="range"] {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>學習進度牆</h1>
+        <p>即時展示小組或學生的進度成果，打造互相激勵的高亮舞台。</p>
+      </header>
+      <div class="layout">
+        <section class="card">
+          <h2>新增 / 匯入</h2>
+          <form id="entryForm">
+            <label>
+              <span>名稱（學生或小組）</span>
+              <input type="text" id="nameInput" placeholder="例如：第二組 / 佳恩" required />
+            </label>
+            <div class="split">
+              <label>
+                <span>進度百分比</span>
+                <input type="number" id="progressInput" min="0" max="100" value="50" />
+              </label>
+              <label>
+                <span>狀態</span>
+                <select id="statusInput">
+                  <option value="進行中">進行中</option>
+                  <option value="需要協助">需要協助</option>
+                  <option value="已完成">已完成</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              <span>徽章 / 亮點標籤（選填）</span>
+              <input type="text" id="badgeInput" placeholder="例如：創意之星 / 節奏達人" />
+            </label>
+            <label>
+              <span>備註（選填）</span>
+              <textarea id="notesInput" placeholder="紀錄重點成果、需要提醒的事項……"></textarea>
+            </label>
+            <div class="board-controls">
+              <button type="submit" class="primary">新增到進度牆</button>
+              <button type="button" class="secondary" id="sampleBtn">載入示範資料</button>
+              <button type="button" class="warning" id="clearBtn">清除全部</button>
+            </div>
+          </form>
+        </section>
+        <section class="card">
+          <h2>進度總覽</h2>
+          <div class="stats-bar" id="statsBar" hidden>
+            <span id="statTotal">總項目：0</span>
+            <span id="statAverage">平均進度：0%</span>
+            <span id="statComplete">完成項目：0</span>
+          </div>
+          <div class="progress-grid" id="progressGrid">
+            <div class="empty-state">新增資料後，進度牆會即時更新於此。</div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script>
+      (() => {
+        const form = document.getElementById("entryForm");
+        const nameInput = document.getElementById("nameInput");
+        const progressInput = document.getElementById("progressInput");
+        const statusInput = document.getElementById("statusInput");
+        const badgeInput = document.getElementById("badgeInput");
+        const notesInput = document.getElementById("notesInput");
+        const progressGrid = document.getElementById("progressGrid");
+        const sampleBtn = document.getElementById("sampleBtn");
+        const clearBtn = document.getElementById("clearBtn");
+        const statsBar = document.getElementById("statsBar");
+        const statTotal = document.getElementById("statTotal");
+        const statAverage = document.getElementById("statAverage");
+        const statComplete = document.getElementById("statComplete");
+
+        let entries = [];
+
+        function resetForm() {
+          nameInput.value = "";
+          progressInput.value = 50;
+          statusInput.value = "進行中";
+          badgeInput.value = "";
+          notesInput.value = "";
+          nameInput.focus();
+        }
+
+        function getStatusClass(status, progress) {
+          if (status === "已完成" || progress >= 100) return "status complete";
+          if (status === "需要協助" || progress < 40) return "status behind";
+          return "status";
+        }
+
+        function updateStats() {
+          if (!entries.length) {
+            statsBar.hidden = true;
+            return;
+          }
+          statsBar.hidden = false;
+          const total = entries.length;
+          const sum = entries.reduce((acc, entry) => acc + entry.progress, 0);
+          const completed = entries.filter((entry) => entry.progress >= 100 || entry.status === "已完成").length;
+          statTotal.textContent = `總項目：${total}`;
+          statAverage.textContent = `平均進度：${Math.round(sum / total)}%`;
+          statComplete.textContent = `完成項目：${completed}`;
+        }
+
+        function renderEntries() {
+          if (!entries.length) {
+            progressGrid.innerHTML = '<div class="empty-state">新增資料後，進度牆會即時更新於此。</div>';
+            updateStats();
+            return;
+          }
+
+          const cards = entries
+            .map(
+              (entry, index) => `
+            <article class="card-item" data-index="${index}">
+              <header>
+                <h3>${entry.name}</h3>
+                <div class="inline-controls">
+                  <span class="${getStatusClass(entry.status, entry.progress)}">${entry.status}</span>
+                  <input type="range" min="0" max="100" value="${entry.progress}" data-action="slide" data-index="${index}" />
+                  <button type="button" class="secondary" data-action="boost" data-index="${index}">+10%</button>
+                </div>
+              </header>
+              <div class="progress-track">
+                <div class="progress-bar" style="width:${Math.min(100, entry.progress)}%;"></div>
+              </div>
+              <div class="notes">進度：${entry.progress}%${entry.badge ? ` ｜ <span class="badge">${entry.badge}</span>` : ""}</div>
+              ${
+                entry.notes
+                  ? `<div class="notes">${entry.notes.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`
+                  : ""
+              }
+              <div class="inline-controls">
+                <select data-action="status" data-index="${index}">
+                  <option value="進行中" ${entry.status === "進行中" ? "selected" : ""}>進行中</option>
+                  <option value="需要協助" ${entry.status === "需要協助" ? "selected" : ""}>需要協助</option>
+                  <option value="已完成" ${entry.status === "已完成" ? "selected" : ""}>已完成</option>
+                </select>
+                <button type="button" class="warning" data-action="remove" data-index="${index}">移除</button>
+              </div>
+            </article>
+          `
+            )
+            .join("");
+
+          progressGrid.innerHTML = cards;
+          updateStats();
+        }
+
+        form.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const name = nameInput.value.trim();
+          const progress = Math.min(100, Math.max(0, Number(progressInput.value)));
+          const status = statusInput.value;
+          const badge = badgeInput.value.trim();
+          const notes = notesInput.value.trim();
+
+          if (!name) {
+            alert("請輸入名稱。");
+            return;
+          }
+
+          entries.push({ name, progress, status, badge, notes });
+          resetForm();
+          renderEntries();
+        });
+
+        progressGrid.addEventListener("click", (event) => {
+          const button = event.target.closest("button");
+          if (!button) return;
+          const index = Number(button.dataset.index);
+          const action = button.dataset.action;
+          if (Number.isNaN(index)) return;
+
+          if (action === "boost") {
+            entries[index].progress = Math.min(100, entries[index].progress + 10);
+            if (entries[index].progress >= 100) {
+              entries[index].status = "已完成";
+            }
+            renderEntries();
+          } else if (action === "remove") {
+            entries.splice(index, 1);
+            renderEntries();
+          }
+        });
+
+        progressGrid.addEventListener("input", (event) => {
+          const target = event.target;
+          if (target.dataset.action === "slide") {
+            const index = Number(target.dataset.index);
+            entries[index].progress = Number(target.value);
+            if (entries[index].progress >= 100) {
+              entries[index].status = "已完成";
+            }
+            renderEntries();
+          }
+        });
+
+        progressGrid.addEventListener("change", (event) => {
+          const select = event.target;
+          if (select.dataset.action === "status") {
+            const index = Number(select.dataset.index);
+            entries[index].status = select.value;
+            renderEntries();
+          }
+        });
+
+        sampleBtn.addEventListener("click", () => {
+          entries = [
+            {
+              name: "第一組｜海豚隊",
+              progress: 85,
+              status: "進行中",
+              badge: "創意亮點",
+              notes: "影片腳本完成，進入拍攝階段。",
+            },
+            {
+              name: "第二組｜雷霆",
+              progress: 60,
+              status: "需要協助",
+              badge: "",
+              notes: "統計資料尚未整理完畢，需要協助確認資料來源。",
+            },
+            {
+              name: "佳恩",
+              progress: 100,
+              status: "已完成",
+              badge: "時間管理王",
+              notes: "提前完成學習單並協助同組同學。",
+            },
+          ];
+          renderEntries();
+        });
+
+        clearBtn.addEventListener("click", () => {
+          if (entries.length === 0) return;
+          if (confirm("確定要清除所有進度紀錄嗎？")) {
+            entries = [];
+            renderEntries();
+          }
+        });
+
+        renderEntries();
+      })();
+    </script>
+  </body>
+</html>
+

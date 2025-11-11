@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>課室倒數提醒 | EduTV Tools</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg-1: #0f172a;
+        --bg-2: #1e293b;
+        --bg-3: #334155;
+        --card-bg: rgba(148, 193, 255, 0.1);
+        --card-border: rgba(148, 193, 255, 0.25);
+        --accent: #38bdf8;
+        --accent-strong: #0ea5e9;
+        --accent-muted: rgba(14, 165, 233, 0.25);
+        --text-main: #f8fafc;
+        --text-muted: rgba(241, 245, 249, 0.75);
+        --warning: #facc15;
+        --success: #4ade80;
+        --shadow: 0 20px 50px rgba(15, 23, 42, 0.55);
+        font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.25), transparent 50%),
+          radial-gradient(circle at bottom right, rgba(74, 222, 128, 0.2), transparent 45%),
+          linear-gradient(135deg, var(--bg-1), var(--bg-2) 55%, var(--bg-3));
+        color: var(--text-main);
+        padding: clamp(1.5rem, 4vw, 3.5rem);
+      }
+
+      main {
+        width: min(1200px, 100%);
+        display: grid;
+        gap: clamp(1.5rem, 3vw, 2.5rem);
+      }
+
+      header {
+        text-align: center;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: clamp(2.4rem, 4vw, 3.4rem);
+        letter-spacing: 0.1em;
+      }
+
+      header p {
+        margin-top: 0.5rem;
+        font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+        color: var(--text-muted);
+      }
+
+      .panels {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: clamp(1.5rem, 3vw, 2.5rem);
+      }
+
+      section.card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 26px;
+        padding: clamp(1.8rem, 3.2vw, 2.4rem);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      section.card h2 {
+        margin: 0 0 1rem;
+        font-size: clamp(1.6rem, 3vw, 2rem);
+        letter-spacing: 0.08em;
+      }
+
+      form.timer-form,
+      form.queue-form {
+        display: grid;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: grid;
+        gap: 0.35rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      input,
+      textarea,
+      select {
+        padding: 0.75rem 1rem;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 193, 255, 0.25);
+        background: rgba(15, 23, 42, 0.45);
+        color: inherit;
+        font: inherit;
+      }
+
+      input:focus,
+      textarea:focus {
+        outline: 2px solid rgba(14, 165, 233, 0.35);
+        outline-offset: 2px;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 140px;
+      }
+
+      .split-inputs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.8rem;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 0.85rem 1.6rem;
+        font: inherit;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: transform 200ms ease, box-shadow 200ms ease;
+      }
+
+      button.primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        color: #04111f;
+      }
+
+      button.secondary {
+        background: rgba(148, 193, 255, 0.18);
+        color: var(--text-main);
+      }
+
+      button.warning {
+        background: linear-gradient(135deg, var(--warning), #f97316);
+        color: #1f1300;
+      }
+
+      button:hover,
+      button:focus-visible {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.25);
+      }
+
+      .phase-list {
+        display: grid;
+        gap: 0.9rem;
+      }
+
+      .phase-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        align-items: center;
+        padding: 1rem 1.2rem;
+        border-radius: 18px;
+        background: rgba(148, 193, 255, 0.12);
+        border: 1px solid transparent;
+        transition: border-color 200ms ease, background 200ms ease;
+      }
+
+      .phase-item.active {
+        border-color: rgba(56, 189, 248, 0.65);
+        background: rgba(56, 189, 248, 0.12);
+      }
+
+      .phase-item strong {
+        font-size: 1.1rem;
+      }
+
+      .phase-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+      }
+
+      .timer-display {
+        display: grid;
+        gap: 0.8rem;
+        margin: 1.5rem 0;
+        text-align: center;
+      }
+
+      .timer-major {
+        font-size: clamp(3.2rem, 8vw, 5.2rem);
+        font-weight: 700;
+        letter-spacing: 0.1em;
+      }
+
+      .timer-phase {
+        font-size: clamp(1.1rem, 2.4vw, 1.4rem);
+        color: var(--text-muted);
+      }
+
+      .progress-track {
+        width: 100%;
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(148, 193, 255, 0.15);
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--accent), var(--success));
+        transition: width 250ms linear;
+      }
+
+      .queue-display {
+        display: grid;
+        gap: 1.2rem;
+      }
+
+      .queue-current {
+        text-align: center;
+        background: rgba(74, 222, 128, 0.12);
+        border: 1px solid rgba(74, 222, 128, 0.5);
+        border-radius: 20px;
+        padding: 1.2rem;
+      }
+
+      .queue-current span {
+        display: block;
+        font-size: clamp(1.1rem, 2vw, 1.35rem);
+        color: var(--text-muted);
+        margin-bottom: 0.35rem;
+      }
+
+      .queue-current strong {
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        letter-spacing: 0.08em;
+      }
+
+      .queue-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+        justify-content: center;
+      }
+
+      .queue-list {
+        display: grid;
+        gap: 0.6rem;
+        max-height: 260px;
+        overflow-y: auto;
+        padding-right: 0.3rem;
+      }
+
+      .queue-item {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.6rem 0.85rem;
+        border-radius: 12px;
+        background: rgba(148, 193, 255, 0.08);
+      }
+
+      .queue-item.active {
+        background: rgba(56, 189, 248, 0.16);
+        border: 1px solid rgba(56, 189, 248, 0.4);
+      }
+
+      .queue-item .number {
+        width: 1.6rem;
+        text-align: right;
+        color: rgba(241, 245, 249, 0.6);
+      }
+
+      .queue-empty {
+        text-align: center;
+        color: rgba(241, 245, 249, 0.55);
+        font-style: italic;
+      }
+
+      @media (max-width: 720px) {
+        .phase-item {
+          grid-template-columns: 1fr;
+        }
+        .phase-controls {
+          justify-content: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>課室倒數提醒</h1>
+        <p>建立多段倒數計畫並管理排隊順序，讓每個活動都在節奏中進行。</p>
+      </header>
+      <div class="panels">
+        <section class="card">
+          <h2>倒數時程</h2>
+          <form class="timer-form" id="timerForm">
+            <label>
+              階段名稱
+              <input type="text" id="phaseLabel" placeholder="例如：討論時間 / 交卷倒數" required />
+            </label>
+            <div class="split-inputs">
+              <label>
+                分鐘
+                <input type="number" id="phaseMinutes" min="0" max="180" value="5" required />
+              </label>
+              <label>
+                秒數
+                <input type="number" id="phaseSeconds" min="0" max="59" value="0" required />
+              </label>
+            </div>
+            <button type="submit" class="primary">加入倒數階段</button>
+          </form>
+          <div class="timer-display">
+            <div class="timer-phase" id="currentPhaseLabel">尚未啟動倒數</div>
+            <div class="timer-major" id="currentTimer">00:00</div>
+            <div class="progress-track">
+              <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="phase-controls">
+              <button type="button" class="primary" id="startSequenceBtn">依序啟動</button>
+              <button type="button" class="secondary" id="pauseBtn" disabled>暫停</button>
+              <button type="button" class="secondary" id="resumeBtn" disabled>繼續</button>
+              <button type="button" class="warning" id="resetBtn" disabled>重置</button>
+            </div>
+          </div>
+          <div class="phase-list" id="phaseList">
+            <div class="queue-empty">目前尚未加入任何倒數階段。</div>
+          </div>
+        </section>
+        <section class="card">
+          <h2>排隊管理</h2>
+          <form class="queue-form" id="queueForm">
+            <label>
+              排隊清單（每行一位同學或小組）
+              <textarea id="queueInput" placeholder="輸入姓名或小組……"></textarea>
+            </label>
+            <button type="submit" class="primary">載入排隊清單</button>
+          </form>
+          <div class="queue-display">
+            <div class="queue-current" id="queueCurrent">
+              <span>輪到</span>
+              <strong>尚未載入名單</strong>
+            </div>
+            <div class="queue-controls">
+              <button type="button" class="secondary" id="prevBtn" disabled>上一位</button>
+              <button type="button" class="primary" id="nextBtn" disabled>下一位</button>
+              <button type="button" class="secondary" id="randomBtn" disabled>隨機抽出</button>
+              <button type="button" class="warning" id="resetQueueBtn" disabled>重置輪序</button>
+            </div>
+            <div class="queue-list" id="queueList">
+              <div class="queue-empty">請先載入排隊清單。</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script>
+      (() => {
+        const timerForm = document.getElementById("timerForm");
+        const phaseLabelInput = document.getElementById("phaseLabel");
+        const minutesInput = document.getElementById("phaseMinutes");
+        const secondsInput = document.getElementById("phaseSeconds");
+        const phaseListEl = document.getElementById("phaseList");
+        const currentTimerEl = document.getElementById("currentTimer");
+        const currentPhaseLabelEl = document.getElementById("currentPhaseLabel");
+        const progressBarEl = document.getElementById("progressBar");
+        const startSequenceBtn = document.getElementById("startSequenceBtn");
+        const pauseBtn = document.getElementById("pauseBtn");
+        const resumeBtn = document.getElementById("resumeBtn");
+        const resetBtn = document.getElementById("resetBtn");
+
+        let phases = [];
+        let timerState = {
+          currentIndex: -1,
+          totalMs: 0,
+          remainingMs: 0,
+          intervalId: null,
+          isPaused: false,
+        };
+
+        function renderPhaseList() {
+          if (!phases.length) {
+            phaseListEl.innerHTML = '<div class="queue-empty">目前尚未加入任何倒數階段。</div>';
+            return;
+          }
+          phaseListEl.innerHTML = phases
+            .map(
+              (phase, index) => `
+              <div class="phase-item ${index === timerState.currentIndex ? "active" : ""}" data-index="${index}">
+                <div>
+                  <strong>${phase.label}</strong>
+                  <div class="phase-meta">${formatTime(phase.durationMs)}</div>
+                </div>
+                <div class="phase-controls">
+                  <button type="button" class="secondary" data-action="start" data-index="${index}">立即啟動</button>
+                  <button type="button" class="secondary" data-action="remove" data-index="${index}">移除</button>
+                </div>
+              </div>
+            `
+            )
+            .join("");
+        }
+
+        function formatTime(ms) {
+          const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+          const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+          const seconds = String(totalSeconds % 60).padStart(2, "0");
+          return `${minutes}:${seconds}`;
+        }
+
+        function updateDisplay() {
+          currentTimerEl.textContent = formatTime(timerState.remainingMs);
+          const phase = phases[timerState.currentIndex];
+          if (phase) {
+            const elapsed = Math.max(0, phase.durationMs - timerState.remainingMs);
+            const progress = Math.min(100, (elapsed / phase.durationMs) * 100);
+            progressBarEl.style.width = `${progress}%`;
+            currentPhaseLabelEl.textContent = `${phase.label}`;
+          } else {
+            progressBarEl.style.width = "0%";
+            currentPhaseLabelEl.textContent = "尚未啟動倒數";
+          }
+        }
+
+        function stopTimer() {
+          if (timerState.intervalId) {
+            clearInterval(timerState.intervalId);
+            timerState.intervalId = null;
+          }
+          timerState.isPaused = false;
+          pauseBtn.disabled = true;
+          resumeBtn.disabled = true;
+          resetBtn.disabled = phases.length === 0;
+        }
+
+        function startTimer(index) {
+          if (!phases[index]) return;
+          stopTimer();
+          timerState.currentIndex = index;
+          timerState.totalMs = phases[index].durationMs;
+          timerState.remainingMs = timerState.totalMs;
+          timerState.isPaused = false;
+          pauseBtn.disabled = false;
+          resumeBtn.disabled = true;
+          resetBtn.disabled = false;
+          tick();
+          timerState.intervalId = setInterval(tick, 250);
+          renderPhaseList();
+        }
+
+        function tick() {
+          if (timerState.isPaused) return;
+          timerState.remainingMs -= 250;
+          if (timerState.remainingMs <= 0) {
+            timerState.remainingMs = 0;
+            updateDisplay();
+            advanceToNextPhase();
+            return;
+          }
+          updateDisplay();
+        }
+
+        function advanceToNextPhase() {
+          stopTimer();
+          const nextIndex = timerState.currentIndex + 1;
+          if (phases[nextIndex]) {
+            startTimer(nextIndex);
+          } else {
+            timerState.currentIndex = -1;
+            currentPhaseLabelEl.textContent = "所有倒數已完成！";
+            currentTimerEl.textContent = "00:00";
+            progressBarEl.style.width = "100%";
+          }
+          renderPhaseList();
+        }
+
+        timerForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const label = phaseLabelInput.value.trim();
+          const minutes = Number(minutesInput.value);
+          const seconds = Number(secondsInput.value);
+          const durationMs = (minutes * 60 + seconds) * 1000;
+          if (!label || durationMs <= 0) {
+            alert("請輸入有效的階段名稱與倒數時間。");
+            return;
+          }
+          phases.push({ label, durationMs });
+          phaseLabelInput.value = "";
+          renderPhaseList();
+          resetBtn.disabled = false;
+        });
+
+        phaseListEl.addEventListener("click", (event) => {
+          const button = event.target.closest("button");
+          if (!button) return;
+          const index = Number(button.dataset.index);
+          if (button.dataset.action === "start") {
+            startTimer(index);
+            updateDisplay();
+          }
+          if (button.dataset.action === "remove") {
+            phases.splice(index, 1);
+            if (timerState.currentIndex === index) {
+              stopTimer();
+              timerState.currentIndex = -1;
+              currentPhaseLabelEl.textContent = "尚未啟動倒數";
+              currentTimerEl.textContent = "00:00";
+              progressBarEl.style.width = "0%";
+            }
+            renderPhaseList();
+            resetBtn.disabled = phases.length === 0;
+          }
+        });
+
+        startSequenceBtn.addEventListener("click", () => {
+          if (!phases.length) {
+            alert("請先加入至少一個倒數階段。");
+            return;
+          }
+          startTimer(0);
+          updateDisplay();
+        });
+
+        pauseBtn.addEventListener("click", () => {
+          if (!timerState.intervalId || timerState.isPaused) return;
+          timerState.isPaused = true;
+          pauseBtn.disabled = true;
+          resumeBtn.disabled = false;
+        });
+
+        resumeBtn.addEventListener("click", () => {
+          if (!timerState.intervalId || !timerState.isPaused) return;
+          timerState.isPaused = false;
+          pauseBtn.disabled = false;
+          resumeBtn.disabled = true;
+        });
+
+        resetBtn.addEventListener("click", () => {
+          stopTimer();
+          timerState.currentIndex = -1;
+          timerState.totalMs = 0;
+          timerState.remainingMs = 0;
+          progressBarEl.style.width = "0%";
+          currentTimerEl.textContent = "00:00";
+          currentPhaseLabelEl.textContent = "尚未啟動倒數";
+          renderPhaseList();
+        });
+
+        updateDisplay();
+      })();
+
+      (() => {
+        const queueForm = document.getElementById("queueForm");
+        const queueInput = document.getElementById("queueInput");
+        const queueCurrentEl = document.getElementById("queueCurrent").querySelector("strong");
+        const queueListEl = document.getElementById("queueList");
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const randomBtn = document.getElementById("randomBtn");
+        const resetBtn = document.getElementById("resetQueueBtn");
+
+        let queue = [];
+        let currentIndex = 0;
+
+        function renderQueue() {
+          if (!queue.length) {
+            queueListEl.innerHTML = '<div class="queue-empty">請先載入排隊清單。</div>';
+            queueCurrentEl.textContent = "尚未載入名單";
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            randomBtn.disabled = true;
+            resetBtn.disabled = true;
+            return;
+          }
+
+          const safeIndex = Math.min(currentIndex, queue.length - 1);
+          currentIndex = Math.max(0, safeIndex);
+          queueCurrentEl.textContent = queue[currentIndex] ?? "全部完成！";
+
+          queueListEl.innerHTML = queue
+            .map(
+              (name, idx) => `
+              <div class="queue-item ${idx === currentIndex ? "active" : ""}">
+                <span class="number">${idx + 1}</span>
+                <span class="name">${name}</span>
+              </div>
+            `
+            )
+            .join("");
+
+          prevBtn.disabled = currentIndex <= 0;
+          nextBtn.disabled = currentIndex >= queue.length - 1;
+          randomBtn.disabled = false;
+          resetBtn.disabled = false;
+        }
+
+        queueForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const lines = queueInput.value
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter(Boolean);
+          if (!lines.length) {
+            alert("請至少輸入一位成員。");
+            return;
+          }
+          queue = lines;
+          currentIndex = 0;
+          renderQueue();
+        });
+
+        prevBtn.addEventListener("click", () => {
+          if (currentIndex > 0) {
+            currentIndex -= 1;
+            renderQueue();
+          }
+        });
+
+        nextBtn.addEventListener("click", () => {
+          if (currentIndex < queue.length - 1) {
+            currentIndex += 1;
+            renderQueue();
+          }
+        });
+
+        randomBtn.addEventListener("click", () => {
+          if (!queue.length) return;
+          const pool = queue.map((name, idx) => ({ name, idx })).filter((item) => item.idx !== currentIndex);
+          const choice = pool[Math.floor(Math.random() * pool.length)];
+          if (choice) {
+            currentIndex = choice.idx;
+            renderQueue();
+          }
+        });
+
+        resetBtn.addEventListener("click", () => {
+          if (!queue.length) return;
+          currentIndex = 0;
+          renderQueue();
+        });
+
+        renderQueue();
+      })();
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>隨機分組任務 | EduTV Tools</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg-a: #1b1026;
+        --bg-b: #301941;
+        --bg-c: #432b60;
+        --card-bg: rgba(222, 180, 255, 0.08);
+        --card-border: rgba(222, 180, 255, 0.32);
+        --accent: #d946ef;
+        --accent-strong: #a855f7;
+        --accent-soft: rgba(209, 118, 255, 0.16);
+        --text-main: #faf5ff;
+        --text-muted: rgba(239, 222, 255, 0.75);
+        --success: #34d399;
+        --warning: #facc15;
+        --shadow: 0 30px 65px rgba(23, 0, 36, 0.6);
+        font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: clamp(1.5rem, 4vw, 3.5rem);
+        background:
+          radial-gradient(circle at top right, rgba(248, 113, 253, 0.25), transparent 45%),
+          radial-gradient(circle at bottom left, rgba(129, 140, 248, 0.18), transparent 50%),
+          linear-gradient(140deg, var(--bg-a), var(--bg-b) 50%, var(--bg-c));
+        color: var(--text-main);
+      }
+
+      main {
+        width: min(1200px, 100%);
+        display: grid;
+        gap: clamp(1.5rem, 3vw, 2.4rem);
+      }
+
+      header {
+        text-align: center;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: clamp(2.4rem, 4vw, 3.4rem);
+        letter-spacing: 0.12em;
+      }
+
+      header p {
+        margin-top: 0.6rem;
+        font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+        color: var(--text-muted);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: clamp(1.4rem, 2.8vw, 2.2rem);
+      }
+
+      section.card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 26px;
+        padding: clamp(1.8rem, 3.2vw, 2.4rem);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      section.card h2 {
+        margin: 0 0 1.1rem;
+        font-size: clamp(1.6rem, 3vw, 2rem);
+        letter-spacing: 0.08em;
+      }
+
+      form {
+        display: grid;
+        gap: 1rem;
+      }
+
+      label span {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: 14px;
+        border: 1px solid rgba(222, 180, 255, 0.28);
+        background: rgba(42, 24, 66, 0.55);
+        color: inherit;
+        font: inherit;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 130px;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: 2px solid rgba(216, 70, 239, 0.35);
+        outline-offset: 2px;
+      }
+
+      .split {
+        display: grid;
+        gap: 0.8rem;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      }
+
+      .mode-select {
+        display: grid;
+        gap: 0.6rem;
+        align-items: center;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+        margin-top: 0.6rem;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 0.85rem 1.7rem;
+        font: inherit;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }
+
+      button.primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        color: #210123;
+      }
+
+      button.secondary {
+        background: rgba(222, 180, 255, 0.16);
+        color: var(--text-main);
+      }
+
+      button.warning {
+        background: linear-gradient(135deg, var(--warning), #f97316);
+        color: #261301;
+      }
+
+      button:hover,
+      button:focus-visible {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 26px rgba(216, 70, 239, 0.28);
+      }
+
+      .results {
+        display: grid;
+        gap: 1.2rem;
+      }
+
+      .group-card {
+        border-radius: 22px;
+        padding: 1.4rem 1.6rem;
+        background: rgba(216, 70, 239, 0.12);
+        border: 1px solid rgba(216, 70, 239, 0.3);
+        display: grid;
+        gap: 0.8rem;
+      }
+
+      .group-card h3 {
+        margin: 0;
+        font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .group-card h3 span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .status-select {
+        border-radius: 999px;
+        padding: 0.45rem 1rem;
+        font-size: 0.95rem;
+        background: rgba(32, 18, 48, 0.65);
+        border: 1px solid rgba(222, 180, 255, 0.32);
+        color: inherit;
+      }
+
+      .member-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+      }
+
+      .chip {
+        border-radius: 999px;
+        padding: 0.45rem 0.95rem;
+        background: rgba(15, 23, 42, 0.35);
+        border: 1px solid rgba(222, 180, 255, 0.24);
+        font-size: 0.95rem;
+      }
+
+      .task {
+        background: rgba(129, 140, 248, 0.18);
+        border: 1px solid rgba(129, 140, 248, 0.35);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 1.6rem;
+        border-radius: 18px;
+        background: rgba(222, 180, 255, 0.1);
+        border: 1px dashed rgba(222, 180, 255, 0.22);
+        color: rgba(239, 222, 255, 0.6);
+        font-size: 1.05rem;
+      }
+
+      .summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: space-between;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+
+      @media (max-width: 720px) {
+        button {
+          width: 100%;
+          justify-content: center;
+        }
+        .group-card h3 {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.6rem;
+        }
+        .summary {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>隨機分組任務</h1>
+        <p>快速分組並指派任務或角色，用最少時間完成最靈活的協作安排。</p>
+      </header>
+      <div class="layout">
+        <section class="card">
+          <h2>設定分組</h2>
+          <form id="groupForm">
+            <label>
+              <span>成員名單（每行一位成員）</span>
+              <textarea id="memberInput" placeholder="輸入學生姓名或小組成員……"></textarea>
+            </label>
+            <div class="split">
+              <label class="mode-select">
+                <span>分組方式</span>
+                <select id="modeSelect">
+                  <option value="size">依每組人數</option>
+                  <option value="count">依組數</option>
+                </select>
+              </label>
+              <label>
+                <span id="modeLabel">每組人數</span>
+                <input type="number" id="modeValue" min="2" value="4" />
+              </label>
+            </div>
+            <label>
+              <span>任務 / 角色清單（選填，每行一項）</span>
+              <textarea id="taskInput" placeholder="例如：主持、紀錄、分享、時間管理……"></textarea>
+            </label>
+            <div class="controls">
+              <button type="submit" class="primary">自動分組</button>
+              <button type="button" id="shuffleBtn" class="secondary" disabled>重新洗牌</button>
+              <button type="button" id="clearBtn" class="warning">清除設定</button>
+            </div>
+          </form>
+        </section>
+        <section class="card">
+          <h2>分組結果</h2>
+          <div class="summary" id="summaryBar" hidden>
+            <span id="summaryMembers">成員數：0</span>
+            <span id="summaryGroups">組數：0</span>
+            <span id="summaryMode">模式：—</span>
+          </div>
+          <div class="results" id="results">
+            <div class="empty-state">
+              請輸入名單並點選「自動分組」，結果會顯示於此。
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script>
+      (() => {
+        const memberInput = document.getElementById("memberInput");
+        const modeSelect = document.getElementById("modeSelect");
+        const modeLabel = document.getElementById("modeLabel");
+        const modeValue = document.getElementById("modeValue");
+        const taskInput = document.getElementById("taskInput");
+        const groupForm = document.getElementById("groupForm");
+        const shuffleBtn = document.getElementById("shuffleBtn");
+        const clearBtn = document.getElementById("clearBtn");
+        const resultsEl = document.getElementById("results");
+        const summaryBar = document.getElementById("summaryBar");
+        const summaryMembers = document.getElementById("summaryMembers");
+        const summaryGroups = document.getElementById("summaryGroups");
+        const summaryMode = document.getElementById("summaryMode");
+
+        let lastMembers = [];
+        let lastTasks = [];
+        let lastGroups = [];
+        let lastMode;
+        let lastValue;
+
+        modeSelect.addEventListener("change", () => {
+          modeLabel.textContent = modeSelect.value === "size" ? "每組人數" : "組數";
+          modeValue.min = modeSelect.value === "size" ? 2 : 2;
+          modeValue.value = modeSelect.value === "size" ? Math.max(2, Math.min(6, Number(modeValue.value) || 4)) : Math.max(2, Math.min(6, Number(modeValue.value) || 4));
+        });
+
+        function parseLines(textarea) {
+          return textarea
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter(Boolean);
+        }
+
+        function shuffle(array) {
+          const arr = [...array];
+          for (let i = arr.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+          }
+          return arr;
+        }
+
+        function chunkBySize(arr, size) {
+          const result = [];
+          for (let i = 0; i < arr.length; i += size) {
+            result.push(arr.slice(i, i + size));
+          }
+          return result;
+        }
+
+        function chunkByCount(arr, count) {
+          const result = Array.from({ length: count }, () => []);
+          arr.forEach((item, index) => {
+            result[index % count].push(item);
+          });
+          return result.filter((group) => group.length);
+        }
+
+        function assignTasks(groups, tasks) {
+          if (!tasks.length) return groups.map((group) => ({ members: group, tasks: [] }));
+          const loopedTasks = [...tasks];
+          while (loopedTasks.length < groups.length) {
+            loopedTasks.push(...tasks);
+          }
+          return groups.map((group, index) => ({
+            members: group,
+            tasks: loopedTasks[index] ? [loopedTasks[index]] : [],
+          }));
+        }
+
+        function renderGroups(groupsWithTasks) {
+          if (!groupsWithTasks.length) {
+            resultsEl.innerHTML = '<div class="empty-state">分組結果會顯示於此。</div>';
+            summaryBar.hidden = true;
+            return;
+          }
+
+          const groupCards = groupsWithTasks
+            .map(
+              (group, idx) => `
+              <div class="group-card" data-group-index="${idx}">
+                <h3>
+                  <span>第 ${idx + 1} 組</span>
+                  <select class="status-select" data-status-index="${idx}">
+                    <option value="準備中">準備中</option>
+                    <option value="進行中">進行中</option>
+                    <option value="完成">完成</option>
+                  </select>
+                </h3>
+                <div class="member-list">
+                  ${group.members.map((member) => `<span class="chip">${member}</span>`).join("")}
+                </div>
+                ${
+                  group.tasks.length
+                    ? `<div class="member-list">
+                        ${group.tasks.map((task) => `<span class="chip task">任務：${task}</span>`).join("")}
+                      </div>`
+                    : ""
+                }
+              </div>
+            `
+            )
+            .join("");
+
+          resultsEl.innerHTML = groupCards;
+          summaryBar.hidden = false;
+          summaryMembers.textContent = `成員數：${lastMembers.length}`;
+          summaryGroups.textContent = `組數：${groupsWithTasks.length}`;
+          summaryMode.textContent = `模式：${
+            lastMode === "size" ? `每組 ${lastValue} 人` : `共 ${groupsWithTasks.length} 組`
+          }`;
+        }
+
+        function generateGroups() {
+          const members = parseLines(memberInput.value);
+          if (members.length < 2) {
+            alert("請至少輸入兩位成員。");
+            return;
+          }
+
+          const mode = modeSelect.value;
+          const value = Number(modeValue.value);
+          if (!Number.isInteger(value) || value < 2) {
+            alert("請輸入大於等於 2 的有效數字。");
+            return;
+          }
+
+          const shuffledMembers = shuffle(members);
+          let groups = [];
+          if (mode === "size") {
+            groups = chunkBySize(shuffledMembers, value);
+          } else {
+            groups = chunkByCount(shuffledMembers, value);
+          }
+
+          const tasks = parseLines(taskInput.value);
+          const groupsWithTasks = assignTasks(groups, shuffle(tasks));
+
+          lastMembers = members;
+          lastTasks = tasks;
+          lastGroups = groupsWithTasks;
+          lastMode = mode;
+          lastValue = value;
+
+          shuffleBtn.disabled = false;
+          renderGroups(groupsWithTasks);
+        }
+
+        groupForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+          generateGroups();
+        });
+
+        shuffleBtn.addEventListener("click", () => {
+          if (!lastMembers.length) return;
+          const shuffledMembers = shuffle(lastMembers);
+          let groups = [];
+          if (lastMode === "size") {
+            groups = chunkBySize(shuffledMembers, lastValue);
+          } else {
+            groups = chunkByCount(shuffledMembers, lastValue);
+          }
+          const tasks = lastTasks.length ? shuffle(lastTasks) : [];
+          lastGroups = assignTasks(groups, tasks);
+          renderGroups(lastGroups);
+        });
+
+        clearBtn.addEventListener("click", () => {
+          memberInput.value = "";
+          taskInput.value = "";
+          lastMembers = [];
+          lastTasks = [];
+          lastGroups = [];
+          shuffleBtn.disabled = true;
+          resultsEl.innerHTML = '<div class="empty-state">請輸入名單並點選「自動分組」，結果會顯示於此。</div>';
+          summaryBar.hidden = true;
+        });
+      })();
+    </script>
+  </body>
+</html>
+

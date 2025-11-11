@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教室氛圍控制 | EduTV Tools</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --font: "Segoe UI", "Noto Sans TC", sans-serif;
+        --text-main: #f8fafc;
+        --text-muted: rgba(241, 245, 249, 0.78);
+        --panel-bg: rgba(255, 255, 255, 0.12);
+        --panel-border: rgba(255, 255, 255, 0.25);
+        --shadow: 0 28px 60px rgba(8, 23, 53, 0.55);
+        --accent: #38bdf8;
+        font-family: var(--font);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0f172a, #1e3a8a);
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: clamp(1.5rem, 4vw, 3.5rem);
+        transition: background 600ms ease;
+      }
+
+      main {
+        width: min(1200px, 100%);
+        display: grid;
+        gap: clamp(1.5rem, 3vw, 2.4rem);
+      }
+
+      header {
+        text-align: center;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: clamp(2.5rem, 4.5vw, 3.6rem);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      header p {
+        margin-top: 0.6rem;
+        font-size: clamp(1rem, 2.2vw, 1.3rem);
+        color: var(--text-muted);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: clamp(1.4rem, 2.8vw, 2.2rem);
+      }
+
+      section.panel {
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-border);
+        border-radius: 28px;
+        padding: clamp(1.8rem, 3.2vw, 2.4rem);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      section.panel h2 {
+        margin: 0 0 1.1rem;
+        font-size: clamp(1.6rem, 3vw, 2rem);
+        letter-spacing: 0.08em;
+      }
+
+      .scene-grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .scene-button {
+        position: relative;
+        border: none;
+        border-radius: 22px;
+        padding: 1.35rem 1.6rem;
+        text-align: left;
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        overflow: hidden;
+        transition: transform 220ms ease, box-shadow 220ms ease, border 220ms ease;
+        border: 1px solid transparent;
+      }
+
+      .scene-button:hover,
+      .scene-button:focus-visible {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 35px rgba(8, 23, 53, 0.45);
+      }
+
+      .scene-button.active {
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 22px 45px rgba(8, 23, 53, 0.55);
+      }
+
+      .scene-title {
+        font-weight: 700;
+        font-size: 1.25rem;
+        letter-spacing: 0.06em;
+      }
+
+      .scene-desc {
+        margin-top: 0.35rem;
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .ambience-controls,
+      .visual-controls {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .toggle-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.6rem;
+        align-items: center;
+        padding: 1rem 1.2rem;
+        border-radius: 18px;
+        background: rgba(15, 23, 42, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+      }
+
+      .toggle-row h3 {
+        margin: 0;
+        font-size: 1.05rem;
+      }
+
+      .toggle-row p {
+        margin: 0.35rem 0 0;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+      }
+
+      .switch {
+        position: relative;
+        width: 56px;
+        height: 30px;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.25);
+        border-radius: 999px;
+        transition: background 0.3s ease;
+      }
+
+      .slider::before {
+        content: "";
+        position: absolute;
+        height: 24px;
+        width: 24px;
+        left: 3px;
+        top: 3px;
+        background: #0f172a;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+      }
+
+      .switch input:checked + .slider {
+        background: rgba(56, 189, 248, 0.85);
+      }
+
+      .switch input:checked + .slider::before {
+        transform: translateX(26px);
+        background: #e0f2fe;
+      }
+
+      .slider-range {
+        display: grid;
+        gap: 0.35rem;
+      }
+
+      .slider-range label {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+      }
+
+      .slider-range input[type="range"] {
+        width: 100%;
+        accent-color: var(--accent);
+      }
+
+      .scene-preview {
+        position: relative;
+        overflow: hidden;
+        border-radius: 26px;
+        min-height: 280px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+      }
+
+      .preview-message {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        gap: 0.8rem;
+      }
+
+      .preview-message h3 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3rem);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .preview-message p {
+        margin: 0;
+        font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      .breathing-guide {
+        margin-top: 1.2rem;
+        display: grid;
+        gap: 0.6rem;
+        justify-items: center;
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      .breathing-circle {
+        width: clamp(140px, 18vw, 220px);
+        height: clamp(140px, 18vw, 220px);
+        border-radius: 50%;
+        background: radial-gradient(circle at center, rgba(255, 255, 255, 0.5), rgba(15, 23, 42, 0.05));
+        display: grid;
+        place-items: center;
+        font-size: clamp(0.95rem, 2vw, 1.2rem);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .ambient-overlay {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.15), transparent 55%),
+          radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.12), transparent 60%);
+        opacity: 0.4;
+        transition: opacity 600ms ease;
+      }
+
+      .ambient-overlay.active {
+        opacity: 0.7;
+      }
+
+      @media (max-width: 720px) {
+        .toggle-row {
+          grid-template-columns: 1fr;
+        }
+        .switch {
+          justify-self: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>教室氛圍控制</h1>
+        <p>一鍵切換場景、音景與視覺節奏，讓教室立即進入專注或放鬆狀態。</p>
+      </header>
+      <div class="layout">
+        <section class="panel">
+          <h2>選擇場景</h2>
+          <div class="scene-grid" id="sceneGrid"></div>
+        </section>
+        <section class="panel">
+          <h2>音景 & 視覺</h2>
+          <div class="ambience-controls">
+            <div class="toggle-row">
+              <div>
+                <h3>白噪音</h3>
+                <p>適合專注與自習，柔和屏蔽環境雜音。</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" data-sound="white" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <h3>柔和棕噪</h3>
+                <p>低頻暖調讓人放鬆，適合緩和或討論情境。</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" data-sound="brown" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <h3>節奏鐘聲</h3>
+                <p>每隔 60 秒輕柔鐘聲，提醒保持節奏或呼吸。</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" data-sound="chime" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="visual-controls">
+            <div class="slider-range">
+              <label for="brightnessRange">背景亮度</label>
+              <input type="range" id="brightnessRange" min="50" max="120" value="100" />
+            </div>
+            <div class="slider-range">
+              <label for="overlayRange">光暈強度</label>
+              <input type="range" id="overlayRange" min="0" max="100" value="40" />
+            </div>
+          </div>
+        </section>
+      </div>
+      <section class="panel scene-preview" id="scenePreview">
+        <div class="ambient-overlay" id="ambientOverlay"></div>
+        <div class="preview-message">
+          <h3 id="previewTitle">專注模式</h3>
+          <p id="previewDescription">沉浸於靜謐藍調，讓思緒進入專心學習的節奏。</p>
+          <div class="breathing-guide" id="breathingGuide">
+            <strong>深呼吸節奏：4-4-4</strong>
+            <div class="breathing-circle" id="breathingCircle">吸氣</div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>
+      (() => {
+        const scenes = [
+          {
+            id: "focus",
+            title: "專注模式",
+            description: "沉浸於靜謐藍調，讓思緒進入專心學習的節奏。",
+            gradient: "linear-gradient(135deg, #0f172a, #1e3a8a 60%, #0284c7)",
+            breathing: { pattern: [4, 4, 4], cues: ["吸氣", "停留", "呼氣"], label: "深呼吸節奏：4-4-4" },
+          },
+          {
+            id: "relax",
+            title: "放鬆伸展",
+            description: "綠意流動，搭配緩慢節奏，適合活動筋骨與補充能量。",
+            gradient: "linear-gradient(135deg, #022c22, #0f766e 60%, #14b8a6)",
+            breathing: { pattern: [4, 6, 6], cues: ["吸氣", "停留", "呼氣"], label: "放鬆呼吸：4-6-6" },
+          },
+          {
+            id: "discussion",
+            title: "討論交流",
+            description: "暖色燈光點燃靈感，鼓勵小組互動與分享。",
+            gradient: "linear-gradient(135deg, #3f0a22, #b91c1c 55%, #f97316)",
+            breathing: { pattern: [2, 0, 2], cues: ["啟動", "自由討論", "換手"], label: "討論節奏：2-0-2", isTimer: true },
+          },
+          {
+            id: "calm",
+            title: "靜心冥想",
+            description: "紫羅蘭光暈包覆全班，帶來安定與沈澱的氣息。",
+            gradient: "linear-gradient(135deg, #1f0a3a, #5b21b6 60%, #7c3aed)",
+            breathing: { pattern: [5, 5, 8], cues: ["吸氣", "停留", "慢慢呼氣"], label: "靜心呼吸：5-5-8" },
+          },
+        ];
+
+        const sceneGrid = document.getElementById("sceneGrid");
+        const previewTitle = document.getElementById("previewTitle");
+        const previewDescription = document.getElementById("previewDescription");
+        const breathingGuide = document.getElementById("breathingGuide");
+        const breathingCircle = document.getElementById("breathingCircle");
+        const scenePreview = document.getElementById("scenePreview");
+        const ambientOverlay = document.getElementById("ambientOverlay");
+        const brightnessRange = document.getElementById("brightnessRange");
+        const overlayRange = document.getElementById("overlayRange");
+        const soundSwitches = document.querySelectorAll(".switch input");
+
+        let currentScene = scenes[0];
+        let breathingInterval = null;
+
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let whiteNoiseNode = null;
+        let brownNoiseNode = null;
+        let chimeInterval = null;
+
+        function createNoiseNode(color = "white") {
+          const bufferSize = 2 * audioContext.sampleRate;
+          const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+          const output = buffer.getChannelData(0);
+
+          let lastOut = 0;
+          for (let i = 0; i < bufferSize; i += 1) {
+            const white = Math.random() * 2 - 1;
+            if (color === "white") {
+              output[i] = white;
+            } else {
+              lastOut = (lastOut + 0.02 * white) / 1.02;
+              output[i] = lastOut * 3.5;
+            }
+          }
+
+          const node = audioContext.createBufferSource();
+          node.buffer = buffer;
+          node.loop = true;
+          const gainNode = audioContext.createGain();
+          gainNode.gain.value = color === "white" ? 0.25 : 0.22;
+          node.connect(gainNode).connect(audioContext.destination);
+          return { node, gainNode };
+        }
+
+        function toggleNoise(color, enabled) {
+          if (color === "white") {
+            if (enabled) {
+              if (!whiteNoiseNode) {
+                whiteNoiseNode = createNoiseNode("white");
+                whiteNoiseNode.node.start();
+              }
+            } else if (whiteNoiseNode) {
+              whiteNoiseNode.node.stop();
+              whiteNoiseNode = null;
+            }
+          } else if (color === "brown") {
+            if (enabled) {
+              if (!brownNoiseNode) {
+                brownNoiseNode = createNoiseNode("brown");
+                brownNoiseNode.node.start();
+              }
+            } else if (brownNoiseNode) {
+              brownNoiseNode.node.stop();
+              brownNoiseNode = null;
+            }
+          }
+        }
+
+        function playChime() {
+          const now = audioContext.currentTime;
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(880, now);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.exponentialRampToValueAtTime(0.12, now + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+          osc.connect(gain).connect(audioContext.destination);
+          osc.start(now);
+          osc.stop(now + 2);
+        }
+
+        function toggleChime(enabled) {
+          if (enabled) {
+            playChime();
+            chimeInterval = setInterval(playChime, 60_000);
+          } else if (chimeInterval) {
+            clearInterval(chimeInterval);
+            chimeInterval = null;
+          }
+        }
+
+        function clearBreathing() {
+          if (breathingInterval) {
+            clearInterval(breathingInterval);
+            breathingInterval = null;
+          }
+        }
+
+        function startBreathingGuide(scene) {
+          clearBreathing();
+          const { pattern, cues, label, isTimer } = scene.breathing;
+          breathingGuide.querySelector("strong").textContent = label;
+
+          if (isTimer) {
+            breathingCircle.textContent = cues[0];
+            let index = 0;
+            breathingInterval = setInterval(() => {
+              index = (index + 1) % cues.length;
+              breathingCircle.textContent = cues[index];
+            }, pattern[0] * 1000);
+            return;
+          }
+
+          let stage = 0;
+          breathingCircle.textContent = cues[stage];
+          breathingCircle.animate([{ transform: "scale(0.9)" }, { transform: "scale(1.1)" }], {
+            duration: pattern[stage] * 1000,
+            easing: "ease-in-out",
+            fill: "forwards",
+          });
+
+          breathingInterval = setInterval(() => {
+            stage = (stage + 1) % pattern.length;
+            breathingCircle.textContent = cues[stage];
+            breathingCircle.animate([{ transform: "scale(0.9)" }, { transform: "scale(1.1)" }], {
+              duration: Math.max(1, pattern[stage]) * 1000,
+              easing: "ease-in-out",
+              fill: "forwards",
+            });
+          }, pattern[stage] * 1000);
+        }
+
+        function applyScene(scene) {
+          currentScene = scene;
+          document.body.style.background = scene.gradient;
+          previewTitle.textContent = scene.title;
+          previewDescription.textContent = scene.description;
+          startBreathingGuide(scene);
+          sceneGrid.querySelectorAll(".scene-button").forEach((btn) => {
+            btn.classList.toggle("active", btn.dataset.scene === scene.id);
+          });
+        }
+
+        sceneGrid.innerHTML = scenes
+          .map(
+            (scene) => `
+          <button class="scene-button ${scene.id === currentScene.id ? "active" : ""}" data-scene="${scene.id}" style="background:${scene.gradient}">
+            <div class="scene-title">${scene.title}</div>
+            <div class="scene-desc">${scene.description}</div>
+          </button>
+        `
+          )
+          .join("");
+
+        sceneGrid.addEventListener("click", (event) => {
+          const button = event.target.closest(".scene-button");
+          if (!button) return;
+          const scene = scenes.find((item) => item.id === button.dataset.scene);
+          if (scene) {
+            applyScene(scene);
+          }
+        });
+
+        brightnessRange.addEventListener("input", () => {
+          const brightness = brightnessRange.value / 100;
+          scenePreview.style.filter = `brightness(${brightness})`;
+        });
+
+        overlayRange.addEventListener("input", () => {
+          const opacity = overlayRange.value / 100;
+          ambientOverlay.style.opacity = opacity;
+        });
+
+        soundSwitches.forEach((switchInput) => {
+          switchInput.addEventListener("change", async (event) => {
+            if (audioContext.state === "suspended") {
+              await audioContext.resume();
+            }
+            const { sound } = event.target.dataset;
+            const { checked } = event.target;
+            if (sound === "white" || sound === "brown") {
+              toggleNoise(sound, checked);
+            } else if (sound === "chime") {
+              toggleChime(checked);
+            }
+          });
+        });
+
+        applyScene(currentScene);
+        startBreathingGuide(currentScene);
+      })();
+    </script>
+  </body>
+</html>
+
