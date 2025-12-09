@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-TW" class="dark">
+<html lang="zh-TW" class="dark" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,7 +14,204 @@
       --bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e5e7eb;--ring:#22d3ee;
       --accent:#38bdf8;--accent-2:#a78bfa;--good:#34d399;--warn:#fbbf24;--bad:#f87171;
     }
+    
+    /* === 主題配置 === */
+    /* 暗色主題（預設） */
+    [data-theme="dark"] {
+      --bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e5e7eb;--ring:#22d3ee;
+      --accent:#38bdf8;--accent-2:#a78bfa;--good:#34d399;--warn:#fbbf24;--bad:#f87171;
+    }
+    
+    /* 黑板主題 */
+    [data-theme="blackboard"] {
+      --bg:#2d5016;--panel:#1a3009;--muted:#9faf7f;--text:#f5f5dc;--ring:#ffd700;
+      --accent:#ffd700;--accent-2:#ffeb3b;--good:#90ee90;--warn:#ffa500;--bad:#ff6b6b;
+    }
+    
+    /* 淺色主題 */
+    [data-theme="light"] {
+      --bg:#f5f5f5;--panel:#ffffff;--muted:#374151;--text:#111827;--ring:#3b82f6;
+      --accent:#2563eb;--accent-2:#7c3aed;--good:#059669;--warn:#d97706;--bad:#dc2626;
+    }
+    
+    /* 淺色主題 2（櫻花粉色系） */
+    [data-theme="light-soft"] {
+      --bg:#fef1f2;--panel:#fff5f7;--muted:#7f1d1d;--text:#1f0a0a;--ring:#ec4899;
+      --accent:#ec4899;--accent-2:#db2777;--good:#059669;--warn:#d97706;--bad:#dc2626;
+    }
+    
+    /* 藍色主題 */
+    [data-theme="blue"] {
+      --bg:#0f172a;--panel:#1e293b;--muted:#94a3b8;--text:#e2e8f0;--ring:#60a5fa;
+      --accent:#60a5fa;--accent-2:#818cf8;--good:#34d399;--warn:#fbbf24;--bad:#f87171;
+    }
+    
+    /* 紫色主題 */
+    [data-theme="purple"] {
+      --bg:#1a0b2e;--panel:#2d1b3d;--muted:#a78bfa;--text:#e9d5ff;--ring:#c084fc;
+      --accent:#c084fc;--accent-2:#a78bfa;--good:#34d399;--warn:#fbbf24;--bad:#f87171;
+    }
+    
+    /* 暖色主題 */
+    [data-theme="warm"] {
+      --bg:#2d1b0e;--panel:#3d2817;--muted:#d4a574;--text:#f5e6d3;--ring:#f59e0b;
+      --accent:#f59e0b;--accent-2:#f97316;--good:#34d399;--warn:#fbbf24;--bad:#f87171;
+    }
+    
+    /* 高對比主題 */
+    [data-theme="high-contrast"] {
+      --bg:#000000;--panel:#1a1a1a;--muted:#808080;--text:#ffffff;--ring:#00ffff;
+      --accent:#00ffff;--accent-2:#ffff00;--good:#00ff00;--warn:#ffaa00;--bad:#ff0000;
+    }
     body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+    
+    /* === 淺色主題文字對比度優化 === */
+    [data-theme="light"] .text-slate-300,
+    [data-theme="light"] .text-slate-400,
+    [data-theme="light-soft"] .text-slate-300,
+    [data-theme="light-soft"] .text-slate-400 {
+      color: var(--muted) !important;
+    }
+    [data-theme="light"] .text-slate-200,
+    [data-theme="light"] .text-slate-100,
+    [data-theme="light-soft"] .text-slate-200,
+    [data-theme="light-soft"] .text-slate-100 {
+      color: var(--text) !important;
+    }
+    [data-theme="light"] .text-slate-500,
+    [data-theme="light-soft"] .text-slate-500 {
+      color: var(--muted) !important;
+    }
+    /* 淺色主題下的邊框和背景調整 */
+    [data-theme="light"] .border-slate-700,
+    [data-theme="light"] .border-slate-800,
+    [data-theme="light-soft"] .border-slate-700,
+    [data-theme="light-soft"] .border-slate-800 {
+      border-color: rgba(0,0,0,.15) !important;
+    }
+    [data-theme="light"] [class*="bg-slate-800"],
+    [data-theme="light"] [class*="bg-slate-900"],
+    [data-theme="light-soft"] [class*="bg-slate-800"],
+    [data-theme="light-soft"] [class*="bg-slate-900"] {
+      background: var(--panel) !important;
+    }
+    
+    /* === 淺色主題時鐘樣式 === */
+    [data-theme="light"] #pres-clock {
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.9)) !important;
+      border: 3px solid rgba(37,99,235,.4) !important;
+      color: #111827 !important;
+      box-shadow:
+        0 10px 35px rgba(0,0,0,.2),
+        0 0 0 1px rgba(37,99,235,.2) inset,
+        0 0 32px rgba(37,99,235,.15) !important;
+    }
+    [data-theme="light"] #pres-clock .clock-time {
+      color: #2563eb !important;
+      text-shadow: 0 2px 8px rgba(37,99,235,.3), 0 0 16px rgba(37,99,235,.2) !important;
+    }
+    [data-theme="light"] #pres-clock .clock-date {
+      color: #374151 !important;
+    }
+    [data-theme="light"] #pres-clock .clock-badge {
+      background: rgba(37,99,235,.15) !important;
+      color: #2563eb !important;
+      border-color: rgba(37,99,235,.3) !important;
+    }
+    
+    /* === 櫻花粉主題特殊樣式 === */
+    [data-theme="light-soft"] #hero {
+      background: linear-gradient(145deg, rgba(236,72,153,.25), rgba(219,39,119,.20)) !important;
+      border: 2px solid rgba(236,72,153,.3) !important;
+      box-shadow: 0 10px 40px rgba(236,72,153,.2), 0 0 20px rgba(236,72,153,.1) !important;
+    }
+    
+    /* === 櫻花粉主題時鐘樣式 === */
+    [data-theme="light-soft"] #pres-clock {
+      background: linear-gradient(180deg, rgba(255,245,247,.95), rgba(254,241,242,.9)) !important;
+      border: 3px solid rgba(236,72,153,.5) !important;
+      color: #1f0a0a !important;
+      box-shadow:
+        0 10px 35px rgba(236,72,153,.25),
+        0 0 0 1px rgba(236,72,153,.3) inset,
+        0 0 32px rgba(236,72,153,.2) !important;
+    }
+    [data-theme="light-soft"] #pres-clock .clock-time {
+      color: #ec4899 !important;
+      text-shadow: 0 2px 8px rgba(236,72,153,.4), 0 0 16px rgba(236,72,153,.3) !important;
+    }
+    [data-theme="light-soft"] #pres-clock .clock-date {
+      color: #7f1d1d !important;
+    }
+    [data-theme="light-soft"] #pres-clock .clock-badge {
+      background: rgba(236,72,153,.2) !important;
+      color: #ec4899 !important;
+      border-color: rgba(236,72,153,.4) !important;
+    }
+    [data-theme="light-soft"] #hero h2 {
+      color: var(--accent) !important;
+      text-shadow: 0 2px 8px rgba(236,72,153,.2) !important;
+    }
+    [data-theme="light-soft"] #hero .rounded-2xl {
+      background: rgba(255,245,247,.9) !important;
+      border: 2px solid rgba(236,72,153,.4) !important;
+      box-shadow: 0 4px 20px rgba(236,72,153,.15), inset 0 1px 0 rgba(255,255,255,.5) !important;
+    }
+    [data-theme="light-soft"] #current-subject {
+      color: var(--accent) !important;
+      text-shadow: 0 2px 12px rgba(236,72,153,.3) !important;
+    }
+    [data-theme="light-soft"] #subject-time-range {
+      color: var(--accent-2) !important;
+      font-weight: 600 !important;
+    }
+    
+    /* === 淺色主題時鐘樣式（全螢幕展示模式） === */
+    [data-theme="light"] #pres-clock {
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.9)) !important;
+      border: 3px solid rgba(37,99,235,.4) !important;
+      color: #111827 !important;
+      box-shadow:
+        0 10px 35px rgba(0,0,0,.2),
+        0 0 0 1px rgba(37,99,235,.2) inset,
+        0 0 32px rgba(37,99,235,.15) !important;
+    }
+    [data-theme="light"] #pres-clock .clock-time {
+      color: #2563eb !important;
+      text-shadow: 0 2px 8px rgba(37,99,235,.3), 0 0 16px rgba(37,99,235,.2) !important;
+    }
+    [data-theme="light"] #pres-clock .clock-date {
+      color: #374151 !important;
+    }
+    [data-theme="light"] #pres-clock .clock-badge {
+      background: rgba(37,99,235,.15) !important;
+      color: #2563eb !important;
+      border-color: rgba(37,99,235,.3) !important;
+    }
+    
+    /* === 櫻花粉主題時鐘樣式（全螢幕展示模式） === */
+    [data-theme="light-soft"] #pres-clock {
+      background: linear-gradient(180deg, rgba(255,245,247,.95), rgba(254,241,242,.9)) !important;
+      border: 3px solid rgba(236,72,153,.5) !important;
+      color: #1f0a0a !important;
+      box-shadow:
+        0 10px 35px rgba(236,72,153,.25),
+        0 0 0 1px rgba(236,72,153,.3) inset,
+        0 0 32px rgba(236,72,153,.2) !important;
+    }
+    [data-theme="light-soft"] #pres-clock .clock-time {
+      color: #ec4899 !important;
+      text-shadow: 0 2px 8px rgba(236,72,153,.4), 0 0 16px rgba(236,72,153,.3) !important;
+    }
+    [data-theme="light-soft"] #pres-clock .clock-date {
+      color: #7f1d1d !important;
+    }
+    [data-theme="light-soft"] #pres-clock .clock-badge {
+      background: rgba(236,72,153,.2) !important;
+      color: #ec4899 !important;
+      border-color: rgba(236,72,153,.4) !important;
+    }
+    
     .main-container{max-width:90rem;height:100%;padding:1.25rem;margin:0 auto;display:flex;flex-direction:column;gap:1rem}
     textarea{min-height:80px;resize:vertical}
     .timeline-item{position:relative;padding-left:1rem;border-left:2px solid rgba(148,163,184,.25);margin-left:.25rem}
@@ -149,6 +346,65 @@
       color:var(--text);
     }
 
+    /* === 主題選擇按鈕樣式 === */
+    .theme-btn{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:0.25rem;
+      padding:0.5rem;
+      border-radius:0.5rem;
+      border:2px solid rgba(148,163,184,.2);
+      background:var(--panel);
+      cursor:pointer;
+      transition:all 0.2s ease;
+      font-size:0.75rem;
+      color:var(--text);
+    }
+    .theme-btn:hover{
+      border-color:var(--accent);
+      background:var(--panel);
+      opacity:0.9;
+      transform:translateY(-2px);
+      box-shadow:0 2px 8px rgba(0,0,0,.2);
+    }
+    .theme-btn.active{
+      border-color:var(--accent);
+      background:var(--panel);
+      box-shadow:0 0 0 2px var(--ring), 0 2px 8px rgba(0,0,0,.2);
+      font-weight:600;
+    }
+    .theme-preview{
+      width:100%;
+      height:24px;
+      border-radius:0.25rem;
+      border:1px solid rgba(148,163,184,.3);
+    }
+    .theme-preview.dark-theme{
+      background:linear-gradient(90deg, #0b1220 0%, #0f172a 50%, #38bdf8 100%);
+    }
+    .theme-preview.blackboard-theme{
+      background:linear-gradient(90deg, #2d5016 0%, #1a3009 50%, #ffd700 100%);
+    }
+    .theme-preview.light-theme{
+      background:linear-gradient(90deg, #f5f5f5 0%, #ffffff 50%, #2563eb 100%);
+    }
+    .theme-preview.light-soft-theme{
+      background:linear-gradient(90deg, #fef1f2 0%, #fff5f7 50%, #ec4899 100%);
+    }
+    .theme-preview.blue-theme{
+      background:linear-gradient(90deg, #0f172a 0%, #1e293b 50%, #60a5fa 100%);
+    }
+    .theme-preview.purple-theme{
+      background:linear-gradient(90deg, #1a0b2e 0%, #2d1b3d 50%, #c084fc 100%);
+    }
+    .theme-preview.warm-theme{
+      background:linear-gradient(90deg, #2d1b0e 0%, #3d2817 50%, #f59e0b 100%);
+    }
+    .theme-preview.high-contrast-theme{
+      background:linear-gradient(90deg, #000000 0%, #1a1a1a 50%, #00ffff 100%);
+    }
+
     /* === Tooltip 樣式 === */
     .tooltip-wrapper{
       position:relative;
@@ -278,11 +534,122 @@
       align-items: center;
       margin-left: auto;
     }
+    /* 確保隱藏時鐘時，容器和時鐘本身都完全隱藏 */
+    #clock-hud-holder.hidden,
+    #clock-hud.hidden,
+    #pres-clock.hidden {
+      display: none !important;
+    }
+    /* 確保隱藏進度條時，容器完全隱藏 */
+    #subject-progress-container.hidden,
+    #pres-progress-container.hidden {
+      display: none !important;
+    }
+
+    /* === 全畫面展示模式主題樣式 === */
+    #presentation-overlay {
+      background: var(--bg) !important;
+      color: var(--text) !important;
+    }
+    #present-toolbar {
+      background: var(--panel) !important;
+      border-color: rgba(148,163,184,.2) !important;
+    }
+    /* 工具列文字顏色 */
+    #present-toolbar > div:first-child,
+    #present-toolbar > div:first-child span {
+      color: var(--muted) !important;
+    }
+    #presentation-overlay .text-slate-300 {
+      color: var(--muted) !important;
+    }
+    /* 強調色文字 */
+    #presentation-overlay .text-cyan-300,
+    #presentation-overlay .text-sky-300,
+    #presentation-overlay .text-sky-200 {
+      color: var(--accent) !important;
+    }
+    /* 進度條容器 */
+    #pres-progress-container {
+      background: var(--panel) !important;
+    }
+    /* 卡片背景 */
+    #presentation-overlay [class*="bg-slate-900"] {
+      background: var(--panel) !important;
+    }
+    /* 邊框顏色 */
+    #presentation-overlay [class*="border-slate"] {
+      border-color: rgba(148,163,184,.2) !important;
+    }
+    /* 次要文字 */
+    #presentation-overlay .text-slate-400 {
+      color: var(--muted) !important;
+    }
+    /* 缺考卡片 */
+    #presentation-overlay [class*="bg-rose-900"] {
+      background: rgba(248,113,113,.15) !important;
+    }
+    #presentation-overlay [class*="border-rose-500"] {
+      border-color: rgba(248,113,113,.3) !important;
+    }
+    #presentation-overlay [class*="text-rose"] {
+      color: var(--bad) !important;
+    }
+    /* 實到卡片 */
+    #presentation-overlay [class*="bg-emerald-900"] {
+      background: rgba(52,211,153,.15) !important;
+    }
+    #presentation-overlay [class*="border-emerald-500"] {
+      border-color: rgba(52,211,153,.3) !important;
+    }
+    #presentation-overlay [class*="text-emerald"] {
+      color: var(--good) !important;
+    }
     .clock-hud.docked .clock-time { font-size: 0.875rem; }
     .clock-hud.docked .clock-date { font-size: 0.625rem; }
     .clock-hud.docked .clock-badge { font-size: 0.625rem; padding: 0.05rem 0.3rem; }
     .clock-hud.docked .flex { gap: 0.25rem !important; }
     .clock-hud .clock-actions, .clock-hud .snap-tip { display: none !important; }
+    
+    /* === 淺色主題鎖定模式時鐘樣式（一般模式） === */
+    [data-theme="light"] .clock-hud.docked {
+      background: rgba(255,255,255,.9) !important;
+      border: 1px solid rgba(37,99,235,.3) !important;
+      border-radius: 0.5rem !important;
+      padding: 0.25rem 0.5rem !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1) !important;
+    }
+    [data-theme="light"] .clock-hud.docked .clock-time {
+      color: #2563eb !important;
+    }
+    [data-theme="light"] .clock-hud.docked .clock-date {
+      color: #374151 !important;
+    }
+    [data-theme="light"] .clock-hud.docked .clock-badge {
+      background: rgba(37,99,235,.15) !important;
+      color: #2563eb !important;
+      border-color: rgba(37,99,235,.3) !important;
+    }
+    
+    /* === 櫻花粉主題鎖定模式時鐘樣式（一般模式） === */
+    [data-theme="light-soft"] .clock-hud.docked {
+      background: rgba(255,245,247,.9) !important;
+      border: 1px solid rgba(236,72,153,.4) !important;
+      border-radius: 0.5rem !important;
+      padding: 0.25rem 0.5rem !important;
+      box-shadow: 0 2px 8px rgba(236,72,153,.15) !important;
+    }
+    [data-theme="light-soft"] .clock-hud.docked .clock-time {
+      color: #ec4899 !important;
+    }
+    [data-theme="light-soft"] .clock-hud.docked .clock-date {
+      color: #7f1d1d !important;
+    }
+    [data-theme="light-soft"] .clock-hud.docked .clock-badge {
+      background: rgba(236,72,153,.2) !important;
+      color: #ec4899 !important;
+      border-color: rgba(236,72,153,.4) !important;
+    }
 	
 	@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&display=swap');
 
@@ -417,6 +784,52 @@
                   <span class="toggle-slider"></span>
                 </span>
               </label>
+              <label class="toggle-label dropdown-toggle-item">
+                <span>顯示進度條</span>
+                <span class="toggle-switch">
+                  <input type="checkbox" id="toggle-progress" />
+                  <span class="toggle-slider"></span>
+                </span>
+              </label>
+            </div>
+            <div class="dropdown-divider"></div>
+            <!-- 主題選擇區 -->
+            <div class="px-3 py-2">
+              <div class="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">佈景主題</div>
+              <div class="grid grid-cols-2 gap-2">
+                <button class="theme-btn" data-theme="dark" title="暗色主題">
+                  <div class="theme-preview dark-theme"></div>
+                  <span class="text-xs">暗色</span>
+                </button>
+                <button class="theme-btn" data-theme="blackboard" title="黑板主題">
+                  <div class="theme-preview blackboard-theme"></div>
+                  <span class="text-xs">黑板</span>
+                </button>
+                <button class="theme-btn" data-theme="light" title="淺色主題">
+                  <div class="theme-preview light-theme"></div>
+                  <span class="text-xs">淺色</span>
+                </button>
+                <button class="theme-btn" data-theme="light-soft" title="淺色主題（櫻花粉色系）">
+                  <div class="theme-preview light-soft-theme"></div>
+                  <span class="text-xs">櫻花粉</span>
+                </button>
+                <button class="theme-btn" data-theme="blue" title="藍色主題">
+                  <div class="theme-preview blue-theme"></div>
+                  <span class="text-xs">藍色</span>
+                </button>
+                <button class="theme-btn" data-theme="purple" title="紫色主題">
+                  <div class="theme-preview purple-theme"></div>
+                  <span class="text-xs">紫色</span>
+                </button>
+                <button class="theme-btn" data-theme="warm" title="暖色主題">
+                  <div class="theme-preview warm-theme"></div>
+                  <span class="text-xs">暖色</span>
+                </button>
+                <button class="theme-btn" data-theme="high-contrast" title="高對比主題">
+                  <div class="theme-preview high-contrast-theme"></div>
+                  <span class="text-xs">高對比</span>
+                </button>
+              </div>
             </div>
             <div class="dropdown-divider"></div>
             <!-- CSV 功能區 -->
@@ -470,8 +883,8 @@
           <div class="rounded-2xl shadow-inner px-6 py-5 bg-slate-900/60 border border-slate-700">
             <p id="current-subject" class="text-5xl md:text-6xl font-black text-center text-sky-300">-- 等待排程 --</p>
           </div>
-          <p id="subject-time-range" class="mt-4 text-lg md:text-2xl font-medium text-slate-300">( --:-- 至 --:-- )</p>
-          <div class="w-full max-w-xl mt-6 bg-slate-800 rounded-full h-4 shadow-inner overflow-hidden">
+          <p id="subject-time-range" class="mt-4 text-3xl md:text-4xl font-medium text-slate-300">( --:-- 至 --:-- )</p>
+          <div id="subject-progress-container" class="w-full max-w-xl mt-6 bg-slate-800 rounded-full h-4 shadow-inner overflow-hidden">
             <div id="subject-progress-bar" class="h-full rounded-full flex items-center justify-end pr-2 font-bold transition-all duration-700 bg-amber-400 text-slate-900" style="width:0%">
               <span id="subject-progress-text" class="text-xs">0%</span>
             </div>
@@ -543,6 +956,8 @@
     let hideBreaks = localStorage.getItem('hideBreaks') !== null ? localStorage.getItem('hideBreaks') === 'true' : true;
     // 預設為隱藏自習（hideStudy = true）
     let hideStudy = localStorage.getItem('hideStudy') !== null ? localStorage.getItem('hideStudy') === 'true' : true;
+    // 預設為顯示進度條（showProgress = true）
+    let showProgress = localStorage.getItem('showProgress') !== null ? localStorage.getItem('showProgress') === 'true' : true;
 
     /* === 全域鎖定旗標：true = 固定 / 不可縮放 / 不可拖曳 / 不可顯示隱藏 === */
     const CLOCK_LOCKED = true;
@@ -607,6 +1022,7 @@
     const toggleClock=el('toggle-clock');
     const toggleBreaks=el('toggle-breaks');
     const toggleStudy=el('toggle-study');
+    const toggleProgress=el('toggle-progress');
     const csvDropdown=el('csv-dropdown');
     const btnCsvMenu=el('btn-csv-menu');
     const menuImport=el('menu-import');
@@ -673,8 +1089,8 @@
           <div class="mb-6">
             <div class="text-xl text-sky-300 tracking-widest">目前進行考科</div>
             <div id="pres-subject" class="mt-2 text-6xl md:text-7xl font-black text-sky-300">—</div>
-            <div id="pres-range" class="mt-2 text-2xl text-slate-300">—</div>
-            <div class="w-full max-w-3xl mx-auto mt-6 bg-slate-800 rounded-full h-5 shadow-inner overflow-hidden">
+            <div id="pres-range" class="mt-2 text-4xl md:text-5xl text-slate-300">—</div>
+            <div id="pres-progress-container" class="w-full max-w-3xl mx-auto mt-6 bg-slate-800 rounded-full h-5 shadow-inner overflow-hidden">
               <div id="pres-progress-bar" class="h-full rounded-full flex items-center justify-end pr-2 font-bold transition-all duration-700 bg-amber-400 text-slate-900" style="width:0%">
                 <span id="pres-progress-text" class="text-xs">0%</span>
               </div>
@@ -904,13 +1320,8 @@
   function openPresentation(){
     updatePresentationView();
     presentationOverlay().classList.remove('hidden');
-    const presClock = el('pres-clock');
-    // 根據 showClock 狀態來顯示/隱藏時鐘
-    if(showClock){
-      presClock.classList.remove('hidden');
-    }else{
-      presClock.classList.add('hidden');
-    }
+    // 使用統一的函數來更新時鐘顯示狀態
+    updateClockVisibility();
     if(!document.fullscreenElement){ document.documentElement.requestFullscreen?.().catch(()=>{}); }
   }
   function closePresentation(){
@@ -1055,10 +1466,21 @@
       subjectProgressBarEl.style.width=pct+'%';
       subjectProgressTextEl.textContent=pct+'%';
 
-      if(currentItem.type==='exam') hero.style.background='linear-gradient(145deg, rgba(14,165,233,.20), rgba(99,102,241,.18))';
-      else if(currentItem.type==='break') hero.style.background='linear-gradient(145deg, rgba(251,191,36,.20), rgba(34,197,94,.18))';
-      else if(currentItem.type==='study') hero.style.background='linear-gradient(145deg, rgba(167,139,250,.22), rgba(56,189,248,.18))';
-      else hero.style.background='linear-gradient(145deg, rgba(148,163,184,.15), rgba(100,116,139,.15))';
+      // 根據主題設置不同的背景
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if(currentTheme === 'light-soft'){
+        // 櫻花粉主題的特殊漸變
+        if(currentItem.type==='exam') hero.style.background='linear-gradient(145deg, rgba(236,72,153,.30), rgba(219,39,119,.25))';
+        else if(currentItem.type==='break') hero.style.background='linear-gradient(145deg, rgba(251,191,36,.25), rgba(34,197,94,.20))';
+        else if(currentItem.type==='study') hero.style.background='linear-gradient(145deg, rgba(236,72,153,.25), rgba(219,39,119,.20))';
+        else hero.style.background='linear-gradient(145deg, rgba(236,72,153,.20), rgba(219,39,119,.15))';
+      }else{
+        // 其他主題使用原有樣式
+        if(currentItem.type==='exam') hero.style.background='linear-gradient(145deg, rgba(14,165,233,.20), rgba(99,102,241,.18))';
+        else if(currentItem.type==='break') hero.style.background='linear-gradient(145deg, rgba(251,191,36,.20), rgba(34,197,94,.18))';
+        else if(currentItem.type==='study') hero.style.background='linear-gradient(145deg, rgba(167,139,250,.22), rgba(56,189,248,.18))';
+        else hero.style.background='linear-gradient(145deg, rgba(148,163,184,.15), rgba(100,116,139,.15))';
+      }
 
       const itemEl=document.getElementById(`schedule-item-${currentIndex}`); if(itemEl) itemEl.classList.add('active');
     }else{
@@ -1066,14 +1488,56 @@
       subjectTimeRangeEl.textContent='---';
       subjectProgressBarEl.style.width='0%';
       subjectProgressTextEl.textContent='0%';
-      hero.style.background='linear-gradient(145deg, rgba(148,163,184,.12), rgba(100,116,139,.12))';
+      // 根據主題設置不同的背景
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if(currentTheme === 'light-soft'){
+        hero.style.background='linear-gradient(145deg, rgba(236,72,153,.20), rgba(219,39,119,.15))';
+      }else{
+        hero.style.background='linear-gradient(145deg, rgba(148,163,184,.12), rgba(100,116,139,.12))';
+      }
     }
 
     if(!presentationOverlay().classList.contains('hidden')) updatePresentationView();
   }
 
+  /* ===== 主題切換功能 ===== */
+  function applyTheme(themeName){
+    const htmlEl = document.documentElement;
+    htmlEl.setAttribute('data-theme', themeName);
+    localStorage.setItem('selectedTheme', themeName);
+    
+    // 更新所有主題按鈕的 active 狀態
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      if(btn.getAttribute('data-theme') === themeName){
+        btn.classList.add('active');
+      }else{
+        btn.classList.remove('active');
+      }
+    });
+    
+    showStatusMessage(`已切換至${getThemeName(themeName)}主題`);
+  }
+  
+  function getThemeName(themeKey){
+    const themeNames = {
+      'dark': '暗色',
+      'blackboard': '黑板',
+      'light': '淺色',
+      'light-soft': '櫻花粉',
+      'blue': '藍色',
+      'purple': '紫色',
+      'warm': '暖色',
+      'high-contrast': '高對比'
+    };
+    return themeNames[themeKey] || themeKey;
+  }
+
   /* ===== 初始化 ===== */
   function init(){
+    // 初始化主題
+    const savedTheme = localStorage.getItem('selectedTheme') || 'dark';
+    applyTheme(savedTheme);
+    
     const savedSeats=localStorage.getItem('absentSeats'); if(savedSeats){ absentInput.value=savedSeats; }
     expectedCount=Number(localStorage.getItem('expectedCount'))||expectedCount;
     updateAbsentSeats();
@@ -1102,6 +1566,22 @@
         if(hud) hud.classList.add('hidden');
         if(presHud) presHud.classList.add('hidden');
         if(clockHolder) clockHolder.classList.add('hidden');
+      }
+    }
+
+    // 控制進度條顯示/隱藏的函數
+    function updateProgressVisibility(){
+      const progressContainer = el('subject-progress-container');
+      const presProgressContainer = el('pres-progress-container');
+      
+      if(showProgress){
+        // 顯示進度條
+        if(progressContainer) progressContainer.classList.remove('hidden');
+        if(presProgressContainer) presProgressContainer.classList.remove('hidden');
+      }else{
+        // 隱藏進度條
+        if(progressContainer) progressContainer.classList.add('hidden');
+        if(presProgressContainer) presProgressContainer.classList.add('hidden');
       }
     }
 
@@ -1155,6 +1635,24 @@
       });
     }
 
+    // 初始化顯示進度條開關（預設為開啟，即顯示進度條）
+    if(toggleProgress){
+      toggleProgress.checked = showProgress;
+      toggleProgress.addEventListener('change', (e)=>{
+        e.stopPropagation(); // 防止觸發下拉選單關閉
+        showProgress = toggleProgress.checked;
+        localStorage.setItem('showProgress', showProgress ? 'true' : 'false');
+        updateProgressVisibility();
+        showStatusMessage(showProgress ? '已顯示進度條' : '已隱藏進度條');
+      });
+      // 防止點擊滑動開關時關閉下拉選單
+      toggleProgress.addEventListener('click', (e)=>{
+        e.stopPropagation();
+      });
+      // 初始化進度條顯示狀態
+      updateProgressVisibility();
+    }
+
     // CSV 下拉選單功能
     if(btnCsvMenu){
       btnCsvMenu.addEventListener('click', (e)=>{
@@ -1162,11 +1660,12 @@
         csvDropdown.classList.toggle('active');
       });
       
-      // 點擊外部關閉選單（但排除滑動開關）
+      // 點擊外部關閉選單（但排除滑動開關和主題按鈕）
       document.addEventListener('click', (e)=>{
         if(!csvDropdown.contains(e.target) && 
            !e.target.closest('.toggle-switch') && 
-           !e.target.closest('.toggle-label')){
+           !e.target.closest('.toggle-label') &&
+           !e.target.closest('.theme-btn')){
           csvDropdown.classList.remove('active');
         }
       });
@@ -1191,6 +1690,17 @@
         });
       }
     }
+
+    // 主題切換按鈕事件
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const themeName = btn.getAttribute('data-theme');
+        if(themeName){
+          applyTheme(themeName);
+        }
+      });
+    });
 
     // 事件綁定（原）
     document.getElementById('btn-close-present').addEventListener('click', closePresentation);
@@ -1358,6 +1868,10 @@
     // 確保時鐘顯示狀態正確應用（在所有初始化完成後）
     if(typeof updateClockVisibility === 'function'){
       updateClockVisibility();
+    }
+    // 確保進度條顯示狀態正確應用（在所有初始化完成後）
+    if(typeof updateProgressVisibility === 'function'){
+      updateProgressVisibility();
     }
 
   }
