@@ -139,13 +139,73 @@
       padding:0;
     }
     .broadcast-msg-card{
-      padding:.65rem .85rem;border-radius:.65rem;font-weight:800;line-height:1.35;word-break:break-word;
-      background:linear-gradient(135deg,rgba(234,88,12,.92),rgba(220,38,38,.88));
-      border:1px solid rgba(251,191,36,.7);color:#fffbeb;
-      box-shadow:0 4px 14px rgba(234,88,12,.25);
-      transition:opacity .4s ease,transform .35s ease;
-      text-shadow:0 1px 2px rgba(0,0,0,.25);
+      padding:.7rem .9rem;border-radius:.75rem;font-weight:800;line-height:1.35;word-break:break-word;
+      backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+      border:1px solid transparent;
+      box-shadow:0 4px 24px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.06);
+      transition:opacity .4s ease,transform .35s ease,box-shadow .35s ease;
       font-size:clamp(.95rem,2vh,1.3rem);
+      letter-spacing:.01em;
+      display:flex;align-items:center;gap:.65rem;
+    }
+    .broadcast-msg-wrap{transition:opacity .4s ease,margin .35s ease}
+    .broadcast-msg-body{flex:1;min-width:0;display:flex;align-items:baseline;justify-content:space-between;gap:.5rem}
+    .broadcast-msg-text{flex:1;min-width:0}
+    .broadcast-msg-countdown{
+      flex-shrink:0;font-size:.68rem;font-weight:600;color:rgba(148,163,184,.5);
+      font-variant-numeric:tabular-nums;letter-spacing:.02em;opacity:.9;
+    }
+    .broadcast-msg-confirm-btn{
+      flex-shrink:0;width:2.35rem;height:2.35rem;border-radius:.55rem;cursor:pointer;
+      border:2px solid rgba(248,113,113,.45);background:rgba(239,68,68,.08);
+      padding:0;appearance:none;-webkit-appearance:none;
+      transition:background .2s,border-color .2s,transform .15s;
+    }
+    .broadcast-msg-confirm-btn:hover{background:rgba(239,68,68,.18);border-color:rgba(248,113,113,.75);transform:scale(1.06)}
+    .broadcast-msg-confirm-btn:active{transform:scale(.96)}
+    .broadcast-msg-confirm{
+      flex-shrink:0;width:2.35rem;height:2.35rem;display:flex;align-items:center;justify-content:center;
+    }
+    .broadcast-msg-confirm svg{width:2rem;height:2rem;overflow:visible}
+    .broadcast-check-path{
+      fill:none;stroke:#ef4444;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;
+      stroke-dasharray:28;stroke-dashoffset:0;
+    }
+    .broadcast-msg-confirm--animate .broadcast-check-path{
+      stroke-dashoffset:28;animation:broadcast-check-draw .65s cubic-bezier(.4,0,.2,1) forwards;
+    }
+    .broadcast-msg-confirm--animate{animation:broadcast-check-pop .5s cubic-bezier(.34,1.56,.64,1)}
+    @keyframes broadcast-check-draw{to{stroke-dashoffset:0}}
+    @keyframes broadcast-check-pop{
+      0%{transform:scale(.4);opacity:0}
+      55%{transform:scale(1.15);opacity:1}
+      100%{transform:scale(1);opacity:1}
+    }
+    .broadcast-msg-card--acknowledged .broadcast-msg-text{opacity:.72}
+    .broadcast-msg-card--all{
+      background:linear-gradient(135deg,rgba(251,191,36,.22),rgba(245,158,11,.1));
+      border-color:rgba(251,191,36,.38);color:#fef9c3;
+      box-shadow:0 4px 22px rgba(251,191,36,.16),inset 0 1px 0 rgba(255,255,255,.1);
+    }
+    .broadcast-msg-card--g7{
+      background:linear-gradient(135deg,rgba(56,189,248,.22),rgba(14,165,233,.1));
+      border-color:rgba(125,211,252,.42);color:#e0f2fe;
+      box-shadow:0 4px 22px rgba(56,189,248,.18),inset 0 1px 0 rgba(255,255,255,.1);
+    }
+    .broadcast-msg-card--g8{
+      background:linear-gradient(135deg,rgba(167,139,250,.22),rgba(139,92,246,.1));
+      border-color:rgba(196,181,253,.42);color:#ede9fe;
+      box-shadow:0 4px 22px rgba(139,92,246,.18),inset 0 1px 0 rgba(255,255,255,.1);
+    }
+    .broadcast-msg-card--g9{
+      background:linear-gradient(135deg,rgba(52,211,153,.22),rgba(16,185,129,.1));
+      border-color:rgba(110,231,183,.42);color:#d1fae5;
+      box-shadow:0 4px 22px rgba(16,185,129,.18),inset 0 1px 0 rgba(255,255,255,.1);
+    }
+    .broadcast-msg-card--custom{
+      background:linear-gradient(135deg,rgba(251,113,133,.2),rgba(244,63,94,.1));
+      border-color:rgba(253,164,175,.4);color:#ffe4e6;
+      box-shadow:0 4px 22px rgba(244,63,94,.15),inset 0 1px 0 rgba(255,255,255,.1);
     }
     .broadcast-msg-card--shake{animation:broadcast-shake 2.8s ease-in-out infinite}
     @keyframes broadcast-shake{
@@ -371,7 +431,7 @@
     #sheets-sync-modal .schedule-settings-panel{
       width:100%;max-width:40rem;max-height:min(92dvh,100%);display:flex;flex-direction:column;overflow:hidden;
     }
-    :fullscreen #sheets-sync-modal .schedule-settings-panel,:fullscreen #appearance-modal .card{max-height:min(94dvh,100%)}
+    :fullscreen #sheets-sync-modal .schedule-settings-panel,:fullscreen #appearance-modal .card,:fullscreen #message-role-modal .card{max-height:min(94dvh,100%)}
     .schedule-settings-header{
       display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;flex-shrink:0;padding-bottom:.75rem;border-bottom:1px solid rgba(100,116,139,.35);
     }
@@ -960,6 +1020,44 @@
     </div>
   </div>
 
+  <!-- 訊息接收角色 Modal -->
+  <div id="message-role-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[70] p-4 modal">
+    <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-md">
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <h3 class="text-xl font-bold text-amber-300">訊息接收角色</h3>
+        <button type="button" id="btn-message-role-close" class="btn btn-gray flex-shrink-0">關閉</button>
+      </div>
+      <p class="text-xs text-slate-400 mb-3">選擇此裝置要接收的訊息對象，僅顯示全校公告與符合對象的訊息。</p>
+      <div class="space-y-1 rounded-xl border border-slate-700 bg-slate-800/40 p-2">
+        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+          <input type="radio" name="message-role" value="all" class="message-role-radio" />
+          <span class="text-sm text-slate-200">全部</span>
+        </label>
+        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+          <input type="radio" name="message-role" value="g7" class="message-role-radio" />
+          <span class="text-sm text-slate-200">七年級</span>
+        </label>
+        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+          <input type="radio" name="message-role" value="g8" class="message-role-radio" />
+          <span class="text-sm text-slate-200">八年級</span>
+        </label>
+        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+          <input type="radio" name="message-role" value="g9" class="message-role-radio" />
+          <span class="text-sm text-slate-200">九年級</span>
+        </label>
+        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+          <input type="radio" name="message-role" value="custom" class="message-role-radio" />
+          <span class="text-sm text-slate-200">自訂</span>
+        </label>
+      </div>
+      <input type="text" id="message-role-custom" class="hidden mt-3 w-full p-2 rounded-lg bg-slate-900/70 border border-slate-600 text-slate-100 text-sm" placeholder="例如：301教室、導師班" />
+      <div class="flex justify-end gap-2 mt-4">
+        <button type="button" id="btn-message-role-cancel" class="btn btn-gray">取消</button>
+        <button type="button" id="btn-message-role-confirm" class="btn btn-teal">確定</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 排程設定 Modal（分頁：Google Sheets / CSV） -->
   <div id="sheets-sync-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center modal">
     <div class="schedule-settings-panel card p-4 sm:p-5 rounded-2xl shadow-2xl" role="dialog" aria-labelledby="schedule-settings-title" aria-modal="true">
@@ -1029,9 +1127,11 @@
               <li>排程欄位：DayKey, DayName, StartTime, EndTime, SubjectName, ActivityType</li>
               <li>時間 <strong>hh:mm</strong>；ActivityType：exam, break, study, end</li>
               <li>選用「設定」分頁：A 欄鍵名、B 欄值，<code class="text-slate-400">ExamTitle</code> 為頁面標題</li>
-              <li>選用「訊息發布」分頁：Day, StartTime, DurationSec, FadeOut, Msg Content（每分鐘自動讀取）</li>
+              <li>選用「訊息發布」分頁：Day, StartTime, DurationSec, FadeOut, Target, Msg Content（每分鐘自動讀取）</li>
+              <li>Target（對象）：<code class="text-slate-400">全部</code>、<code class="text-slate-400">七年級</code>、<code class="text-slate-400">八年級</code>、<code class="text-slate-400">九年級</code> 或自訂文字；欄名亦可用「對象」</li>
               <li>DurationSec 為顯示秒數；FadeOut 填 Y/N（或 是/否）表示到期是否淡出</li>
-              <li>舊格式 EndTime（hh:mm）仍相容，會自動換算顯示秒數</li>
+              <li>舊格式 EndTime（hh:mm）仍相容，會自動換算顯示秒數；無 Target 欄視為全校公告</li>
+              <li>裝置端可點工具列 📢「訊息角色」設定接收範圍（預設全部）</li>
             </ol>
           </details>
         </div>
@@ -1051,6 +1151,44 @@
             <button type="button" id="btn-schedule-confirm" class="btn btn-teal w-full">確認匯入並取代</button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 訊息接收角色 Modal -->
+  <div id="message-role-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[70] p-4 modal">
+    <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-md">
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <h3 class="text-xl font-bold text-amber-300">訊息接收角色</h3>
+        <button type="button" id="btn-message-role-close" class="btn btn-gray flex-shrink-0">關閉</button>
+      </div>
+      <p class="text-xs text-slate-400 mb-3">選擇此裝置要接收的訊息對象，僅顯示全校公告與符合對象的訊息。</p>
+      <div class="space-y-1 rounded-xl border border-slate-700 bg-slate-800/40 p-2">
+        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+          <input type="radio" name="message-role" value="all" class="message-role-radio" />
+          <span class="text-sm text-slate-200">全部</span>
+        </label>
+        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+          <input type="radio" name="message-role" value="g7" class="message-role-radio" />
+          <span class="text-sm text-slate-200">七年級</span>
+        </label>
+        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+          <input type="radio" name="message-role" value="g8" class="message-role-radio" />
+          <span class="text-sm text-slate-200">八年級</span>
+        </label>
+        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+          <input type="radio" name="message-role" value="g9" class="message-role-radio" />
+          <span class="text-sm text-slate-200">九年級</span>
+        </label>
+        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+          <input type="radio" name="message-role" value="custom" class="message-role-radio" />
+          <span class="text-sm text-slate-200">自訂</span>
+        </label>
+      </div>
+      <input type="text" id="message-role-custom" class="hidden mt-3 w-full p-2 rounded-lg bg-slate-900/70 border border-slate-600 text-slate-100 text-sm" placeholder="例如：301教室、導師班" />
+      <div class="flex justify-end gap-2 mt-4">
+        <button type="button" id="btn-message-role-cancel" class="btn btn-gray">取消</button>
+        <button type="button" id="btn-message-role-confirm" class="btn btn-teal">確定</button>
       </div>
     </div>
   </div>
@@ -1106,6 +1244,10 @@
           <div class="tooltip-wrapper">
             <button type="button" id="btn-appearance" class="icon-btn" title="外觀設定">🎨</button>
             <div class="tooltip">外觀設定</div>
+          </div>
+          <div class="tooltip-wrapper">
+            <button type="button" id="btn-message-role" class="icon-btn" title="訊息角色">📢</button>
+            <div class="tooltip">訊息角色</div>
           </div>
         </div>
 
@@ -1615,7 +1757,14 @@
   const MESSAGE_SHEET_NAME='訊息發布';
   const MESSAGE_HEADER_V1=['Day','StartTime','EndTime','Msg Content'];
   const MESSAGE_HEADER_V2=['Day','StartTime','DurationSec','FadeOut','Msg Content'];
+  const MESSAGE_HEADER_V3=['Day','StartTime','DurationSec','FadeOut','Target','Msg Content'];
   const MESSAGE_LS_KEY='broadcastMessagesJSON';
+  const MESSAGE_CONFIRM_LS_KEY='broadcastConfirmedIds';
+  const MESSAGE_SHAKE_MS=30*1000;
+  const MESSAGE_COUNTDOWN_SEC=30;
+  const MESSAGE_ROLE_LS_KEY='messageViewerRole';
+  const MESSAGE_ROLE_CUSTOM_LS_KEY='messageViewerRoleCustom';
+  const MESSAGE_VIEWER_GRADES={g7:'七年級',g8:'八年級',g9:'九年級'};
   const MESSAGE_SYNC_INTERVAL_MS=60*1000;
   const DEFAULT_PAGE_TITLE='段考時程表';
   const EXAM_TITLE_LS_KEY='examPageTitle';
@@ -1774,7 +1923,13 @@
   function getSheetsSyncIntervalMin(){
     return Number(localStorage.getItem(SHEETS_LS_KEYS.intervalMin))||5;
   }
+  function isTargetColumnLabel(label){
+    const s=String(label||'').trim().toLowerCase();
+    return s==='target'||s==='對象'||s==='对象';
+  }
   function detectMessageSheetFormat(colLabels,firstValues){
+    if(colLabels[5]==='Msg Content'||firstValues[5]==='Msg Content') return 'v3';
+    if(isTargetColumnLabel(colLabels[4])||isTargetColumnLabel(firstValues[4])) return 'v3';
     if(colLabels[2]==='DurationSec'||firstValues[2]==='DurationSec') return 'v2';
     if(colLabels[4]==='Msg Content'||firstValues[4]==='Msg Content') return 'v2';
     if(colLabels[3]==='Msg Content'||firstValues[3]==='Msg Content') return 'v1';
@@ -1785,7 +1940,7 @@
     return ['y','yes','1','true','是'].includes(s);
   }
   function parseMessageDurationSec(vals,format,start){
-    if(format==='v2'){
+    if(format==='v2'||format==='v3'){
       const raw=vals[2]?.formatted??vals[2]?.value??'';
       const num=Number(String(raw).trim());
       if(Number.isFinite(num)&&num>0) return Math.round(num);
@@ -1796,17 +1951,58 @@
     const s=parseTime(start),e=parseTime(end);
     return Math.max(1,Math.round((e-s)/1000));
   }
+  function normalizeTarget(val){
+    const s=String(val??'').trim();
+    if(!s||/^全部$/i.test(s)||/^all$/i.test(s)) return '';
+    return s;
+  }
   function normalizeBroadcastMessage(m){
     if(!m||!m.day||!m.start||!m.content) return null;
+    const target=normalizeTarget(m.target);
     if(m.durationSec!=null&&m.durationSec>0){
-      return {day:m.day,start:m.start,durationSec:m.durationSec,fadeOut:!!m.fadeOut,content:m.content,id:m.id};
+      return {day:m.day,start:m.start,durationSec:m.durationSec,fadeOut:!!m.fadeOut,target,content:m.content,id:m.id};
     }
     if(m.end){
       const s=parseTime(m.start),e=parseTime(m.end);
       const durationSec=Math.max(1,Math.round((e-s)/1000));
-      return {day:m.day,start:m.start,durationSec,fadeOut:false,content:m.content,id:m.id};
+      return {day:m.day,start:m.start,durationSec,fadeOut:false,target,content:m.content,id:m.id};
     }
     return null;
+  }
+  function getViewerRoleConfig(){
+    const mode=localStorage.getItem(MESSAGE_ROLE_LS_KEY)||'all';
+    const custom=(localStorage.getItem(MESSAGE_ROLE_CUSTOM_LS_KEY)||'').trim();
+    return {mode,custom};
+  }
+  function saveViewerRoleConfig(mode,custom){
+    localStorage.setItem(MESSAGE_ROLE_LS_KEY,mode);
+    if(mode==='custom'){
+      localStorage.setItem(MESSAGE_ROLE_CUSTOM_LS_KEY,custom);
+    }else{
+      localStorage.removeItem(MESSAGE_ROLE_CUSTOM_LS_KEY);
+    }
+  }
+  function messageMatchesViewerRole(msg){
+    const target=normalizeTarget(msg.target);
+    const viewer=getViewerRoleConfig();
+    if(viewer.mode==='all') return true;
+    if(!target) return true;
+    if(viewer.mode in MESSAGE_VIEWER_GRADES) return target===MESSAGE_VIEWER_GRADES[viewer.mode];
+    if(viewer.mode==='custom') return viewer.custom&&target===viewer.custom;
+    return false;
+  }
+  function formatMessageDisplay(msg){
+    const target=normalizeTarget(msg.target);
+    if(!target) return msg.content;
+    return `${target}：${msg.content}`;
+  }
+  function getMessageTargetThemeClass(msg){
+    const target=normalizeTarget(msg.target);
+    if(!target) return 'broadcast-msg-card--all';
+    if(target==='七年級'||target==='7年級') return 'broadcast-msg-card--g7';
+    if(target==='八年級'||target==='8年級') return 'broadcast-msg-card--g8';
+    if(target==='九年級'||target==='9年級') return 'broadcast-msg-card--g9';
+    return 'broadcast-msg-card--custom';
   }
   function getMessageStartMs(msg,now){
     const d=parseDayNameDate(msg.day,now.getFullYear());
@@ -1827,6 +2023,7 @@
   function getActiveMessagesWithOpacity(now){
     const active=broadcastMessages
       .filter(m=>isMessageActive(m,now))
+      .filter(m=>messageMatchesViewerRole(m))
       .map(m=>({msg:m,startMs:getMessageStartMs(m,now)}))
       .sort((a,b)=>b.startMs-a.startMs);
     const nowMs=now.getTime();
@@ -1841,14 +2038,62 @@
           opacity*=Math.max(0,remaining/fadeWindowMs);
         }
       }
-      return {...msg,opacity,rank,isNewest:rank===0};
+      const remainingMs=endMs-nowMs;
+      const remainingSec=Math.max(0,Math.ceil(remainingMs/1000));
+      return {...msg,opacity,rank,isNewest:rank===0,startMs,endMs,remainingSec,showCountdown:remainingSec>0&&remainingSec<=MESSAGE_COUNTDOWN_SEC};
     });
   }
-  function renderBroadcastDock(container,items){
+  let confirmedMessageIds=new Set();
+  let messageJustConfirmedIds=new Set();
+  function loadConfirmedMessageIds(){
+    try{
+      const raw=localStorage.getItem(MESSAGE_CONFIRM_LS_KEY);
+      if(raw) confirmedMessageIds=new Set(JSON.parse(raw));
+    }catch{ confirmedMessageIds=new Set(); }
+  }
+  function saveConfirmedMessageIds(){
+    try{ localStorage.setItem(MESSAGE_CONFIRM_LS_KEY,JSON.stringify([...confirmedMessageIds])); }catch{}
+  }
+  function pruneConfirmedMessageIds(activeIds){
+    const active=new Set(activeIds);
+    let changed=false;
+    confirmedMessageIds.forEach(id=>{
+      if(!active.has(id)){ confirmedMessageIds.delete(id); changed=true; }
+    });
+    if(changed) saveConfirmedMessageIds();
+  }
+  function getMessageId(msg){
+    return msg.id||`${msg.day}-${msg.start}`;
+  }
+  function confirmBroadcastMessage(msgId){
+    if(!msgId) return;
+    confirmedMessageIds.add(msgId);
+    messageJustConfirmedIds.add(msgId);
+    saveConfirmedMessageIds();
+    updateBroadcastDisplay(new Date());
+    setTimeout(()=>{ messageJustConfirmedIds.delete(msgId); },1200);
+  }
+  function renderConfirmControl(msgId,isConfirmed,animateCheck){
+    if(isConfirmed){
+      const animClass=animateCheck?' broadcast-msg-confirm--animate':'';
+      return `<div class="broadcast-msg-confirm${animClass}" aria-label="已確認"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="broadcast-check-path" d="M5 13l4 4L19 7"/></svg></div>`;
+    }
+    return `<button type="button" class="broadcast-msg-confirm-btn" data-msg-id="${encodeURIComponent(msgId)}" title="確認已處理" aria-label="確認已處理"></button>`;
+  }
+  function renderBroadcastDock(container,items,nowMs){
     container.innerHTML=items.map(item=>{
-      const shakeClass=item.isNewest?' broadcast-msg-card--shake':'';
+      const msgId=getMessageId(item);
+      const isConfirmed=confirmedMessageIds.has(msgId);
+      const animateCheck=messageJustConfirmedIds.has(msgId);
+      const elapsed=nowMs-(item.startMs||0);
+      const shouldShake=item.isNewest&&elapsed<MESSAGE_SHAKE_MS&&!isConfirmed;
+      const shakeClass=shouldShake?' broadcast-msg-card--shake':'';
+      const ackClass=isConfirmed?' broadcast-msg-card--acknowledged':'';
+      const themeClass=getMessageTargetThemeClass(item);
       const ty=item.rank*4;
-      return `<div class="broadcast-msg-card${shakeClass}" style="opacity:${item.opacity.toFixed(3)};transform:translateY(${ty}px)">${escapeHtml(item.content)}</div>`;
+      const confirmHtml=renderConfirmControl(msgId,isConfirmed,animateCheck);
+      const countdownHtml=item.showCountdown?`<span class="broadcast-msg-countdown" aria-label="剩餘 ${item.remainingSec} 秒">${item.remainingSec}s</span>`:'';
+      return `<div class="broadcast-msg-wrap" style="opacity:${item.opacity.toFixed(3)};margin-top:${ty}px"><div class="broadcast-msg-card ${themeClass}${shakeClass}${ackClass}">${confirmHtml}<div class="broadcast-msg-body"><span class="broadcast-msg-text">${escapeHtml(formatMessageDisplay(item))}</span>${countdownHtml}</div></div></div>`;
     }).join('');
   }
   function isMessageSheet(gvizJson){
@@ -1856,13 +2101,13 @@
     if(!table?.rows?.length) return false;
     if(looksLikeScheduleSheet(gvizJson)) return false;
     const colLabels=(table.cols||[]).map(c=>(c.label||'').trim());
-    if(colLabels[0]==='Day'&&(colLabels[3]==='Msg Content'||colLabels[4]==='Msg Content')) return true;
+    if(colLabels[0]==='Day'&&(colLabels[3]==='Msg Content'||colLabels[4]==='Msg Content'||colLabels[5]==='Msg Content'||isTargetColumnLabel(colLabels[4]))) return true;
     const firstRow=table.rows[0];
     const firstValues=(firstRow.c||[]).map((cell)=>{
       const {value,formatted}=gvizCellData(cell);
       return String(formatted||value||'').trim();
     });
-    return firstValues[0]==='Day'&&(firstValues[3]==='Msg Content'||firstValues[4]==='Msg Content');
+    return firstValues[0]==='Day'&&(firstValues[3]==='Msg Content'||firstValues[4]==='Msg Content'||firstValues[5]==='Msg Content');
   }
   function gvizToMessages(gvizJson){
     if(!isMessageSheet(gvizJson)) return null;
@@ -1877,7 +2122,8 @@
     });
     const format=detectMessageSheetFormat(colLabels,firstValues);
     if(!format) return null;
-    const header=format==='v2'?MESSAGE_HEADER_V2:MESSAGE_HEADER_V1;
+    const headerMap={v1:MESSAGE_HEADER_V1,v2:MESSAGE_HEADER_V2,v3:MESSAGE_HEADER_V3};
+    const header=headerMap[format];
     if(firstValues[0]===header[0]&&firstValues[header.length-1]===header[header.length-1]) startRowIndex=1;
     for(let i=startRowIndex;i<table.rows.length;i++){
       const cells=table.rows[i].c||[];
@@ -1885,11 +2131,20 @@
       const day=String(vals[0]?.formatted||vals[0]?.value||'').trim();
       const start=normalizeTime(vals[1]?.value,vals[1]?.formatted);
       const durationSec=parseMessageDurationSec(vals,format,start);
-      const fadeOut=format==='v2'?parseFadeOut(vals[3]?.formatted??vals[3]?.value):false;
-      const contentIdx=format==='v2'?4:3;
+      let fadeOut=false,target='',contentIdx=3;
+      if(format==='v1'){
+        contentIdx=3;
+      }else if(format==='v2'){
+        fadeOut=parseFadeOut(vals[3]?.formatted??vals[3]?.value);
+        contentIdx=4;
+      }else if(format==='v3'){
+        fadeOut=parseFadeOut(vals[3]?.formatted??vals[3]?.value);
+        target=String(vals[4]?.formatted||vals[4]?.value||'').trim();
+        contentIdx=5;
+      }
       const content=String(vals[contentIdx]?.formatted||vals[contentIdx]?.value||'').trim();
       if(!day||!start||!durationSec||!content) continue;
-      messages.push({day,start,durationSec,fadeOut,content,id:`${day}-${start}-${i}`});
+      messages.push({day,start,durationSec,fadeOut,target,content,id:`${day}-${start}-${i}`});
     }
     return messages;
   }
@@ -1926,7 +2181,7 @@
       const {spreadsheetId}=parseSheetsUrl(url);
       const messages=await fetchMessagesFromSheets(spreadsheetId);
       if(messages){
-        broadcastMessages=messages;
+        broadcastMessages=messages.map(normalizeBroadcastMessage).filter(Boolean);
         saveBroadcastMessagesCache();
       }
       updateBroadcastDisplay(new Date());
@@ -1950,7 +2205,9 @@
     messagesSyncTimer=setInterval(()=>{ syncBroadcastMessages().catch(()=>{}); },MESSAGE_SYNC_INTERVAL_MS);
   }
   function updateBroadcastDisplay(now){
-    const items=getActiveMessagesWithOpacity(now);
+    const t=now||new Date();
+    const items=getActiveMessagesWithOpacity(t);
+    pruneConfirmedMessageIds(items.map(getMessageId));
     const hasMessages=items.length>0;
     const dashboardLeft=el('broadcast-dock')?.closest('.dashboard-left');
     const presLayout=el('pres-broadcast-dock')?.closest('.pres-layout');
@@ -1968,8 +2225,20 @@
         return;
       }
       dock.classList.remove('broadcast-dock--idle');
-      renderBroadcastDock(container,items);
+      renderBroadcastDock(container,items,t.getTime());
     });
+  }
+  function initBroadcastConfirmHandlers(){
+    const onConfirmClick=(e)=>{
+      const btn=e.target.closest?.('.broadcast-msg-confirm-btn');
+      if(!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const msgId=decodeURIComponent(btn.dataset.msgId||'');
+      confirmBroadcastMessage(msgId);
+    };
+    el('broadcast-messages')?.addEventListener('click',onConfirmClick);
+    el('pres-broadcast-messages')?.addEventListener('click',onConfirmClick);
   }
   function looksLikeScheduleSheet(gvizJson){
     const table=gvizJson?.table;
@@ -2488,6 +2757,8 @@
     const savedCSV=localStorage.getItem('schedulesCSV');
     if(savedCSV){ try{ initialSchedules=parseCsv(savedCSV);}catch{} }
     loadBroadcastMessagesFromCache();
+    loadConfirmedMessageIds();
+    initBroadcastConfirmHandlers();
     applyPageTitle(localStorage.getItem(EXAM_TITLE_LS_KEY)||DEFAULT_PAGE_TITLE);
     restoreSheetsSettingsUI();
     if(!localStorage.getItem(SHEETS_LS_KEYS.url)){
@@ -2647,6 +2918,65 @@
     if(appearanceModal){
       appearanceModal.addEventListener('click', (e)=>{
         if(e.target===appearanceModal) closeAppearanceModal();
+      });
+    }
+
+    const messageRoleModal=el('message-role-modal');
+    const messageRoleCustomInput=el('message-role-custom');
+    const btnMessageRole=el('btn-message-role');
+    const btnMessageRoleClose=el('btn-message-role-close');
+    const btnMessageRoleCancel=el('btn-message-role-cancel');
+    const btnMessageRoleConfirm=el('btn-message-role-confirm');
+    function syncMessageRoleCustomVisibility(){
+      const isCustom=!!messageRoleModal?.querySelector('input[name="message-role"]:checked[value="custom"]');
+      messageRoleCustomInput?.classList.toggle('hidden',!isCustom);
+    }
+    function restoreMessageRoleUI(){
+      const {mode,custom}=getViewerRoleConfig();
+      const radio=messageRoleModal?.querySelector(`input[name="message-role"][value="${mode}"]`);
+      if(radio) radio.checked=true;
+      else{
+        const allRadio=messageRoleModal?.querySelector('input[name="message-role"][value="all"]');
+        if(allRadio) allRadio.checked=true;
+      }
+      if(messageRoleCustomInput) messageRoleCustomInput.value=custom||'';
+      syncMessageRoleCustomVisibility();
+    }
+    function openMessageRoleModal(){
+      restoreMessageRoleUI();
+      messageRoleModal?.classList.remove('hidden');
+    }
+    function closeMessageRoleModal(){
+      messageRoleModal?.classList.add('hidden');
+    }
+    function confirmMessageRole(){
+      const selected=messageRoleModal?.querySelector('input[name="message-role"]:checked');
+      const mode=selected?.value||'all';
+      const custom=(messageRoleCustomInput?.value||'').trim();
+      if(mode==='custom'&&!custom){
+        showStatusMessage('請輸入自訂對象名稱。',true);
+        return;
+      }
+      saveViewerRoleConfig(mode,custom);
+      closeMessageRoleModal();
+      updateBroadcastDisplay(new Date());
+      showStatusMessage('訊息接收角色已更新。');
+    }
+    if(btnMessageRole){
+      btnMessageRole.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        openMessageRoleModal();
+      });
+    }
+    btnMessageRoleClose?.addEventListener('click', ()=>closeMessageRoleModal());
+    btnMessageRoleCancel?.addEventListener('click', ()=>closeMessageRoleModal());
+    btnMessageRoleConfirm?.addEventListener('click', ()=>confirmMessageRole());
+    messageRoleModal?.querySelectorAll('.message-role-radio').forEach(radio=>{
+      radio.addEventListener('change', syncMessageRoleCustomVisibility);
+    });
+    if(messageRoleModal){
+      messageRoleModal.addEventListener('click', (e)=>{
+        if(e.target===messageRoleModal) closeMessageRoleModal();
       });
     }
 
