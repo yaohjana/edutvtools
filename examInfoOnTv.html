@@ -84,20 +84,32 @@
     #page-title{line-height:1.2;max-width:min(36rem,42vw)}
     #day-out-of-schedule-hint{font-size:.75rem;color:rgba(252,211,77,.9);white-space:nowrap;flex-shrink:0}
     .dashboard-content{flex:1;min-height:0;overflow:hidden;gap:clamp(.35rem,.8vh,1rem)!important}
-    .dashboard-left{min-height:0;overflow:hidden;gap:clamp(.35rem,.7vh,.85rem)!important}
-    .dashboard-sidebar{min-height:0;overflow:hidden;padding:clamp(.75rem,1.5vh,1.5rem)!important}
-    .dashboard-sidebar #schedule-title{font-size:clamp(1.125rem,2vh,1.5rem);margin-bottom:clamp(.5rem,1vh,1rem)!important}
-    #hero{
-      flex:1 1 0;min-height:0;
-      padding:clamp(.75rem,2vh,2rem)!important;
+    .dashboard-left{
+      min-height:0;overflow:hidden;
+      display:grid;grid-template-rows:1fr;
+      gap:clamp(.35rem,.7vh,.85rem)!important;
     }
+    .dashboard-left.dashboard-left--messages-active{grid-template-rows:3fr 2fr}
+    .dashboard-sidebar{
+      min-height:0;overflow:hidden;padding:clamp(.75rem,1.5vh,1.5rem)!important;
+      display:flex;flex-direction:column;
+    }
+    .dashboard-sidebar #schedule-title{font-size:clamp(1.125rem,2vh,1.5rem);margin-bottom:clamp(.35rem,.7vh,.75rem)!important;flex-shrink:0}
+    .dashboard-sidebar .schedule-list{flex:1;min-height:0;overflow-y:auto}
+    #hero{min-height:0;padding:clamp(.75rem,2vh,2rem)!important}
     #hero .hero-body{flex:1 1 0;min-height:0;overflow:hidden;width:100%}
     #hero h2{font-size:clamp(1.125rem,2.2vh,1.875rem);margin-bottom:clamp(.35rem,.8vh,1rem)}
-    #current-subject{font-size:clamp(1.75rem,5.5vh,3.75rem)!important;line-height:1.1;word-break:break-word;max-width:100%}
+    #current-subject{font-size:clamp(3.5rem,11vh,7.5rem)!important;line-height:1.1;word-break:break-word;max-width:100%}
     #hero .rounded-2xl.shadow-inner{padding:clamp(.5rem,1.2vh,1.25rem) clamp(.75rem,1.8vh,1.5rem)!important}
     #subject-time-range{font-size:clamp(1.125rem,2.8vh,2.25rem)!important;margin-top:clamp(.35rem,.8vh,1rem)!important}
     #subject-progress-container{margin-top:clamp(.5rem,1.2vh,1.5rem)!important;max-width:min(36rem,100%)}
-    #absent-section{flex-shrink:0;padding:clamp(.65rem,1.2vh,1.25rem)!important}
+    #absent-section{flex-shrink:0;padding:clamp(.5rem,1vh,.85rem)!important}
+    #absent-section.absent-section--sidebar .absent-section-head h2{font-size:clamp(.875rem,1.5vh,1.125rem)}
+    #absent-section.absent-section--sidebar .absent-stat-value{font-size:clamp(1.25rem,2.5vh,2rem)!important}
+    #absent-section.absent-section--sidebar .absent-stat-grid{margin-bottom:clamp(.25rem,.5vh,.5rem)!important}
+    #absent-section.absent-section--sidebar .absent-seat-box{margin-top:clamp(.15rem,.35vh,.35rem)!important;padding:clamp(.3rem,.6vh,.5rem)!important}
+    #absent-section.absent-section--sidebar #absent-seat-display{max-height:2.75rem;overflow-y:auto;font-size:clamp(.75rem,1.2vh,.875rem)!important;line-height:1.3}
+    #absent-section.absent-section--sidebar .btn{padding:.2rem .45rem;font-size:.7rem}
     #absent-section .absent-section-head{margin-bottom:clamp(.35rem,.7vh,.75rem)!important;padding:.25rem!important}
     #absent-section .absent-section-head h2{font-size:clamp(1rem,1.8vh,1.5rem)}
     #absent-section .absent-stat-grid{gap:clamp(.35rem,.7vh,.75rem);margin-bottom:clamp(.35rem,.7vh,1rem)!important}
@@ -115,6 +127,80 @@
       #hero h2{display:none}
       #subject-progress-container{height:.65rem!important}
     }
+
+    /* === 訊息發布（無框、無訊息時完全不佔位） === */
+    .broadcast-dock{
+      min-height:0;overflow:hidden;display:flex;flex-direction:column;
+      border:none;background:transparent;box-shadow:none;border-radius:0;
+    }
+    .broadcast-dock--idle{display:none!important}
+    .broadcast-messages-stack{
+      flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:.45rem;
+      padding:0;
+    }
+    .broadcast-msg-card{
+      padding:.65rem .85rem;border-radius:.65rem;font-weight:800;line-height:1.35;word-break:break-word;
+      background:linear-gradient(135deg,rgba(234,88,12,.92),rgba(220,38,38,.88));
+      border:1px solid rgba(251,191,36,.7);color:#fffbeb;
+      box-shadow:0 4px 14px rgba(234,88,12,.25);
+      transition:opacity .4s ease,transform .35s ease;
+      text-shadow:0 1px 2px rgba(0,0,0,.25);
+      font-size:clamp(.95rem,2vh,1.3rem);
+    }
+    .broadcast-msg-card--shake{animation:broadcast-shake 2.8s ease-in-out infinite}
+    @keyframes broadcast-shake{
+      0%,100%{transform:translateX(0)}
+      15%{transform:translateX(-3px) rotate(-.3deg)}
+      30%{transform:translateX(3px) rotate(.3deg)}
+      45%{transform:translateX(-2px)}
+      60%{transform:translateX(2px)}
+      75%{transform:translateX(-1px)}
+    }
+    .pres-broadcast-dock .broadcast-msg-card{font-size:clamp(1.1rem,2.4vh,1.65rem)}
+    .pres-broadcast-dock .broadcast-messages-stack{padding:0 .85rem .65rem}
+    .pres-layout{display:grid;grid-template-rows:auto 1fr;height:100%;min-height:0}
+    .pres-layout.pres-layout--messages-active{grid-template-rows:auto 1fr 30%}
+    .pres-header{
+      display:flex;align-items:center;gap:.75rem 1rem;flex-wrap:wrap;
+      padding:clamp(.75rem,1.5vh,1.1rem) 1rem;border-bottom:1px solid rgba(100,116,139,.35);
+      background:rgba(15,23,42,.75);flex-shrink:0;
+    }
+    .pres-header-hints{font-size:.75rem;color:#94a3b8;flex:1;min-width:10rem}
+    .pres-absent-grid{
+      display:grid;grid-template-columns:repeat(3,minmax(5.5rem,1fr));
+      gap:clamp(.5rem,1vh,.85rem);margin-left:auto;flex-shrink:0;
+    }
+    .pres-absent-box{
+      padding:clamp(.5rem,1vh,.85rem) clamp(.65rem,1.2vh,1rem);
+      border-radius:.85rem;text-align:center;min-width:5.5rem;
+    }
+    .pres-absent-box--expected{background:rgba(30,41,59,.85);border:2px solid rgba(100,116,139,.45)}
+    .pres-absent-box--absent{background:rgba(127,29,29,.35);border:2px solid rgba(244,63,94,.45)}
+    .pres-absent-box--actual{background:rgba(6,78,59,.35);border:2px solid rgba(52,211,153,.45)}
+    .pres-absent-box-label{font-size:1.6rem;font-weight:700;color:#cbd5e1;line-height:1.2}
+    .pres-absent-box-value{font-size:clamp(2.5rem,5vh,4rem);font-weight:800;line-height:1.05;color:#f1f5f9}
+    .pres-absent-box--absent .pres-absent-box-value{color:#fecdd3}
+    .pres-absent-box--actual .pres-absent-box-value{color:#a7f3d0}
+    .pres-absent-box-seats{
+      margin-top:.35rem;font-size:1.2rem;font-weight:700;color:#fda4af;
+      line-height:1.25;word-break:break-word;max-height:3.2rem;overflow-y:auto;
+    }
+    .pres-main{min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:.75rem 1.25rem}
+    .pres-subject-block{width:100%;max-width:56rem;text-align:center}
+    .pres-subject-block .pres-label{font-size:clamp(1rem,2vh,1.25rem);color:#7dd3fc;letter-spacing:.12em}
+    #pres-subject{font-size:clamp(3.75rem,12vh,6.75rem)!important;line-height:1.05}
+    #pres-range{font-size:clamp(1.25rem,3.5vh,2.25rem)!important}
+    .pres-next-hint{
+      font-size:clamp(.8rem,1.4vh,1rem)!important;color:rgba(148,163,184,.5);
+      margin-top:.65rem;font-weight:500;letter-spacing:.02em;
+    }
+    .pres-next-hint::before{content:'Next: ';color:rgba(148,163,184,.65);font-weight:600}
+    .pres-next-hint--empty::before{display:none}
+    #pres-clock.docked .clock-time{font-size:3.45rem!important}
+    #pres-clock.docked .clock-date{font-size:1.95rem!important}
+    #pres-clock.docked .clock-badge{font-size:1.875rem!important;padding:.2rem .75rem!important}
+    #pres-clock.docked{padding:.5rem 1rem!important;gap:.5rem!important}
+    #pres-clock.docked{margin-right:auto}
     
     /* === 淺色主題文字對比度優化 === */
     [data-theme="light"] .text-slate-300,
@@ -919,7 +1005,7 @@
               <label class="toggle-label flex items-center justify-between gap-2 cursor-pointer">
                 <span class="text-sm text-slate-300">自動同步</span>
                 <span class="toggle-switch">
-                  <input type="checkbox" id="sheets-auto-sync" />
+                  <input type="checkbox" id="sheets-auto-sync" checked />
                   <span class="toggle-slider"></span>
                 </span>
               </label>
@@ -943,6 +1029,9 @@
               <li>排程欄位：DayKey, DayName, StartTime, EndTime, SubjectName, ActivityType</li>
               <li>時間 <strong>hh:mm</strong>；ActivityType：exam, break, study, end</li>
               <li>選用「設定」分頁：A 欄鍵名、B 欄值，<code class="text-slate-400">ExamTitle</code> 為頁面標題</li>
+              <li>選用「訊息發布」分頁：Day, StartTime, DurationSec, FadeOut, Msg Content（每分鐘自動讀取）</li>
+              <li>DurationSec 為顯示秒數；FadeOut 填 Y/N（或 是/否）表示到期是否淡出</li>
+              <li>舊格式 EndTime（hh:mm）仍相容，會自動換算顯示秒數</li>
             </ol>
           </details>
         </div>
@@ -1040,13 +1129,9 @@
       <div id="clock-hud-holder" class="flex-shrink-0"></div>
     </div>
 
-    <!-- 內容區 -->
     <div class="dashboard-content flex flex-col lg:flex-row gap-4 min-h-0">
-      <!-- 左側 -->
-      <div class="dashboard-left w-full lg:w-2/3 flex flex-col gap-4 min-h-0">
-        <!-- （已移除：當前日期卡片） -->
-
-        <!-- 當前考科顯示 -->
+      <!-- 左側：考科 60% + 訊息 dock 40% -->
+      <div class="dashboard-left w-full lg:w-2/3 min-h-0">
         <main id="hero" class="flex flex-col justify-center items-center rounded-2xl shadow-xl transition-colors duration-300" style="background: linear-gradient(145deg, rgba(2,132,199,.15), rgba(67,56,202,.12));">
           <div class="hero-body flex flex-col justify-center items-center w-full">
             <h2 class="font-bold text-slate-200">目前進行考科</h2>
@@ -1062,8 +1147,14 @@
           </div>
         </main>
 
-        <!-- 缺考區塊 -->
-        <section id="absent-section" class="card rounded-2xl border border-rose-400/30">
+        <section id="broadcast-dock" class="broadcast-dock broadcast-dock--idle" aria-live="polite">
+          <div id="broadcast-messages" class="broadcast-messages-stack"></div>
+        </section>
+      </div>
+
+      <!-- 右側：缺考 + 排程概覽 -->
+      <div class="dashboard-sidebar w-full lg:w-1/3 card rounded-2xl shadow-xl">
+        <section id="absent-section" class="absent-section--sidebar card rounded-2xl border border-rose-400/30 mb-3">
           <div class="absent-section-head flex flex-wrap justify-between items-center gap-2">
             <h2 class="font-semibold text-rose-300 flex items-center">缺考座號追蹤</h2>
             <div class="flex items-center gap-2 flex-shrink-0">
@@ -1096,10 +1187,7 @@
 
           <!-- （已移除：缺考座號 匯出(Base64)/匯入 按鈕列） -->
         </section>
-      </div>
 
-      <!-- 右側：排程概覽 -->
-      <div class="dashboard-sidebar w-full lg:w-1/3 card p-6 rounded-2xl shadow-xl flex flex-col min-h-0">
         <h2 id="schedule-title" class="text-2xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-700 flex-shrink-0">
           排程概覽
         </h2>
@@ -1178,6 +1266,9 @@
 
     let sheetsAutoSyncTimer=null;
     let sheetsSyncInFlight=false;
+    let messagesSyncTimer=null;
+    let messagesSyncInFlight=false;
+    let broadcastMessages=[];
     const SHEETS_LS_KEYS={
       url:'sheetsUrl',
       autoSync:'sheetsAutoSync',
@@ -1256,21 +1347,33 @@
 
   <!-- 全畫面展示覆蓋層 -->
   <div id="presentation-overlay" class="hidden fixed inset-0 z-[60] bg-slate-950 text-slate-100">
-    <div class="absolute inset-0 flex flex-col">
-      <!-- 加上 id 以便將展示時鐘嵌入 -->
-      <div id="present-toolbar" class="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/70">
-        <div class="text-sm text-slate-300 space-x-3">
+    <div class="pres-layout">
+      <div id="present-toolbar" class="pres-header">
+        <div class="pres-header-hints">
           <span>按 <span class="font-bold">X</span> 開啟/關閉展示</span>
+          <span class="mx-2">·</span>
           <span>按 <span class="font-bold">F</span> 進入/退出全螢幕</span>
+          <span class="mx-2">·</span>
           <span>按 <span class="font-bold">Esc</span> 關閉</span>
         </div>
-        <div class="hidden text-sm text-slate-300">
-          目前時間：<span id="pres-now" class="font-semibold text-cyan-300">--</span>
+        <div id="pres-absent-compact" class="pres-absent-grid">
+          <div class="pres-absent-box pres-absent-box--expected">
+            <div class="pres-absent-box-label">應到</div>
+            <div id="pres-expected-compact" class="pres-absent-box-value">—</div>
+          </div>
+          <div class="pres-absent-box pres-absent-box--absent">
+            <div class="pres-absent-box-label">缺考</div>
+            <div id="pres-absent-count-compact" class="pres-absent-box-value">0</div>
+            <div id="pres-absent-list-compact" class="pres-absent-box-seats">—</div>
+          </div>
+          <div class="pres-absent-box pres-absent-box--actual">
+            <div class="pres-absent-box-label">實到</div>
+            <div id="pres-actual-compact" class="pres-absent-box-value">—</div>
+          </div>
         </div>
-        <button id="btn-close-present" class="btn btn-gray">關閉</button>
+        <button id="btn-close-present" class="btn btn-gray flex-shrink-0">關閉</button>
       </div>
 
-      <!-- 展示模式時鐘（將被嵌入 present-toolbar） -->
       <div id="pres-clock" class="clock-hud hidden md:flex">
         <div class="clock-badge">現在時間</div>
         <div class="flex flex-col leading-tight">
@@ -1286,41 +1389,23 @@
         </div>
       </div>
 
-      <div class="flex-1 grid place-items-center p-6">
-        <div class="w-full max-w-5xl text-center">
-          <div class="mb-6">
-            <div class="text-xl text-sky-300 tracking-widest">目前進行考科</div>
-            <div id="pres-subject" class="mt-2 text-6xl md:text-7xl font-black text-sky-300">—</div>
-            <div id="pres-range" class="mt-2 text-4xl md:text-5xl text-slate-300">—</div>
-            <div id="pres-progress-container" class="w-full max-w-3xl mx-auto mt-6 bg-slate-800 rounded-full h-5 shadow-inner overflow-hidden">
-              <div id="pres-progress-bar" class="h-full rounded-full flex items-center justify-end pr-2 font-bold transition-all duration-700 bg-amber-400 text-slate-900" style="width:0%">
-                <span id="pres-progress-text" class="text-xs">0%</span>
-              </div>
+      <div class="pres-main">
+        <div class="pres-subject-block">
+          <div class="pres-label">目前進行考科</div>
+          <div id="pres-subject" class="mt-2 font-black text-sky-300">—</div>
+          <div id="pres-range" class="mt-2 text-slate-300">—</div>
+          <div id="pres-progress-container" class="w-full max-w-3xl mx-auto mt-4 bg-slate-800 rounded-full h-5 shadow-inner overflow-hidden">
+            <div id="pres-progress-bar" class="h-full rounded-full flex items-center justify-end pr-2 font-bold transition-all duration-700 bg-amber-400 text-slate-900" style="width:0%">
+              <span id="pres-progress-text" class="text-xs">0%</span>
             </div>
           </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-700">
-              <div class="text-sm text-slate-400">應到人數</div>
-              <div id="pres-expected" class="text-5xl font-extrabold">—</div>
-            </div>
-            <div class="p-4 rounded-2xl bg-rose-900/30 border border-rose-500/30">
-              <div class="text-sm text-rose-300">缺考人數 / 座號</div>
-              <div class="text-5xl font-extrabold text-rose-200"><span id="pres-absent-count">0</span></div>
-              <div id="pres-absent-list" class="mt-2 text-lg font-bold text-rose-200 break-words">—</div>
-            </div>
-            <div class="p-4 rounded-2xl bg-emerald-900/30 border border-emerald-500/30">
-              <div class="text-sm text-emerald-300">實到人數</div>
-              <div id="pres-actual" class="text-5xl font-extrabold text-emerald-200">—</div>
-            </div>
-          </div>
-
-          <div class="mt-8 p-4 rounded-2xl bg-slate-900/70 border border-slate-700">
-            <div class="text-sm text-slate-400">下一個 study / exam</div>
-            <div id="pres-next" class="text-2xl md:text-3xl font-bold text-sky-200 mt-1">—</div>
-          </div>
+          <p id="pres-next" class="pres-next-hint">—</p>
         </div>
       </div>
+
+      <section id="pres-broadcast-dock" class="broadcast-dock pres-broadcast-dock broadcast-dock--idle" aria-live="polite">
+        <div id="pres-broadcast-messages" class="broadcast-messages-stack"></div>
+      </section>
     </div>
   </div>
 
@@ -1527,6 +1612,11 @@
   const SCHEDULE_HEADER=['DayKey','DayName','StartTime','EndTime','SubjectName','ActivityType'];
   const SETTINGS_SHEET_NAME='設定';
   const SETTINGS_HEADER=['Key','Value'];
+  const MESSAGE_SHEET_NAME='訊息發布';
+  const MESSAGE_HEADER_V1=['Day','StartTime','EndTime','Msg Content'];
+  const MESSAGE_HEADER_V2=['Day','StartTime','DurationSec','FadeOut','Msg Content'];
+  const MESSAGE_LS_KEY='broadcastMessagesJSON';
+  const MESSAGE_SYNC_INTERVAL_MS=60*1000;
   const DEFAULT_PAGE_TITLE='段考時程表';
   const EXAM_TITLE_LS_KEY='examPageTitle';
   const ACTIVITY_TYPES=['exam','break','study','end'];
@@ -1673,6 +1763,214 @@
     localStorage.removeItem(EXAM_TITLE_LS_KEY);
     return applyPageTitle(DEFAULT_PAGE_TITLE);
   }
+  function escapeHtml(str){
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function isSheetsAutoSyncEnabled(){
+    const v=localStorage.getItem(SHEETS_LS_KEYS.autoSync);
+    if(v===null) return true;
+    return v==='true';
+  }
+  function getSheetsSyncIntervalMin(){
+    return Number(localStorage.getItem(SHEETS_LS_KEYS.intervalMin))||5;
+  }
+  function detectMessageSheetFormat(colLabels,firstValues){
+    if(colLabels[2]==='DurationSec'||firstValues[2]==='DurationSec') return 'v2';
+    if(colLabels[4]==='Msg Content'||firstValues[4]==='Msg Content') return 'v2';
+    if(colLabels[3]==='Msg Content'||firstValues[3]==='Msg Content') return 'v1';
+    return null;
+  }
+  function parseFadeOut(val){
+    const s=String(val??'').trim().toLowerCase();
+    return ['y','yes','1','true','是'].includes(s);
+  }
+  function parseMessageDurationSec(vals,format,start){
+    if(format==='v2'){
+      const raw=vals[2]?.formatted??vals[2]?.value??'';
+      const num=Number(String(raw).trim());
+      if(Number.isFinite(num)&&num>0) return Math.round(num);
+      return 0;
+    }
+    const end=normalizeTime(vals[2]?.value,vals[2]?.formatted);
+    if(!start||!end) return 0;
+    const s=parseTime(start),e=parseTime(end);
+    return Math.max(1,Math.round((e-s)/1000));
+  }
+  function normalizeBroadcastMessage(m){
+    if(!m||!m.day||!m.start||!m.content) return null;
+    if(m.durationSec!=null&&m.durationSec>0){
+      return {day:m.day,start:m.start,durationSec:m.durationSec,fadeOut:!!m.fadeOut,content:m.content,id:m.id};
+    }
+    if(m.end){
+      const s=parseTime(m.start),e=parseTime(m.end);
+      const durationSec=Math.max(1,Math.round((e-s)/1000));
+      return {day:m.day,start:m.start,durationSec,fadeOut:false,content:m.content,id:m.id};
+    }
+    return null;
+  }
+  function getMessageStartMs(msg,now){
+    const d=parseDayNameDate(msg.day,now.getFullYear());
+    if(!d) return null;
+    const [h,m]=msg.start.split(':').map(Number);
+    d.setHours(h,m,0,0);
+    return d.getTime();
+  }
+  function isMessageActive(msg,now){
+    if(!isSameCalendarDayAsName(msg.day,now)) return false;
+    const startMs=getMessageStartMs(msg,now);
+    if(startMs===null) return false;
+    const nowMs=now.getTime();
+    const endMs=startMs+msg.durationSec*1000;
+    return nowMs>=startMs&&nowMs<endMs;
+  }
+  const STACK_BASE_OPACITY=[1,0.75,0.5,0.35];
+  function getActiveMessagesWithOpacity(now){
+    const active=broadcastMessages
+      .filter(m=>isMessageActive(m,now))
+      .map(m=>({msg:m,startMs:getMessageStartMs(m,now)}))
+      .sort((a,b)=>b.startMs-a.startMs);
+    const nowMs=now.getTime();
+    return active.map((item,rank)=>{
+      const {msg,startMs}=item;
+      const endMs=startMs+msg.durationSec*1000;
+      let opacity=STACK_BASE_OPACITY[Math.min(rank,STACK_BASE_OPACITY.length-1)];
+      if(msg.fadeOut){
+        const fadeWindowMs=Math.min(30000,msg.durationSec*1000*0.2);
+        const remaining=endMs-nowMs;
+        if(remaining<fadeWindowMs){
+          opacity*=Math.max(0,remaining/fadeWindowMs);
+        }
+      }
+      return {...msg,opacity,rank,isNewest:rank===0};
+    });
+  }
+  function renderBroadcastDock(container,items){
+    container.innerHTML=items.map(item=>{
+      const shakeClass=item.isNewest?' broadcast-msg-card--shake':'';
+      const ty=item.rank*4;
+      return `<div class="broadcast-msg-card${shakeClass}" style="opacity:${item.opacity.toFixed(3)};transform:translateY(${ty}px)">${escapeHtml(item.content)}</div>`;
+    }).join('');
+  }
+  function isMessageSheet(gvizJson){
+    const table=gvizJson?.table;
+    if(!table?.rows?.length) return false;
+    if(looksLikeScheduleSheet(gvizJson)) return false;
+    const colLabels=(table.cols||[]).map(c=>(c.label||'').trim());
+    if(colLabels[0]==='Day'&&(colLabels[3]==='Msg Content'||colLabels[4]==='Msg Content')) return true;
+    const firstRow=table.rows[0];
+    const firstValues=(firstRow.c||[]).map((cell)=>{
+      const {value,formatted}=gvizCellData(cell);
+      return String(formatted||value||'').trim();
+    });
+    return firstValues[0]==='Day'&&(firstValues[3]==='Msg Content'||firstValues[4]==='Msg Content');
+  }
+  function gvizToMessages(gvizJson){
+    if(!isMessageSheet(gvizJson)) return null;
+    const table=gvizJson.table;
+    const colLabels=(table.cols||[]).map(c=>(c.label||'').trim());
+    const messages=[];
+    let startRowIndex=0;
+    const firstRow=table.rows[0];
+    const firstValues=(firstRow.c||[]).map((cell)=>{
+      const {value,formatted}=gvizCellData(cell);
+      return String(formatted||value||'').trim();
+    });
+    const format=detectMessageSheetFormat(colLabels,firstValues);
+    if(!format) return null;
+    const header=format==='v2'?MESSAGE_HEADER_V2:MESSAGE_HEADER_V1;
+    if(firstValues[0]===header[0]&&firstValues[header.length-1]===header[header.length-1]) startRowIndex=1;
+    for(let i=startRowIndex;i<table.rows.length;i++){
+      const cells=table.rows[i].c||[];
+      const vals=cells.map(c=>gvizCellData(c));
+      const day=String(vals[0]?.formatted||vals[0]?.value||'').trim();
+      const start=normalizeTime(vals[1]?.value,vals[1]?.formatted);
+      const durationSec=parseMessageDurationSec(vals,format,start);
+      const fadeOut=format==='v2'?parseFadeOut(vals[3]?.formatted??vals[3]?.value):false;
+      const contentIdx=format==='v2'?4:3;
+      const content=String(vals[contentIdx]?.formatted||vals[contentIdx]?.value||'').trim();
+      if(!day||!start||!durationSec||!content) continue;
+      messages.push({day,start,durationSec,fadeOut,content,id:`${day}-${start}-${i}`});
+    }
+    return messages;
+  }
+  function loadBroadcastMessagesFromCache(){
+    try{
+      const raw=localStorage.getItem(MESSAGE_LS_KEY);
+      if(raw){
+        const parsed=JSON.parse(raw);
+        if(Array.isArray(parsed)){
+          broadcastMessages=parsed.map(normalizeBroadcastMessage).filter(Boolean);
+        }
+      }
+    }catch{broadcastMessages=[];}
+  }
+  function saveBroadcastMessagesCache(){
+    try{ localStorage.setItem(MESSAGE_LS_KEY,JSON.stringify(broadcastMessages)); }catch{}
+  }
+  async function fetchMessagesFromSheets(spreadsheetId){
+    try{
+      const apiUrl=`https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(MESSAGE_SHEET_NAME)}`;
+      const json=await fetchGvizFromUrl(apiUrl);
+      return gvizToMessages(json);
+    }catch(e){
+      console.debug('訊息發布分頁讀取略過：',e.message);
+      return null;
+    }
+  }
+  async function syncBroadcastMessages(){
+    if(messagesSyncInFlight) return false;
+    const url=(localStorage.getItem(SHEETS_LS_KEYS.url)||getDefaultSheetsUrl()||'').trim();
+    if(!url) return false;
+    messagesSyncInFlight=true;
+    try{
+      const {spreadsheetId}=parseSheetsUrl(url);
+      const messages=await fetchMessagesFromSheets(spreadsheetId);
+      if(messages){
+        broadcastMessages=messages;
+        saveBroadcastMessagesCache();
+      }
+      updateBroadcastDisplay(new Date());
+      return true;
+    }catch(e){
+      console.debug('訊息同步失敗：',e.message);
+      return false;
+    }finally{
+      messagesSyncInFlight=false;
+    }
+  }
+  function stopMessagesAutoSync(){
+    if(messagesSyncTimer){
+      clearInterval(messagesSyncTimer);
+      messagesSyncTimer=null;
+    }
+  }
+  function startMessagesAutoSync(){
+    stopMessagesAutoSync();
+    syncBroadcastMessages().catch(()=>{});
+    messagesSyncTimer=setInterval(()=>{ syncBroadcastMessages().catch(()=>{}); },MESSAGE_SYNC_INTERVAL_MS);
+  }
+  function updateBroadcastDisplay(now){
+    const items=getActiveMessagesWithOpacity(now);
+    const hasMessages=items.length>0;
+    const dashboardLeft=el('broadcast-dock')?.closest('.dashboard-left');
+    const presLayout=el('pres-broadcast-dock')?.closest('.pres-layout');
+    dashboardLeft?.classList.toggle('dashboard-left--messages-active',hasMessages);
+    presLayout?.classList.toggle('pres-layout--messages-active',hasMessages);
+    const targets=[
+      {dock:el('broadcast-dock'),container:el('broadcast-messages')},
+      {dock:el('pres-broadcast-dock'),container:el('pres-broadcast-messages')},
+    ];
+    targets.forEach(({dock,container})=>{
+      if(!dock||!container) return;
+      if(!hasMessages){
+        dock.classList.add('broadcast-dock--idle');
+        container.innerHTML='';
+        return;
+      }
+      dock.classList.remove('broadcast-dock--idle');
+      renderBroadcastDock(container,items);
+    });
+  }
   function looksLikeScheduleSheet(gvizJson){
     const table=gvizJson?.table;
     if(!table?.rows?.length) return false;
@@ -1803,8 +2101,8 @@
     const savedUrl=localStorage.getItem(SHEETS_LS_KEYS.url)||getDefaultSheetsUrl();
     const urlInput=el('sheets-url-input');
     if(urlInput) urlInput.value=savedUrl;
-    if(sheetsAutoSyncToggle) sheetsAutoSyncToggle.checked=localStorage.getItem(SHEETS_LS_KEYS.autoSync)==='true';
-    const interval=localStorage.getItem(SHEETS_LS_KEYS.intervalMin)||'5';
+    if(sheetsAutoSyncToggle) sheetsAutoSyncToggle.checked=isSheetsAutoSyncEnabled();
+    const interval=String(getSheetsSyncIntervalMin());
     if(sheetsSyncIntervalSelect) sheetsSyncIntervalSelect.value=interval;
     autoSwitchDay=localStorage.getItem('autoSwitchDay')!=='false';
     if(toggleAutoDay) toggleAutoDay.checked=autoSwitchDay;
@@ -1832,8 +2130,8 @@
   }
   function startSheetsAutoSync(){
     stopSheetsAutoSync();
-    const autoSync=localStorage.getItem(SHEETS_LS_KEYS.autoSync)==='true';
-    const intervalMin=Number(localStorage.getItem(SHEETS_LS_KEYS.intervalMin))||5;
+    const autoSync=isSheetsAutoSyncEnabled();
+    const intervalMin=getSheetsSyncIntervalMin();
     const url=localStorage.getItem(SHEETS_LS_KEYS.url)||getDefaultSheetsUrl();
     if(!autoSync||!url||intervalMin<=0) return;
     sheetsAutoSyncTimer=setInterval(()=>{ syncFromGoogleSheets({manual:false}); },intervalMin*60*1000);
@@ -1856,6 +2154,7 @@
       applyExamTitleFromSettings(settings||{});
       localStorage.setItem(SHEETS_LS_KEYS.url,url);
       applySchedules(schedules,{silent:!manual});
+      syncBroadcastMessages().catch(()=>{});
       localStorage.setItem(SHEETS_LS_KEYS.lastSyncAt,new Date().toISOString());
       localStorage.setItem(SHEETS_LS_KEYS.lastSyncStatus,'ok');
       updateSheetsSyncStatus(null,{success:true,dayCount:Object.keys(schedules).length});
@@ -1920,8 +2219,10 @@
     showStatusMessage('找不到 CSV 範本檔，請至排程設定下載。',true);
   }
 
-  /* ===== v1.0.1：展示層同步 ===== */
+  /* ===== v2.0.0：展示層同步 ===== */
   function updatePresentationView(){
+    const now=new Date();
+    updateBroadcastDisplay(now);
     const subject=document.getElementById('current-subject')?.textContent||'—';
     const range=document.getElementById('subject-time-range')?.textContent||'';
     const raw=absentInput?.value||'';
@@ -1930,14 +2231,10 @@
     const actual=Math.max(0, expectedCount-absentCount);
     el('pres-subject').textContent=subject;
     el('pres-range').textContent=range;
-    el('pres-expected').textContent=String(expectedCount);
-    el('pres-absent-count').textContent=String(absentCount);
-    el('pres-absent-list').textContent=list.length?list.join('、 '):'—';
-    el('pres-actual').textContent=String(actual);
-
-    const now=new Date();
-    const fmt={year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false};
-    el('pres-now').textContent=now.toLocaleString('zh-TW',fmt);
+    el('pres-expected-compact').textContent=String(expectedCount);
+    el('pres-absent-count-compact').textContent=String(absentCount);
+    el('pres-absent-list-compact').textContent=list.length?list.join('、 '):'—';
+    el('pres-actual-compact').textContent=String(actual);
 
     let pct=0,currentIndex=-1,currentItem=null,nextInfo='—';
     if(currentScheduleData && currentScheduleData.data){
@@ -1952,7 +2249,9 @@
     }
     const bar=el('pres-progress-bar'); const txt=el('pres-progress-text');
     bar.style.width=pct+'%'; txt.textContent=pct+'%';
-    el('pres-next').textContent=nextInfo;
+    const presNextEl=el('pres-next');
+    presNextEl.textContent=nextInfo;
+    presNextEl.classList.toggle('pres-next-hint--empty',nextInfo==='—');
   }
   function openPresentation(){
     updatePresentationView();
@@ -2080,6 +2379,7 @@
   function updateDisplay(){
     const now=new Date();
     updateDayToolbarHint(now);
+    updateBroadcastDisplay(now);
     if(maybeAutoSwitchDay(now)) return;
 
     if(!currentScheduleData||!currentScheduleData.data){
@@ -2187,10 +2487,17 @@
 
     const savedCSV=localStorage.getItem('schedulesCSV');
     if(savedCSV){ try{ initialSchedules=parseCsv(savedCSV);}catch{} }
+    loadBroadcastMessagesFromCache();
     applyPageTitle(localStorage.getItem(EXAM_TITLE_LS_KEY)||DEFAULT_PAGE_TITLE);
     restoreSheetsSettingsUI();
     if(!localStorage.getItem(SHEETS_LS_KEYS.url)){
       localStorage.setItem(SHEETS_LS_KEYS.url,getDefaultSheetsUrl());
+    }
+    if(localStorage.getItem(SHEETS_LS_KEYS.autoSync)===null){
+      localStorage.setItem(SHEETS_LS_KEYS.autoSync,'true');
+    }
+    if(localStorage.getItem(SHEETS_LS_KEYS.intervalMin)===null){
+      localStorage.setItem(SHEETS_LS_KEYS.intervalMin,'5');
     }
     const firstDayKey=Object.keys(initialSchedules).sort()[0];
     const autoDay=resolveDayKeyForNow(new Date());
@@ -2209,9 +2516,10 @@
         currentSubjectEl.textContent='無排程資料';
       }
     });
-    if(localStorage.getItem(SHEETS_LS_KEYS.autoSync)==='true'){
+    if(isSheetsAutoSyncEnabled()){
       startSheetsAutoSync();
     }
+    startMessagesAutoSync();
 
     setInterval(()=>{ updateDisplay(); tickClocks(); }, 1000);
     tickClocks();
@@ -2419,7 +2727,7 @@
     if(sheetsSyncIntervalSelect){
       sheetsSyncIntervalSelect.addEventListener('change', ()=>{
         saveSheetsSettings();
-        if(localStorage.getItem(SHEETS_LS_KEYS.autoSync)==='true'){
+        if(isSheetsAutoSyncEnabled()){
           startSheetsAutoSync();
           showStatusMessage(`自動同步間隔已設為 ${sheetsSyncIntervalSelect.value} 分鐘`);
         }
