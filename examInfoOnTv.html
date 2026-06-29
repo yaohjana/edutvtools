@@ -3,10 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>定期評量實時狀態揭示板</title>
+  <title>段考時程表</title>
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script> tailwind.config = { darkMode: 'class' };</script>
+  <script>
+    (function(){
+      const DEFAULT_THEME='dark';
+      const ALLOWED=['dark','blackboard','light','light-soft','blue','purple','warm','high-contrast'];
+      let theme=localStorage.getItem('selectedTheme');
+      if(!theme||!ALLOWED.includes(theme)) theme=DEFAULT_THEME;
+      const root=document.documentElement;
+      root.setAttribute('data-theme',theme);
+      root.classList.toggle('dark',['dark','blackboard','blue','purple','warm','high-contrast'].includes(theme));
+    })();
+  </script>
   <style>
     /* === v1.0.1 新增/調整樣式區 === */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
@@ -63,7 +74,47 @@
       --bg:#000000;--panel:#1a1a1a;--muted:#808080;--text:#ffffff;--ring:#00ffff;
       --accent:#00ffff;--accent-2:#ffff00;--good:#00ff00;--warn:#ffaa00;--bad:#ff0000;
     }
-    body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+    body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);height:100dvh;overflow:hidden}
+    html{height:100%}
+    .main-container{
+      max-width:90rem;height:100%;min-height:0;margin:0 auto;display:flex;flex-direction:column;gap:clamp(.5rem,1vh,.85rem);
+      padding:clamp(.5rem,1.2vh,1.25rem);padding-bottom:clamp(.35rem,.8vh,.75rem);overflow:hidden;box-sizing:border-box;
+    }
+    #top-toolbar{flex-shrink:0;padding:clamp(.5rem,1.2vh,1rem)!important}
+    #page-title{line-height:1.2;max-width:min(36rem,42vw)}
+    #day-out-of-schedule-hint{font-size:.75rem;color:rgba(252,211,77,.9);white-space:nowrap;flex-shrink:0}
+    .dashboard-content{flex:1;min-height:0;overflow:hidden;gap:clamp(.35rem,.8vh,1rem)!important}
+    .dashboard-left{min-height:0;overflow:hidden;gap:clamp(.35rem,.7vh,.85rem)!important}
+    .dashboard-sidebar{min-height:0;overflow:hidden;padding:clamp(.75rem,1.5vh,1.5rem)!important}
+    .dashboard-sidebar #schedule-title{font-size:clamp(1.125rem,2vh,1.5rem);margin-bottom:clamp(.5rem,1vh,1rem)!important}
+    #hero{
+      flex:1 1 0;min-height:0;
+      padding:clamp(.75rem,2vh,2rem)!important;
+    }
+    #hero .hero-body{flex:1 1 0;min-height:0;overflow:hidden;width:100%}
+    #hero h2{font-size:clamp(1.125rem,2.2vh,1.875rem);margin-bottom:clamp(.35rem,.8vh,1rem)}
+    #current-subject{font-size:clamp(1.75rem,5.5vh,3.75rem)!important;line-height:1.1;word-break:break-word;max-width:100%}
+    #hero .rounded-2xl.shadow-inner{padding:clamp(.5rem,1.2vh,1.25rem) clamp(.75rem,1.8vh,1.5rem)!important}
+    #subject-time-range{font-size:clamp(1.125rem,2.8vh,2.25rem)!important;margin-top:clamp(.35rem,.8vh,1rem)!important}
+    #subject-progress-container{margin-top:clamp(.5rem,1.2vh,1.5rem)!important;max-width:min(36rem,100%)}
+    #absent-section{flex-shrink:0;padding:clamp(.65rem,1.2vh,1.25rem)!important}
+    #absent-section .absent-section-head{margin-bottom:clamp(.35rem,.7vh,.75rem)!important;padding:.25rem!important}
+    #absent-section .absent-section-head h2{font-size:clamp(1rem,1.8vh,1.5rem)}
+    #absent-section .absent-stat-grid{gap:clamp(.35rem,.7vh,.75rem);margin-bottom:clamp(.35rem,.7vh,1rem)!important}
+    #absent-section .absent-stat-box{padding:clamp(.25rem,.5vh,.5rem)!important}
+    #absent-section .absent-stat-value{font-size:clamp(1.75rem,4.2vh,3.75rem)!important;line-height:1.05}
+    #absent-section .absent-seat-box{padding:clamp(.4rem,.8vh,.75rem)!important;margin-top:clamp(.25rem,.5vh,.75rem)!important}
+    #absent-section .absent-seat-box p{font-size:clamp(.7rem,1.2vh,.875rem)}
+    #absent-section #absent-seat-display{font-size:clamp(.875rem,1.5vh,1.125rem)}
+    @media (max-height:820px){
+      #top-toolbar{padding:.65rem!important}
+      #page-title{font-size:clamp(1rem,2vh,1.5rem)!important}
+      #absent-section .btn{padding:.2rem .55rem;font-size:.75rem}
+    }
+    @media (max-height:700px){
+      #hero h2{display:none}
+      #subject-progress-container{height:.65rem!important}
+    }
     
     /* === 淺色主題文字對比度優化 === */
     [data-theme="light"] .text-slate-300,
@@ -212,7 +263,6 @@
       border-color: rgba(236,72,153,.4) !important;
     }
     
-    .main-container{max-width:90rem;height:100%;padding:1.25rem;margin:0 auto;display:flex;flex-direction:column;gap:1rem}
     textarea{min-height:80px;resize:vertical}
     .timeline-item{position:relative;padding-left:1rem;border-left:2px solid rgba(148,163,184,.25);margin-left:.25rem}
     .timeline-item.active{border-left-color:var(--bad);background:rgba(248,113,113,.08)}
@@ -231,6 +281,43 @@
     .timeline-item.exam.active .text-sm{color:var(--bad)}
     #schedule-timeline .timeline-item.exam .text-sm,#schedule-timeline .timeline-item[data-type="exam"] .text-sm{font-size:1.125rem;font-weight:800}
     .modal{opacity:1}
+    #sheets-sync-modal{z-index:70;padding:max(.75rem,env(safe-area-inset-top)) max(.75rem,env(safe-area-inset-right)) max(.75rem,env(safe-area-inset-bottom)) max(.75rem,env(safe-area-inset-left))}
+    #sheets-sync-modal .schedule-settings-panel{
+      width:100%;max-width:40rem;max-height:min(92dvh,100%);display:flex;flex-direction:column;overflow:hidden;
+    }
+    :fullscreen #sheets-sync-modal .schedule-settings-panel,:fullscreen #appearance-modal .card{max-height:min(94dvh,100%)}
+    .schedule-settings-header{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;flex-shrink:0;padding-bottom:.75rem;border-bottom:1px solid rgba(100,116,139,.35);
+    }
+    .schedule-settings-actions{display:flex;flex-wrap:wrap;gap:.5rem;flex-shrink:0}
+    .schedule-settings-tabs{
+      display:flex;gap:.25rem;flex-shrink:0;margin-top:.75rem;padding:.2rem;border-radius:.75rem;background:rgba(15,23,42,.55);border:1px solid rgba(100,116,139,.35);
+    }
+    .schedule-settings-tab{
+      flex:1;border:0;border-radius:.55rem;padding:.5rem .75rem;font-size:.8125rem;font-weight:700;color:#94a3b8;background:transparent;cursor:pointer;transition:background-color .15s ease,color .15s ease;
+    }
+    .schedule-settings-tab:hover{color:#e2e8f0;background:rgba(148,163,184,.08)}
+    .schedule-settings-tab.is-active{color:#67e8f9;background:rgba(14,165,233,.18);box-shadow:inset 0 0 0 1px rgba(34,211,238,.25)}
+    .schedule-settings-body{
+      flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin-top:.75rem;padding-right:.15rem;
+    }
+    .schedule-settings-pane{display:none}
+    .schedule-settings-pane.is-active{display:block}
+    .settings-card{padding:.85rem 1rem;border-radius:.9rem;background:rgba(30,41,59,.55);border:1px solid rgba(100,116,139,.35)}
+    .settings-card+.settings-card{margin-top:.75rem}
+    .settings-card-title{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;margin-bottom:.5rem}
+    .settings-inline-2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;align-items:center}
+    @media (max-width:520px){.settings-inline-2{grid-template-columns:1fr}}
+  .schedule-help summary{cursor:pointer;color:#94a3b8;font-size:.75rem;user-select:none}
+  .schedule-help summary:hover{color:#cbd5e1}
+  .schedule-help[open] summary{margin-bottom:.5rem;color:#67e8f9}
+  .schedule-help ol{margin-top:.35rem}
+    @media (max-width:720px){
+      #sheets-sync-modal .schedule-settings-panel{max-width:100%}
+      .schedule-settings-header{flex-direction:column}
+      .schedule-settings-actions{width:100%}
+      .schedule-settings-actions .btn{flex:1}
+    }
 
     /* === 下拉選單樣式 === */
     .dropdown-menu{
@@ -705,19 +792,182 @@
 
   <!-- （已移除：缺考 Base64 匯入 Modal） -->
 
-  <!-- 排程 CSV 匯入 Modal -->
-  <div id="schedule-import-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 modal">
-    <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-2xl">
-      <h3 class="text-xl font-bold text-cyan-300 mb-3">匯入段考排程資料（CSV）</h3>
-      <p class="text-sm text-slate-300 mb-2">請將 <strong>CSV 檔案的完整內容</strong> 貼入下方文字框（需包含標題列）。</p>
-      <p class="text-xs text-cyan-300 mb-3">CSV 標題列：DayKey,DayName,StartTime,EndTime,SubjectName,ActivityType</p>
-      <textarea id="schedule-import-data-textarea" class="w-full h-48 p-2 rounded-lg bg-slate-800/70 border border-slate-600 text-slate-100 focus:ring-focus text-sm" placeholder="貼上 CSV 內容..."></textarea>
-      <div class="flex justify-end gap-2 mt-4">
-        <button id="btn-schedule-cancel" class="btn btn-gray">取消</button>
-        <button id="btn-schedule-confirm" class="btn btn-teal">確認匯入並取代</button>
+  <!-- 外觀設定 Modal -->
+  <div id="appearance-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[70] p-4 modal">
+    <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <h3 class="text-xl font-bold text-violet-300">外觀設定</h3>
+        <button type="button" id="btn-appearance-close" class="btn btn-gray flex-shrink-0">關閉</button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <div class="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">顯示項目</div>
+          <div class="space-y-1 rounded-xl border border-slate-700 bg-slate-800/40 p-2">
+            <label class="toggle-label flex items-center justify-between gap-3 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+              <span class="text-sm text-slate-200">顯示時鐘</span>
+              <span class="toggle-switch">
+                <input type="checkbox" id="toggle-clock" />
+                <span class="toggle-slider"></span>
+              </span>
+            </label>
+            <label class="toggle-label flex items-center justify-between gap-3 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+              <span class="text-sm text-slate-200">顯示下課時間</span>
+              <span class="toggle-switch">
+                <input type="checkbox" id="toggle-breaks" />
+                <span class="toggle-slider"></span>
+              </span>
+            </label>
+            <label class="toggle-label flex items-center justify-between gap-3 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+              <span class="text-sm text-slate-200">顯示自習</span>
+              <span class="toggle-switch">
+                <input type="checkbox" id="toggle-study" />
+                <span class="toggle-slider"></span>
+              </span>
+            </label>
+            <label class="toggle-label flex items-center justify-between gap-3 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
+              <span class="text-sm text-slate-200">顯示進度條</span>
+              <span class="toggle-switch">
+                <input type="checkbox" id="toggle-progress" />
+                <span class="toggle-slider"></span>
+              </span>
+            </label>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">佈景主題</div>
+          <div class="grid grid-cols-4 gap-2">
+            <button class="theme-btn active" data-theme="dark" title="暗色主題">
+              <div class="theme-preview dark-theme"></div>
+              <span class="text-xs">暗色</span>
+            </button>
+            <button class="theme-btn" data-theme="blackboard" title="黑板主題">
+              <div class="theme-preview blackboard-theme"></div>
+              <span class="text-xs">黑板</span>
+            </button>
+            <button class="theme-btn" data-theme="light" title="淺色主題">
+              <div class="theme-preview light-theme"></div>
+              <span class="text-xs">淺色</span>
+            </button>
+            <button class="theme-btn" data-theme="light-soft" title="櫻花粉">
+              <div class="theme-preview light-soft-theme"></div>
+              <span class="text-xs">櫻花粉</span>
+            </button>
+            <button class="theme-btn" data-theme="blue" title="藍色主題">
+              <div class="theme-preview blue-theme"></div>
+              <span class="text-xs">藍色</span>
+            </button>
+            <button class="theme-btn" data-theme="purple" title="紫色主題">
+              <div class="theme-preview purple-theme"></div>
+              <span class="text-xs">紫色</span>
+            </button>
+            <button class="theme-btn" data-theme="warm" title="暖色主題">
+              <div class="theme-preview warm-theme"></div>
+              <span class="text-xs">暖色</span>
+            </button>
+            <button class="theme-btn" data-theme="high-contrast" title="高對比主題">
+              <div class="theme-preview high-contrast-theme"></div>
+              <span class="text-xs">高對比</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- 排程設定 Modal（分頁：Google Sheets / CSV） -->
+  <div id="sheets-sync-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center modal">
+    <div class="schedule-settings-panel card p-4 sm:p-5 rounded-2xl shadow-2xl" role="dialog" aria-labelledby="schedule-settings-title" aria-modal="true">
+      <div class="schedule-settings-header">
+        <div class="min-w-0">
+          <h3 id="schedule-settings-title" class="text-lg sm:text-xl font-bold text-cyan-300">排程設定</h3>
+          <div id="sheets-sync-status" class="text-xs text-slate-400 min-h-[1.25rem] mt-1 truncate">尚未同步</div>
+        </div>
+        <div class="schedule-settings-actions">
+          <button type="button" id="btn-sheets-sync-now" class="btn btn-teal text-sm">立即同步</button>
+          <button type="button" id="btn-sheets-cancel" class="btn btn-gray text-sm">關閉</button>
+        </div>
+      </div>
+
+      <div class="schedule-settings-tabs" role="tablist" aria-label="排程設定分頁">
+        <button type="button" class="schedule-settings-tab is-active" data-tab="sheets" role="tab" aria-selected="true" aria-controls="schedule-pane-sheets">Google Sheets</button>
+        <button type="button" class="schedule-settings-tab" data-tab="csv" role="tab" aria-selected="false" aria-controls="schedule-pane-csv">CSV 匯入匯出</button>
+      </div>
+
+      <div class="schedule-settings-body">
+        <div id="schedule-pane-sheets" class="schedule-settings-pane is-active" data-panel="sheets" role="tabpanel">
+          <div class="settings-card">
+            <div class="settings-card-title">日期顯示</div>
+            <label class="toggle-label flex items-center justify-between gap-3 cursor-pointer">
+              <span class="text-sm text-slate-200">自動切換今日場次</span>
+              <span class="toggle-switch">
+                <input type="checkbox" id="toggle-auto-day" checked />
+                <span class="toggle-slider"></span>
+              </span>
+            </label>
+            <p class="text-xs text-slate-500 mt-2">開啟時，頁面載入會自動選今日場次；點日期按鈕可強制切換並固定顯示該日排程</p>
+          </div>
+
+          <div class="settings-card space-y-3">
+            <div class="settings-card-title">試算表連線</div>
+            <div class="flex items-center justify-between gap-2 text-sm">
+              <span class="text-slate-300">預設範本</span>
+              <a id="btn-sheets-template-link" href="https://docs.google.com/spreadsheets/d/1pYyX2gbs72SXl17atg4oFlAH84nFMV3lemfUlCtEwHY/edit?usp=sharing" target="_blank" rel="noopener" class="text-xs text-sky-300 hover:text-sky-200 underline truncate max-w-[55%] text-right">大橋國中段考時程表 ↗</a>
+            </div>
+            <label for="sheets-url-input" class="text-sm text-slate-300 block">試算表網址</label>
+            <input id="sheets-url-input" type="url" class="w-full p-2 rounded-lg bg-slate-900/70 border border-slate-600 text-slate-100 focus:ring-focus text-sm" placeholder="https://docs.google.com/spreadsheets/d/..." />
+            <div class="settings-inline-2">
+              <label class="toggle-label flex items-center justify-between gap-2 cursor-pointer">
+                <span class="text-sm text-slate-300">自動同步</span>
+                <span class="toggle-switch">
+                  <input type="checkbox" id="sheets-auto-sync" />
+                  <span class="toggle-slider"></span>
+                </span>
+              </label>
+              <label class="text-sm text-slate-300 flex items-center justify-between gap-2">
+                <span>間隔</span>
+                <select id="sheets-sync-interval" class="p-1.5 rounded-lg bg-slate-900/70 border border-slate-600 text-slate-100 text-sm min-w-[5.5rem]">
+                  <option value="1">1 分鐘</option>
+                  <option value="5" selected>5 分鐘</option>
+                  <option value="15">15 分鐘</option>
+                  <option value="30">30 分鐘</option>
+                </select>
+              </label>
+            </div>
+            <button type="button" id="btn-sheets-use-default" class="btn btn-gray w-full text-sm">還原為大橋國中預設範本</button>
+          </div>
+
+          <details class="schedule-help settings-card">
+            <summary>試算表格式與標題說明</summary>
+            <ol class="text-xs text-slate-500 list-decimal list-inside space-y-1">
+              <li>試算表須設為「知道連結者可檢視」</li>
+              <li>排程欄位：DayKey, DayName, StartTime, EndTime, SubjectName, ActivityType</li>
+              <li>時間 <strong>hh:mm</strong>；ActivityType：exam, break, study, end</li>
+              <li>選用「設定」分頁：A 欄鍵名、B 欄值，<code class="text-slate-400">ExamTitle</code> 為頁面標題</li>
+            </ol>
+          </details>
+        </div>
+
+        <div id="schedule-pane-csv" class="schedule-settings-pane" data-panel="csv" role="tabpanel" hidden>
+          <div class="settings-card space-y-3">
+            <div class="settings-card-title">匯出與範本</div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" id="btn-sheets-template" class="btn btn-gray text-sm flex-1 min-w-[8rem]">匯出目前排程</button>
+              <a id="btn-sheets-template-file" href="exam_schedule_google_sheets_template.csv" download class="btn btn-gray text-sm flex-1 min-w-[8rem] text-center">下載 CSV 範本</a>
+            </div>
+          </div>
+          <div class="settings-card space-y-2">
+            <div class="settings-card-title">貼上 CSV 匯入</div>
+            <p class="text-xs text-cyan-300/80">標題列：DayKey,DayName,StartTime,EndTime,SubjectName,ActivityType</p>
+            <textarea id="schedule-import-data-textarea" class="w-full h-28 sm:h-32 p-2 rounded-lg bg-slate-900/70 border border-slate-600 text-slate-100 focus:ring-focus text-sm" placeholder="貼上 CSV 內容..."></textarea>
+            <button type="button" id="btn-schedule-confirm" class="btn btn-teal w-full">確認匯入並取代</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 排程 CSV 匯入 Modal（已併入排程設定 Modal，保留 id 供相容） -->
+  <div id="schedule-import-modal" class="hidden" aria-hidden="true"></div>
 
   <!-- 應到人數設定 Modal -->
   <div id="expected-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 modal">
@@ -751,103 +1001,22 @@
     <!-- 頂部控制列 -->
     <div id="top-toolbar" class="card p-4 rounded-2xl shadow-md border-b-2 border-b-sky-500 flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center gap-2">
-        <h1 id="page-title" class="text-xl md:text-2xl font-extrabold text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 rounded px-1" contenteditable="true" title="點擊即可編輯標題">114年度下學期第二次定期評量</h1>
+        <h1 id="page-title" class="text-xl md:text-2xl font-extrabold text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 rounded px-1" contenteditable="true" title="點擊即可編輯標題">段考時程表</h1>
       </div>
       <div class="flex flex-wrap items-center gap-2 flex-1 min-w-0">
-        <div id="day-buttons-container" class="flex gap-2 flex-shrink-0"></div>
-        
-        <!-- CSV 功能下拉選單 -->
-        <div class="dropdown-menu flex-shrink-0" id="csv-dropdown">
-          <button class="icon-btn" id="btn-csv-menu" title="設定選單">⚙️</button>
-          <div class="dropdown-content">
-            <!-- 顯示設定區 -->
-            <div class="px-3 py-2">
-              <div class="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">顯示設定</div>
-              <label class="toggle-label dropdown-toggle-item">
-                <span>顯示時鐘</span>
-                <span class="toggle-switch">
-                  <input type="checkbox" id="toggle-clock" />
-                  <span class="toggle-slider"></span>
-                </span>
-              </label>
-              <label class="toggle-label dropdown-toggle-item">
-                <span>顯示下課時間</span>
-                <span class="toggle-switch">
-                  <input type="checkbox" id="toggle-breaks" />
-                  <span class="toggle-slider"></span>
-                </span>
-              </label>
-              <label class="toggle-label dropdown-toggle-item">
-                <span>顯示自習</span>
-                <span class="toggle-switch">
-                  <input type="checkbox" id="toggle-study" />
-                  <span class="toggle-slider"></span>
-                </span>
-              </label>
-              <label class="toggle-label dropdown-toggle-item">
-                <span>顯示進度條</span>
-                <span class="toggle-switch">
-                  <input type="checkbox" id="toggle-progress" />
-                  <span class="toggle-slider"></span>
-                </span>
-              </label>
-            </div>
-            <div class="dropdown-divider"></div>
-            <!-- 主題選擇區 -->
-            <div class="px-3 py-2">
-              <div class="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">佈景主題</div>
-              <div class="grid grid-cols-2 gap-2">
-                <button class="theme-btn" data-theme="dark" title="暗色主題">
-                  <div class="theme-preview dark-theme"></div>
-                  <span class="text-xs">暗色</span>
-                </button>
-                <button class="theme-btn" data-theme="blackboard" title="黑板主題">
-                  <div class="theme-preview blackboard-theme"></div>
-                  <span class="text-xs">黑板</span>
-                </button>
-                <button class="theme-btn" data-theme="light" title="淺色主題">
-                  <div class="theme-preview light-theme"></div>
-                  <span class="text-xs">淺色</span>
-                </button>
-                <button class="theme-btn" data-theme="light-soft" title="淺色主題（櫻花粉色系）">
-                  <div class="theme-preview light-soft-theme"></div>
-                  <span class="text-xs">櫻花粉</span>
-                </button>
-                <button class="theme-btn" data-theme="blue" title="藍色主題">
-                  <div class="theme-preview blue-theme"></div>
-                  <span class="text-xs">藍色</span>
-                </button>
-                <button class="theme-btn" data-theme="purple" title="紫色主題">
-                  <div class="theme-preview purple-theme"></div>
-                  <span class="text-xs">紫色</span>
-                </button>
-                <button class="theme-btn" data-theme="warm" title="暖色主題">
-                  <div class="theme-preview warm-theme"></div>
-                  <span class="text-xs">暖色</span>
-                </button>
-                <button class="theme-btn" data-theme="high-contrast" title="高對比主題">
-                  <div class="theme-preview high-contrast-theme"></div>
-                  <span class="text-xs">高對比</span>
-                </button>
-              </div>
-            </div>
-            <div class="dropdown-divider"></div>
-            <!-- CSV 功能區 -->
-            <div class="px-1">
-              <div class="dropdown-item" id="menu-import">
-                <span>📥</span>
-                <span>匯入排程 (CSV)</span>
-              </div>
-              <div class="dropdown-item" id="menu-export">
-                <span>📤</span>
-                <span>匯出排程 (CSV)</span>
-              </div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-item" id="menu-sample">
-                <span>📋</span>
-                <span>下載 CSV 範例</span>
-              </div>
-            </div>
+        <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
+          <div id="day-buttons-container" class="flex gap-2 flex-shrink-0"></div>
+          <span id="day-out-of-schedule-hint" class="hidden" role="status" aria-live="polite">目前非時程之內</span>
+        </div>
+
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <div class="tooltip-wrapper">
+            <button type="button" id="btn-schedule-settings" class="icon-btn" title="排程設定">📊</button>
+            <div class="tooltip">排程設定</div>
+          </div>
+          <div class="tooltip-wrapper">
+            <button type="button" id="btn-appearance" class="icon-btn" title="外觀設定">🎨</button>
+            <div class="tooltip">外觀設定</div>
           </div>
         </div>
 
@@ -872,19 +1041,21 @@
     </div>
 
     <!-- 內容區 -->
-    <div class="flex-grow flex flex-col lg:flex-row gap-4 min-h-0">
+    <div class="dashboard-content flex flex-col lg:flex-row gap-4 min-h-0">
       <!-- 左側 -->
-      <div class="w-full lg:w-2/3 flex flex-col gap-4 min-h-0">
+      <div class="dashboard-left w-full lg:w-2/3 flex flex-col gap-4 min-h-0">
         <!-- （已移除：當前日期卡片） -->
 
         <!-- 當前考科顯示 -->
-        <main id="hero" class="flex-grow flex flex-col justify-center items-center rounded-2xl shadow-xl p-8 transition-colors duration-300" style="background: linear-gradient(145deg, rgba(2,132,199,.15), rgba(67,56,202,.12));">
-          <h2 class="text-2xl md:text-3xl font-bold text-slate-200 mb-4">目前進行考科</h2>
-          <div class="rounded-2xl shadow-inner px-6 py-5 bg-slate-900/60 border border-slate-700">
-            <p id="current-subject" class="text-5xl md:text-6xl font-black text-center text-sky-300">-- 等待排程 --</p>
+        <main id="hero" class="flex flex-col justify-center items-center rounded-2xl shadow-xl transition-colors duration-300" style="background: linear-gradient(145deg, rgba(2,132,199,.15), rgba(67,56,202,.12));">
+          <div class="hero-body flex flex-col justify-center items-center w-full">
+            <h2 class="font-bold text-slate-200">目前進行考科</h2>
+            <div class="rounded-2xl shadow-inner bg-slate-900/60 border border-slate-700">
+              <p id="current-subject" class="font-black text-center text-sky-300">-- 等待排程 --</p>
+            </div>
+            <p id="subject-time-range" class="font-medium text-slate-300">( --:-- 至 --:-- )</p>
           </div>
-          <p id="subject-time-range" class="mt-4 text-3xl md:text-4xl font-medium text-slate-300">( --:-- 至 --:-- )</p>
-          <div id="subject-progress-container" class="w-full max-w-xl mt-6 bg-slate-800 rounded-full h-4 shadow-inner overflow-hidden">
+          <div id="subject-progress-container" class="w-full flex-shrink-0 bg-slate-800 rounded-full h-4 shadow-inner overflow-hidden">
             <div id="subject-progress-bar" class="h-full rounded-full flex items-center justify-end pr-2 font-bold transition-all duration-700 bg-amber-400 text-slate-900" style="width:0%">
               <span id="subject-progress-text" class="text-xs">0%</span>
             </div>
@@ -892,33 +1063,33 @@
         </main>
 
         <!-- 缺考區塊 -->
-        <section class="card p-5 rounded-2xl border border-rose-400/30">
-          <div class="flex justify-between items-center mb-3 p-2 rounded-md">
-            <h2 class="text-2xl font-semibold text-rose-300 flex items-center">缺考座號追蹤</h2>
-            <div class="flex items-center gap-2">
+        <section id="absent-section" class="card rounded-2xl border border-rose-400/30">
+          <div class="absent-section-head flex flex-wrap justify-between items-center gap-2">
+            <h2 class="font-semibold text-rose-300 flex items-center">缺考座號追蹤</h2>
+            <div class="flex items-center gap-2 flex-shrink-0">
               <button id="btn-open-expected" class="btn btn-teal" title="設定應到人數">設定應到人數</button>
               <button id="btn-open-absent" class="btn btn-rose" title="設定缺考座號">設定缺考座號</button>
             </div>
           </div>
 
-          <div class="grid grid-cols-3 gap-3 mb-4 text-center">
-            <div class="bg-slate-800/70 p-2 rounded-lg border border-slate-700">
+          <div class="absent-stat-grid grid grid-cols-3 text-center">
+            <div class="absent-stat-box bg-slate-800/70 rounded-lg border border-slate-700">
               <p class="text-xs font-medium text-slate-300">應到人數</p>
-              <p id="expected-count" class="text-5xl md:text-6xl font-bold text-slate-100">30</p>
+              <p id="expected-count" class="absent-stat-value font-bold text-slate-100">30</p>
             </div>
-            <div class="bg-rose-900/30 p-2 rounded-lg border border-rose-500/30">
+            <div class="absent-stat-box bg-rose-900/30 rounded-lg border border-rose-500/30">
               <p class="text-xs font-medium text-rose-300">缺考人數</p>
-              <p id="absent-count" class="text-5xl md:text-6xl font-bold text-rose-200">0</p>
+              <p id="absent-count" class="absent-stat-value font-bold text-rose-200">0</p>
             </div>
-            <div class="bg-emerald-900/30 p-2 rounded-lg border border-emerald-500/30">
+            <div class="absent-stat-box bg-emerald-900/30 rounded-lg border border-emerald-500/30">
               <p class="text-xs font-medium text-emerald-300">實到人數</p>
-              <p id="actual-count" class="text-5xl md:text-6xl font-bold text-emerald-200">30</p>
+              <p id="actual-count" class="absent-stat-value font-bold text-emerald-200">30</p>
             </div>
           </div>
 
-          <div class="mt-3 p-3 bg-slate-900/60 border border-rose-500/20 rounded-md">
-            <p class="font-medium text-rose-300 mb-1 text-sm">目前缺考座號：</p>
-            <div id="absent-seat-display" class="text-lg font-extrabold text-rose-200">尚無缺考記錄。</div>
+          <div class="absent-seat-box bg-slate-900/60 border border-rose-500/20 rounded-md">
+            <p class="font-medium text-rose-300 mb-1">目前缺考座號：</p>
+            <div id="absent-seat-display" class="font-extrabold text-rose-200">尚無缺考記錄。</div>
           </div>
 
           <div id="absent-input-area" class="hidden mt-4"></div>
@@ -928,7 +1099,7 @@
       </div>
 
       <!-- 右側：排程概覽 -->
-      <div class="w-full lg:w-1/3 card p-6 rounded-2xl shadow-xl flex flex-col min-h-0">
+      <div class="dashboard-sidebar w-full lg:w-1/3 card p-6 rounded-2xl shadow-xl flex flex-col min-h-0">
         <h2 id="schedule-title" class="text-2xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-700 flex-shrink-0">
           排程概覽
         </h2>
@@ -962,47 +1133,16 @@
     /* === 全域鎖定旗標：true = 固定 / 不可縮放 / 不可拖曳 / 不可顯示隱藏 === */
     const CLOCK_LOCKED = true;
 
-    let initialSchedules = {
-      day1:{ name:'6/26 星期五', data:[
-        {start:'08:10',end:'08:50',name:'自習 (40分)',type:'study'},
-        {start:'08:50',end:'09:00',name:'下課 (10分)',type:'break'},
-        {start:'09:00',end:'10:00',name:'數學 (60分)',type:'exam'},
-        {start:'10:00',end:'10:10',name:'下課 (10分)',type:'break'},
-        {start:'10:10',end:'10:40',name:'自習 (30分)',type:'study'},
-        {start:'10:40',end:'10:55',name:'下課 (15分)',type:'break'},
-        {start:'10:55',end:'11:45',name:'作文 (50分)',type:'exam'},
-        {start:'11:45',end:'13:05',name:'中午休息 (80分)',type:'break'},
-        {start:'13:05',end:'13:50',name:'自習 (45分)',type:'study'},
-        {start:'13:50',end:'14:00',name:'下課 (10分)',type:'break'},
-        {start:'14:00',end:'15:00',name:'英文 (60分)',type:'exam'},
-        {start:'15:00',end:'15:10',name:'下課 (10分)',type:'break'},
-        {start:'15:10',end:'15:40',name:'自習 (30分)',type:'study'},
-        {start:'15:40',end:'15:50',name:'放學時間',type:'end'},
-      ]},
-      day2:{ name:'6/29 星期一', data:[
-        {start:'08:10',end:'08:40',name:'自習 (30分)',type:'study'},
-        {start:'08:40',end:'08:50',name:'下課 (10分)',type:'break'},
-        {start:'08:50',end:'09:50',name:'國文 (60分)',type:'exam'},
-        {start:'09:50',end:'10:00',name:'下課 (10分)',type:'break'},
-        {start:'10:00',end:'10:30',name:'自習 (30分)',type:'study'},
-        {start:'10:30',end:'10:45',name:'下課 (15分)',type:'break'},
-        {start:'10:45',end:'11:45',name:'社會 (60分)',type:'exam'},
-        {start:'11:45',end:'13:05',name:'中午休息 (80分)',type:'break'},
-        {start:'13:05',end:'13:50',name:'自習 (45分)',type:'study'},
-        {start:'13:50',end:'14:00',name:'下課 (10分)',type:'break'},
-        {start:'14:00',end:'14:30',name:'自習 (30分)',type:'study'},
-        {start:'14:30',end:'14:40',name:'下課 (10分)',type:'break'},
-        {start:'14:40',end:'15:40',name:'自然 (60分)',type:'exam'},
-        {start:'15:40',end:'15:50',name:'放學時間',type:'end'},
-      ]},
-    };
-
-    let currentDay = 'day1';
-    let currentScheduleData = initialSchedules[currentDay];
+    let initialSchedules = {};
+    let currentDay = '';
+    let currentScheduleData = null;
+    let dayManuallySelected = localStorage.getItem('dayManuallySelected') === 'true';
+    let autoSwitchDay = localStorage.getItem('autoSwitchDay') !== 'false';
 
     const el = (id)=>document.getElementById(id);
     const currentSubjectEl=el('current-subject');
     const subjectTimeRangeEl=el('subject-time-range');
+    const dayOutOfScheduleHintEl=el('day-out-of-schedule-hint');
     const subjectProgressBarEl=el('subject-progress-bar');
     const subjectProgressTextEl=el('subject-progress-text');
     const morningScheduleEl=el('morning-schedule');
@@ -1022,11 +1162,74 @@
     const toggleBreaks=el('toggle-breaks');
     const toggleStudy=el('toggle-study');
     const toggleProgress=el('toggle-progress');
-    const csvDropdown=el('csv-dropdown');
-    const btnCsvMenu=el('btn-csv-menu');
-    const menuImport=el('menu-import');
-    const menuExport=el('menu-export');
-    const menuSample=el('menu-sample');
+    const toggleAutoDay=el('toggle-auto-day');
+    const appearanceModal=el('appearance-modal');
+    const btnAppearance=el('btn-appearance');
+    const btnAppearanceClose=el('btn-appearance-close');
+    const btnScheduleSettings=el('btn-schedule-settings');
+    const sheetsSyncModal=el('sheets-sync-modal');
+    const sheetsUrlInput=el('sheets-url-input');
+    const sheetsAutoSyncToggle=el('sheets-auto-sync');
+    const sheetsSyncIntervalSelect=el('sheets-sync-interval');
+    const btnSheetsSyncNow=el('btn-sheets-sync-now');
+    const btnSheetsCancel=el('btn-sheets-cancel');
+    const btnSheetsTemplate=el('btn-sheets-template');
+    const btnSheetsTemplateLink=el('btn-sheets-template-link');
+
+    let sheetsAutoSyncTimer=null;
+    let sheetsSyncInFlight=false;
+    const SHEETS_LS_KEYS={
+      url:'sheetsUrl',
+      autoSync:'sheetsAutoSync',
+      intervalMin:'sheetsSyncIntervalMin',
+      lastSyncAt:'sheetsLastSyncAt',
+      lastSyncStatus:'sheetsLastSyncStatus',
+    };
+    const SHEETS_TEMPLATE_URL='https://docs.google.com/spreadsheets/d/1pYyX2gbs72SXl17atg4oFlAH84nFMV3lemfUlCtEwHY/edit?usp=sharing';
+    const SHEETS_TEMPLATE_NAME='大橋國中段考時程表';
+    function getDefaultSheetsUrl(){ return SHEETS_TEMPLATE_URL; }
+    function openScheduleSettingsModal(){
+      restoreSheetsSettingsUI();
+      switchScheduleSettingsTab('sheets');
+      sheetsSyncModal.classList.remove('hidden');
+    }
+    function switchScheduleSettingsTab(tabName){
+      if(!sheetsSyncModal) return;
+      const tabs=sheetsSyncModal.querySelectorAll('.schedule-settings-tab');
+      const panes=sheetsSyncModal.querySelectorAll('.schedule-settings-pane');
+      tabs.forEach(tab=>{
+        const active=tab.dataset.tab===tabName;
+        tab.classList.toggle('is-active',active);
+        tab.setAttribute('aria-selected',active?'true':'false');
+      });
+      panes.forEach(pane=>{
+        const active=pane.dataset.panel===tabName;
+        pane.classList.toggle('is-active',active);
+        if(active){
+          pane.removeAttribute('hidden');
+        }else{
+          pane.setAttribute('hidden','');
+        }
+      });
+    }
+    function initScheduleSettingsTabs(){
+      if(!sheetsSyncModal) return;
+      sheetsSyncModal.querySelectorAll('.schedule-settings-tab').forEach(tab=>{
+        tab.addEventListener('click', ()=>switchScheduleSettingsTab(tab.dataset.tab||'sheets'));
+      });
+      sheetsSyncModal.addEventListener('click', (e)=>{
+        if(e.target===sheetsSyncModal){
+          saveSheetsSettings();
+          sheetsSyncModal.classList.add('hidden');
+        }
+      });
+    }
+    function openAppearanceModal(){
+      appearanceModal?.classList.remove('hidden');
+    }
+    function closeAppearanceModal(){
+      appearanceModal?.classList.add('hidden');
+    }
     const btnPresent=el('btn-present');
     const btnFullscreen=el('btn-fullscreen');
     const pageTitleEl=el('page-title');
@@ -1125,6 +1328,80 @@
   /* ===== 原功能：工具函式 ===== */
   const parseTime=(t)=>{const [h,m]=t.split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);return d}
   const within=(now,s,e)=>now>=s&&now<e;
+  function parseDayNameDate(dayName,year){
+    const m=String(dayName||'').match(/(\d{1,2})\s*\/\s*(\d{1,2})/);
+    if(!m) return null;
+    return new Date(year,parseInt(m[1],10)-1,parseInt(m[2],10));
+  }
+  function isSameCalendarDayAsName(dayName,now){
+    const d=parseDayNameDate(dayName,now.getFullYear());
+    if(!d) return false;
+    return d.getMonth()===now.getMonth()&&d.getDate()===now.getDate();
+  }
+  function getScheduleDayBounds(data){
+    if(!data?.length) return null;
+    return {start:parseTime(data[0].start),end:parseTime(data[data.length-1].end)};
+  }
+  function isNowWithinDayBounds(now,data){
+    const b=getScheduleDayBounds(data);
+    if(!b) return false;
+    return now>=b.start&&now<b.end;
+  }
+  function findCurrentSlot(now,data){
+    if(!data) return null;
+    for(let i=0;i<data.length;i++){
+      const s=parseTime(data[i].start),e=parseTime(data[i].end);
+      if(within(now,s,e)) return {item:data[i],index:i};
+    }
+    return null;
+  }
+  function resolveDayKeyForNow(now){
+    const keys=Object.keys(initialSchedules).sort();
+    if(!keys.length) return null;
+    const calendarMatches=keys.filter(k=>isSameCalendarDayAsName(initialSchedules[k].name,now));
+    if(calendarMatches.length===1) return calendarMatches[0];
+    if(calendarMatches.length>1){
+      const inBounds=calendarMatches.filter(k=>isNowWithinDayBounds(now,initialSchedules[k].data));
+      if(inBounds.length===1) return inBounds[0];
+      return calendarMatches[0];
+    }
+    const timeMatches=keys.filter(k=>isNowWithinDayBounds(now,initialSchedules[k].data));
+    if(timeMatches.length>=1) return timeMatches[0];
+    return null;
+  }
+  function findCalendarDayKeyForNow(now){
+    return Object.keys(initialSchedules).find(k=>isSameCalendarDayAsName(initialSchedules[k].name,now))||null;
+  }
+  function isNowInLiveExamSchedule(now){
+    const calendarDayKey=findCalendarDayKeyForNow(now);
+    if(!calendarDayKey) return false;
+    return isNowWithinDayBounds(now,initialSchedules[calendarDayKey].data);
+  }
+  function updateDayToolbarHint(now){
+    if(!dayOutOfScheduleHintEl) return;
+    if(isNowInLiveExamSchedule(now)){
+      dayOutOfScheduleHintEl.classList.add('hidden');
+    }else{
+      dayOutOfScheduleHintEl.classList.remove('hidden');
+    }
+  }
+  function getSelectedDayIdleTitle(now,dayKey){
+    if(!dayKey||!initialSchedules[dayKey]) return '目前無進行中時段';
+    const data=initialSchedules[dayKey].data;
+    const bounds=getScheduleDayBounds(data);
+    if(bounds&&now<bounds.start) return '段考尚未開始';
+    if(bounds&&now>=bounds.end) return '今日段考已結束';
+    return '目前無進行中時段';
+  }
+  function maybeAutoSwitchDay(now){
+    if(!autoSwitchDay||dayManuallySelected) return false;
+    const resolved=resolveDayKeyForNow(now);
+    if(resolved&&resolved!==currentDay){
+      loadSchedule(resolved,{fromAuto:true});
+      return true;
+    }
+    return false;
+  }
   function getSplitSchedules(scheduleData){
     const lunchIndex=scheduleData.findIndex(i=>i.start==='11:45'&&i.end==='13:05');
     if(lunchIndex===-1) return {morning:scheduleData,lunch:null,afternoon:[]};
@@ -1162,13 +1439,25 @@
       const btn=document.createElement('button');
       btn.id=`${day}-btn`; btn.textContent=schedule.name;
       btn.className=`btn ${isActive?'bg-indigo-500 text-white':'btn-gray'}`;
-      btn.addEventListener('click',()=>loadSchedule(day));
+      btn.addEventListener('click',()=>loadSchedule(day,{force:true}));
       dayButtonsContainer.appendChild(btn);
     });
   }
-  function loadSchedule(day){
+  function loadSchedule(day,options={}){
+    const {force=false,fromAuto=false}=options;
+    if(force){
+      dayManuallySelected=true;
+      localStorage.setItem('dayManuallySelected','true');
+      localStorage.setItem('forcedDayKey',day);
+    }
+    if(fromAuto){
+      dayManuallySelected=false;
+      localStorage.removeItem('dayManuallySelected');
+      localStorage.removeItem('forcedDayKey');
+    }
     if(!initialSchedules[day]){
-      const first=Object.keys(initialSchedules)[0];
+      const autoDay=resolveDayKeyForNow(new Date());
+      const first=autoDay||Object.keys(initialSchedules)[0];
       if(!first){ currentScheduleData=null; renderDayButtons(); renderSchedule(); updateDisplay(); return;}
       day=first;
     }
@@ -1234,7 +1523,355 @@
     },2200);
   }
 
-  /* ===== CSV/下載（原函式保留） ===== */
+  /* ===== CSV / Google Sheets 排程 ===== */
+  const SCHEDULE_HEADER=['DayKey','DayName','StartTime','EndTime','SubjectName','ActivityType'];
+  const SETTINGS_SHEET_NAME='設定';
+  const SETTINGS_HEADER=['Key','Value'];
+  const DEFAULT_PAGE_TITLE='段考時程表';
+  const EXAM_TITLE_LS_KEY='examPageTitle';
+  const ACTIVITY_TYPES=['exam','break','study','end'];
+
+  function normalizeTime(value, formatted){
+    const fmt=formatted!=null?String(formatted).trim():'';
+    if(fmt){
+      let m=fmt.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+      if(m) return `${String(m[1]).padStart(2,'0')}:${m[2]}`;
+      m=fmt.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+      if(m){
+        let h=parseInt(m[1],10);
+        const pm=m[3].toUpperCase()==='PM';
+        if(pm&&h!==12) h+=12;
+        if(!pm&&h===12) h=0;
+        return `${String(h).padStart(2,'0')}:${m[2]}`;
+      }
+      m=fmt.match(/Date\((\d+),(\d+),(\d+),(\d+),(\d+)/);
+      if(m) return `${String(m[4]).padStart(2,'0')}:${String(m[5]).padStart(2,'0')}`;
+    }
+    if(value!=null&&value!==''){
+      const num=Number(value);
+      if(!Number.isNaN(num)&&num>=0&&num<1){
+        const totalMin=Math.round(num*24*60);
+        return `${String(Math.floor(totalMin/60)).padStart(2,'0')}:${String(totalMin%60).padStart(2,'0')}`;
+      }
+      const raw=String(value).trim();
+      if(raw){
+        let m=raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+        if(m) return `${String(m[1]).padStart(2,'0')}:${m[2]}`;
+        m=raw.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+        if(m){
+          let h=parseInt(m[1],10);
+          const pm=m[3].toUpperCase()==='PM';
+          if(pm&&h!==12) h+=12;
+          if(!pm&&h===12) h=0;
+          return `${String(h).padStart(2,'0')}:${m[2]}`;
+        }
+        m=raw.match(/Date\((\d+),(\d+),(\d+),(\d+),(\d+)/);
+        if(m) return `${String(m[4]).padStart(2,'0')}:${String(m[5]).padStart(2,'0')}`;
+      }
+    }
+    return null;
+  }
+  function gvizCellData(cell){
+    if(!cell||cell.v===null||cell.v===undefined) return {value:'',formatted:''};
+    return {value:cell.v,formatted:cell.f??String(cell.v)};
+  }
+  function addScheduleRow(schedules,rowNum,DayKey,DayName,StartTime,EndTime,SubjectName,ActivityType){
+    const start=typeof StartTime==='object'&&StartTime?normalizeTime(StartTime.value,StartTime.formatted):normalizeTime(StartTime);
+    const end=typeof EndTime==='object'&&EndTime?normalizeTime(EndTime.value,EndTime.formatted):normalizeTime(EndTime);
+    if(!start||!end) throw new Error(`第 ${rowNum} 行時間格式錯誤，請將 StartTime / EndTime 欄設為 hh:mm 格式。`);
+    const type=String(ActivityType||'').trim().toLowerCase();
+    if(!ACTIVITY_TYPES.includes(type)) throw new Error(`第 ${rowNum} 行活動類型錯誤：僅允許 exam, break, study, end`);
+    const dayKey=String(DayKey||'').trim();
+    const dayName=String(DayName||'').trim();
+    const subjectName=String(SubjectName||'').trim();
+    if(!dayKey||!dayName||!subjectName) throw new Error(`第 ${rowNum} 行資料不完整。`);
+    if(!schedules[dayKey]) schedules[dayKey]={name:dayName,data:[]};
+    schedules[dayKey].data.push({start,end,name:subjectName,type});
+  }
+  function applySchedules(newSchedules,options={}){
+    const {silent=false}=options;
+    if(!Object.keys(newSchedules).length) throw new Error('解析後未得到任何有效的排程資料。');
+    initialSchedules=newSchedules;
+    const first=Object.keys(initialSchedules).sort()[0];
+    const autoDay=resolveDayKeyForNow(new Date());
+    const preserveDay=autoDay||(initialSchedules[currentDay]?currentDay:first);
+    loadSchedule(preserveDay);
+    localStorage.setItem('schedulesCSV',convertToCsv(initialSchedules));
+    if(!silent){
+      const dayCount=Object.keys(initialSchedules).length;
+      showStatusMessage(`排程已更新！已載入 ${dayCount} 天排程。`);
+    }
+    return initialSchedules;
+  }
+  function parseSheetsUrl(url){
+    const trimmed=(url||'').trim();
+    if(!trimmed) throw new Error('請貼上完整的 Google 試算表網址。');
+    const idMatch=trimmed.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    if(!idMatch) throw new Error('無法從網址解析試算表 ID，請確認為 Google 試算表連結。');
+    const gidMatch=trimmed.match(/[?#&]gid=(\d+)/);
+    return {spreadsheetId:idMatch[1],gid:gidMatch?gidMatch[1]:'0'};
+  }
+  function parseGvizResponse(text){
+    const match=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]+)\);?\s*$/);
+    if(!match) throw new Error('無法解析 Google 試算表回應格式。');
+    const json=JSON.parse(match[1]);
+    if(json.status==='error'){
+      const msg=json.errors?.[0]?.detailed_message||json.errors?.[0]?.message||'試算表查詢失敗。';
+      throw new Error(msg);
+    }
+    return json;
+  }
+  function gvizToSchedules(gvizJson){
+    const table=gvizJson.table;
+    if(!table||!table.rows||!table.rows.length) throw new Error('試算表沒有資料列，請確認「排程」分頁已填寫。');
+    const colLabels=(table.cols||[]).map(c=>(c.label||'').trim());
+    const schedules={};
+    let startRowIndex=0;
+    const firstRow=table.rows[0];
+    const firstValues=(firstRow.c||[]).map((cell,i)=>{
+      const {value,formatted}=gvizCellData(cell);
+      return String(formatted||value||'').trim();
+    });
+    const isHeaderRow=SCHEDULE_HEADER.every((h,i)=>firstValues[i]===h);
+    if(isHeaderRow){
+      startRowIndex=1;
+    }else{
+      const labelsOk=SCHEDULE_HEADER.every((h,i)=>(colLabels[i]||'')===h);
+      if(!labelsOk) throw new Error('第一列須為：DayKey, DayName, StartTime, EndTime, SubjectName, ActivityType');
+    }
+    for(let i=startRowIndex;i<table.rows.length;i++){
+      const cells=table.rows[i].c||[];
+      const vals=cells.map(c=>gvizCellData(c));
+      const dayKey=String(vals[0]?.formatted||vals[0]?.value||'').trim();
+      if(!dayKey) continue;
+      addScheduleRow(
+        schedules,
+        i+1,
+        dayKey,
+        vals[1]?.formatted||vals[1]?.value,
+        vals[2],
+        vals[3],
+        vals[4]?.formatted||vals[4]?.value,
+        vals[5]?.formatted||vals[5]?.value
+      );
+    }
+    if(!Object.keys(schedules).length) throw new Error('解析後未得到任何有效的排程資料。');
+    return schedules;
+  }
+  function applyPageTitle(title){
+    const text=(title||'').trim()||DEFAULT_PAGE_TITLE;
+    if(pageTitleEl) pageTitleEl.textContent=text;
+    document.title=text;
+    return text;
+  }
+  function applyExamTitleFromSettings(settings){
+    const examTitle=settings?.ExamTitle?.trim();
+    if(examTitle){
+      localStorage.setItem(EXAM_TITLE_LS_KEY,examTitle);
+      return applyPageTitle(examTitle);
+    }
+    localStorage.removeItem(EXAM_TITLE_LS_KEY);
+    return applyPageTitle(DEFAULT_PAGE_TITLE);
+  }
+  function looksLikeScheduleSheet(gvizJson){
+    const table=gvizJson?.table;
+    if(!table?.rows?.length) return false;
+    const colLabels=(table.cols||[]).map(c=>(c.label||'').trim());
+    if(SCHEDULE_HEADER.every((h,i)=>(colLabels[i]||'')===h)) return true;
+    const firstRow=table.rows[0];
+    const firstValues=(firstRow.c||[]).map((cell)=>{
+      const {value,formatted}=gvizCellData(cell);
+      return String(formatted||value||'').trim();
+    });
+    return SCHEDULE_HEADER.every((h,i)=>firstValues[i]===h);
+  }
+  function gvizToSettings(gvizJson){
+    const table=gvizJson?.table;
+    if(!table?.rows?.length) return null;
+    if(looksLikeScheduleSheet(gvizJson)) return null;
+    const settings={};
+    let startRowIndex=0;
+    const firstRow=table.rows[0];
+    const firstValues=(firstRow.c||[]).map((cell)=>{
+      const {value,formatted}=gvizCellData(cell);
+      return String(formatted||value||'').trim();
+    });
+    if(firstValues[0]===SETTINGS_HEADER[0]&&firstValues[1]===SETTINGS_HEADER[1]) startRowIndex=1;
+    for(let i=startRowIndex;i<table.rows.length;i++){
+      const cells=table.rows[i].c||[];
+      const vals=cells.map(c=>gvizCellData(c));
+      const key=String(vals[0]?.formatted||vals[0]?.value||'').trim();
+      const value=String(vals[1]?.formatted||vals[1]?.value||'').trim();
+      if(key) settings[key]=value;
+    }
+    return Object.keys(settings).length?settings:null;
+  }
+  async function fetchGvizFromUrl(apiUrl){
+    return new Promise((resolve,reject)=>{
+      const script=document.createElement('script');
+      const timeoutId=setTimeout(()=>{
+        finish(new Error('讀取試算表逾時，請稍後再試。'));
+      },20000);
+      let settled=false;
+      let prevHandler;
+      function finish(err,result){
+        if(settled) return;
+        settled=true;
+        clearTimeout(timeoutId);
+        script.remove();
+        if(prevHandler) window.google.visualization.Query.setResponse=prevHandler;
+        if(err) reject(err); else resolve(result);
+      }
+      window.google=window.google||{};
+      window.google.visualization=window.google.visualization||{};
+      window.google.visualization.Query=window.google.visualization.Query||{};
+      prevHandler=window.google.visualization.Query.setResponse;
+      window.google.visualization.Query.setResponse=(json)=>{
+        try{
+          if(!json||json.status==='error'){
+            const msg=json?.errors?.[0]?.detailed_message||json?.errors?.[0]?.message||'試算表查詢失敗。';
+            throw new Error(msg);
+          }
+          finish(null,json);
+        }catch(e){ finish(e); }
+      };
+      script.onerror=()=>finish(new Error('無法讀取試算表，請確認網路連線並將試算表設為「知道連結者可檢視」。'));
+      script.src=apiUrl;
+      document.head.appendChild(script);
+    });
+  }
+  async function fetchScheduleFromSheets(url){
+    const {spreadsheetId,gid}=parseSheetsUrl(url);
+    const apiUrl=`https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+    const json=await fetchGvizFromUrl(apiUrl);
+    return gvizToSchedules(json);
+  }
+  async function fetchSettingsFromSheets(spreadsheetId){
+    try{
+      const apiUrl=`https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SETTINGS_SHEET_NAME)}`;
+      const json=await fetchGvizFromUrl(apiUrl);
+      return gvizToSettings(json);
+    }catch(e){
+      console.debug('設定分頁讀取略過：',e.message);
+      return null;
+    }
+  }
+  function formatSheetsSyncTime(iso){
+    if(!iso) return '';
+    try{
+      return new Date(iso).toLocaleString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+    }catch{ return ''; }
+  }
+  function updateSheetsSyncStatus(errorMessage,meta={}){
+    const statusEl=el('sheets-sync-status');
+    if(!statusEl) return;
+    const lastAt=localStorage.getItem(SHEETS_LS_KEYS.lastSyncAt);
+    const lastStatus=localStorage.getItem(SHEETS_LS_KEYS.lastSyncStatus);
+    const baseClass='text-xs min-h-[1.25rem] mt-1 truncate';
+    if(errorMessage){
+      statusEl.textContent=errorMessage;
+      statusEl.className=`${baseClass} text-rose-300`;
+      return;
+    }
+    if(meta.success){
+      const timeStr=formatSheetsSyncTime(lastAt);
+      statusEl.textContent=`上次同步：${timeStr||'剛剛'}，已載入 ${meta.dayCount??Object.keys(initialSchedules).length} 天排程`;
+      statusEl.className=`${baseClass} text-emerald-300`;
+      return;
+    }
+    if(lastStatus&&lastStatus!=='ok'){
+      statusEl.textContent=`上次同步失敗：${lastStatus}`;
+      statusEl.className=`${baseClass} text-rose-300`;
+      return;
+    }
+    if(lastAt){
+      statusEl.textContent=`上次同步：${formatSheetsSyncTime(lastAt)}`;
+      statusEl.className=`${baseClass} text-slate-400`;
+      return;
+    }
+    statusEl.textContent='尚未同步';
+    statusEl.className=`${baseClass} text-slate-400`;
+  }
+  function saveSheetsSettings(){
+    const urlInput=el('sheets-url-input');
+    const url=(urlInput?.value||'').trim();
+    if(url) localStorage.setItem(SHEETS_LS_KEYS.url,url);
+    localStorage.setItem(SHEETS_LS_KEYS.autoSync,sheetsAutoSyncToggle?.checked?'true':'false');
+    localStorage.setItem(SHEETS_LS_KEYS.intervalMin,String(sheetsSyncIntervalSelect?.value||'5'));
+  }
+  function restoreSheetsSettingsUI(){
+    const savedUrl=localStorage.getItem(SHEETS_LS_KEYS.url)||getDefaultSheetsUrl();
+    const urlInput=el('sheets-url-input');
+    if(urlInput) urlInput.value=savedUrl;
+    if(sheetsAutoSyncToggle) sheetsAutoSyncToggle.checked=localStorage.getItem(SHEETS_LS_KEYS.autoSync)==='true';
+    const interval=localStorage.getItem(SHEETS_LS_KEYS.intervalMin)||'5';
+    if(sheetsSyncIntervalSelect) sheetsSyncIntervalSelect.value=interval;
+    autoSwitchDay=localStorage.getItem('autoSwitchDay')!=='false';
+    if(toggleAutoDay) toggleAutoDay.checked=autoSwitchDay;
+    if(btnSheetsTemplateLink&&SHEETS_TEMPLATE_URL){
+      btnSheetsTemplateLink.href=SHEETS_TEMPLATE_URL;
+      btnSheetsTemplateLink.textContent=`${SHEETS_TEMPLATE_NAME} ↗`;
+    }
+    updateSheetsSyncStatus();
+  }
+  function applyDefaultSheetsTemplate({syncNow=false}={}){
+    const url=getDefaultSheetsUrl();
+    const urlInput=el('sheets-url-input');
+    if(urlInput) urlInput.value=url;
+    localStorage.setItem(SHEETS_LS_KEYS.url,url);
+    updateSheetsSyncStatus();
+    if(syncNow) return syncFromGoogleSheets({manual:true});
+    showStatusMessage(`已還原為${SHEETS_TEMPLATE_NAME}`);
+    return Promise.resolve(true);
+  }
+  function stopSheetsAutoSync(){
+    if(sheetsAutoSyncTimer){
+      clearInterval(sheetsAutoSyncTimer);
+      sheetsAutoSyncTimer=null;
+    }
+  }
+  function startSheetsAutoSync(){
+    stopSheetsAutoSync();
+    const autoSync=localStorage.getItem(SHEETS_LS_KEYS.autoSync)==='true';
+    const intervalMin=Number(localStorage.getItem(SHEETS_LS_KEYS.intervalMin))||5;
+    const url=localStorage.getItem(SHEETS_LS_KEYS.url)||getDefaultSheetsUrl();
+    if(!autoSync||!url||intervalMin<=0) return;
+    sheetsAutoSyncTimer=setInterval(()=>{ syncFromGoogleSheets({manual:false}); },intervalMin*60*1000);
+  }
+  async function syncFromGoogleSheets({manual=false}={}){
+    const urlInput=el('sheets-url-input');
+    const url=(urlInput?.value||localStorage.getItem(SHEETS_LS_KEYS.url)||getDefaultSheetsUrl()||'').trim();
+    if(!url){
+      if(manual) showStatusMessage('請先輸入 Google 試算表網址。',true);
+      updateSheetsSyncStatus('尚未設定試算表網址');
+      return false;
+    }
+    if(sheetsSyncInFlight) return false;
+    sheetsSyncInFlight=true;
+    if(btnSheetsSyncNow) btnSheetsSyncNow.disabled=true;
+    try{
+      const {spreadsheetId}=parseSheetsUrl(url);
+      const schedules=await fetchScheduleFromSheets(url);
+      const settings=await fetchSettingsFromSheets(spreadsheetId);
+      applyExamTitleFromSettings(settings||{});
+      localStorage.setItem(SHEETS_LS_KEYS.url,url);
+      applySchedules(schedules,{silent:!manual});
+      localStorage.setItem(SHEETS_LS_KEYS.lastSyncAt,new Date().toISOString());
+      localStorage.setItem(SHEETS_LS_KEYS.lastSyncStatus,'ok');
+      updateSheetsSyncStatus(null,{success:true,dayCount:Object.keys(schedules).length});
+      if(manual) showStatusMessage(`Google Sheets 同步成功！已載入 ${Object.keys(schedules).length} 天排程。`);
+      return true;
+    }catch(e){
+      console.error(e);
+      localStorage.setItem(SHEETS_LS_KEYS.lastSyncStatus,e.message);
+      updateSheetsSyncStatus(e.message,{success:false});
+      if(manual) showStatusMessage(`Google Sheets 同步失敗：${e.message}`,true);
+      return false;
+    }finally{
+      sheetsSyncInFlight=false;
+      if(btnSheetsSyncNow) btnSheetsSyncNow.disabled=false;
+    }
+  }
   function convertToCsv(schedules){
     const header='DayKey,DayName,StartTime,EndTime,SubjectName,ActivityType\n';
     let csv=header;
@@ -1257,10 +1894,7 @@
       const values=line.match(/(?:[^,"]+|"[^"]*")+/g)?.map(v=>v.trim().replace(/^"|"$/g,'').replace(/""/g,'"'))||[];
       if(values.length!==6){ console.warn(`Line ${i+2} 欄位數不符，已略過：`,line); return;}
       const [DayKey,DayName,StartTime,EndTime,SubjectName,ActivityType]=values;
-      if(!/^\d{2}:\d{2}$/.test(StartTime)||!/^\d{2}:\d{2}$/.test(EndTime)) throw new Error(`第 ${i+2} 行時間格式錯誤：${StartTime}-${EndTime}`);
-      if(!['exam','break','study','end'].includes(ActivityType)) throw new Error(`第 ${i+2} 行活動類型錯誤：${ActivityType}`);
-      if(!schedules[DayKey]) schedules[DayKey]={name:DayName,data:[]};
-      schedules[DayKey].data.push({start:StartTime,end:EndTime,name:SubjectName,type:ActivityType});
+      addScheduleRow(schedules,i+2,DayKey,DayName,StartTime,EndTime,SubjectName,ActivityType);
     });
     return schedules;
   }
@@ -1277,9 +1911,13 @@
     showStatusMessage('排程資料已成功匯出為 exam_schedule.csv！');
   }
   function downloadSampleCsv(){
-    const csv=convertToCsv(initialSchedules);
-    downloadFile(csv,'exam_schedule_sample.csv','text/csv;charset=utf-8;');
-    showStatusMessage('CSV 範例檔案已下載！');
+    const templateLink=el('btn-sheets-template-file');
+    if(templateLink){
+      templateLink.click();
+      showStatusMessage('CSV 範例檔案已下載！');
+      return;
+    }
+    showStatusMessage('找不到 CSV 範本檔，請至排程設定下載。',true);
   }
 
   /* ===== v1.0.1：展示層同步 ===== */
@@ -1440,6 +2078,10 @@
 
   /* ===== 主更新 ===== */
   function updateDisplay(){
+    const now=new Date();
+    updateDayToolbarHint(now);
+    if(maybeAutoSwitchDay(now)) return;
+
     if(!currentScheduleData||!currentScheduleData.data){
       currentSubjectEl.textContent='無排程資料';
       subjectTimeRangeEl.textContent='---';
@@ -1448,7 +2090,6 @@
       return;
     }
     const schedule=currentScheduleData.data;
-    const now=new Date();
 
     let currentItem=null,currentIndex=-1,pct=0;
     document.querySelectorAll('.timeline-item').forEach(el=>el.classList.remove('active'));
@@ -1465,29 +2106,26 @@
       subjectProgressBarEl.style.width=pct+'%';
       subjectProgressTextEl.textContent=pct+'%';
 
-      // 根據主題設置不同的背景
       const currentTheme = document.documentElement.getAttribute('data-theme');
       if(currentTheme === 'light-soft'){
-        // 櫻花粉主題的特殊漸變
         if(currentItem.type==='exam') hero.style.background='linear-gradient(145deg, rgba(236,72,153,.30), rgba(219,39,119,.25))';
         else if(currentItem.type==='break') hero.style.background='linear-gradient(145deg, rgba(251,191,36,.25), rgba(34,197,94,.20))';
         else if(currentItem.type==='study') hero.style.background='linear-gradient(145deg, rgba(236,72,153,.25), rgba(219,39,119,.20))';
         else hero.style.background='linear-gradient(145deg, rgba(236,72,153,.20), rgba(219,39,119,.15))';
       }else{
-        // 其他主題使用原有樣式
         if(currentItem.type==='exam') hero.style.background='linear-gradient(145deg, rgba(14,165,233,.20), rgba(99,102,241,.18))';
         else if(currentItem.type==='break') hero.style.background='linear-gradient(145deg, rgba(251,191,36,.20), rgba(34,197,94,.18))';
         else if(currentItem.type==='study') hero.style.background='linear-gradient(145deg, rgba(167,139,250,.22), rgba(56,189,248,.18))';
         else hero.style.background='linear-gradient(145deg, rgba(148,163,184,.15), rgba(100,116,139,.15))';
       }
 
-      const itemEl=document.getElementById(`schedule-item-${currentIndex}`); if(itemEl) itemEl.classList.add('active');
+      const itemEl=document.getElementById(`schedule-item-${currentIndex}`);
+      if(itemEl) itemEl.classList.add('active');
     }else{
-      currentSubjectEl.textContent='今日排程已結束 / 尚未開始';
+      currentSubjectEl.textContent=getSelectedDayIdleTitle(now,currentDay);
       subjectTimeRangeEl.textContent='---';
       subjectProgressBarEl.style.width='0%';
       subjectProgressTextEl.textContent='0%';
-      // 根據主題設置不同的背景
       const currentTheme = document.documentElement.getAttribute('data-theme');
       if(currentTheme === 'light-soft'){
         hero.style.background='linear-gradient(145deg, rgba(236,72,153,.20), rgba(219,39,119,.15))';
@@ -1500,9 +2138,14 @@
   }
 
   /* ===== 主題切換功能 ===== */
-  function applyTheme(themeName){
+  const THEME_DEFAULT='dark';
+  const THEME_ALLOWED=['dark','blackboard','light','light-soft','blue','purple','warm','high-contrast'];
+  function applyTheme(themeName,options={}){
+    const {silent=false}=options;
+    if(!THEME_ALLOWED.includes(themeName)) themeName=THEME_DEFAULT;
     const htmlEl = document.documentElement;
     htmlEl.setAttribute('data-theme', themeName);
+    htmlEl.classList.toggle('dark',['dark','blackboard','blue','purple','warm','high-contrast'].includes(themeName));
     localStorage.setItem('selectedTheme', themeName);
     
     // 更新所有主題按鈕的 active 狀態
@@ -1514,7 +2157,7 @@
       }
     });
     
-    showStatusMessage(`已切換至${getThemeName(themeName)}主題`);
+    if(!silent) showStatusMessage(`已切換至${getThemeName(themeName)}主題`);
   }
   
   function getThemeName(themeKey){
@@ -1534,8 +2177,9 @@
   /* ===== 初始化 ===== */
   function init(){
     // 初始化主題
-    const savedTheme = localStorage.getItem('selectedTheme') || 'dark';
-    applyTheme(savedTheme);
+    const savedTheme = localStorage.getItem('selectedTheme');
+    const themeToApply = (savedTheme && THEME_ALLOWED.includes(savedTheme)) ? savedTheme : THEME_DEFAULT;
+    applyTheme(themeToApply, { silent: true });
     
     const savedSeats=localStorage.getItem('absentSeats'); if(savedSeats){ absentInput.value=savedSeats; }
     expectedCount=Number(localStorage.getItem('expectedCount'))||expectedCount;
@@ -1543,8 +2187,31 @@
 
     const savedCSV=localStorage.getItem('schedulesCSV');
     if(savedCSV){ try{ initialSchedules=parseCsv(savedCSV);}catch{} }
+    applyPageTitle(localStorage.getItem(EXAM_TITLE_LS_KEY)||DEFAULT_PAGE_TITLE);
+    restoreSheetsSettingsUI();
+    if(!localStorage.getItem(SHEETS_LS_KEYS.url)){
+      localStorage.setItem(SHEETS_LS_KEYS.url,getDefaultSheetsUrl());
+    }
     const firstDayKey=Object.keys(initialSchedules).sort()[0];
-    if(firstDayKey) loadSchedule(firstDayKey); else { renderDayButtons(); renderSchedule(); updateDisplay(); }
+    const autoDay=resolveDayKeyForNow(new Date());
+    const forcedDay=localStorage.getItem('forcedDayKey');
+    if(dayManuallySelected&&forcedDay&&initialSchedules[forcedDay]) loadSchedule(forcedDay);
+    else if(autoDay) loadSchedule(autoDay,{fromAuto:true});
+    else if(firstDayKey) loadSchedule(firstDayKey);
+    else {
+      renderDayButtons();
+      renderSchedule();
+      updateDisplay();
+      if(currentSubjectEl) currentSubjectEl.textContent='載入排程中...';
+    }
+    syncFromGoogleSheets({manual:false}).then((ok)=>{
+      if(!ok&&!Object.keys(initialSchedules).length&&currentSubjectEl){
+        currentSubjectEl.textContent='無排程資料';
+      }
+    });
+    if(localStorage.getItem(SHEETS_LS_KEYS.autoSync)==='true'){
+      startSheetsAutoSync();
+    }
 
     setInterval(()=>{ updateDisplay(); tickClocks(); }, 1000);
     tickClocks();
@@ -1652,42 +2319,27 @@
       updateProgressVisibility();
     }
 
-    // CSV 下拉選單功能
-    if(btnCsvMenu){
-      btnCsvMenu.addEventListener('click', (e)=>{
+    // 外觀 / 排程設定按鈕
+    if(btnScheduleSettings){
+      btnScheduleSettings.addEventListener('click', (e)=>{
         e.stopPropagation();
-        csvDropdown.classList.toggle('active');
+        openScheduleSettingsModal();
       });
-      
-      // 點擊外部關閉選單（但排除滑動開關和主題按鈕）
-      document.addEventListener('click', (e)=>{
-        if(!csvDropdown.contains(e.target) && 
-           !e.target.closest('.toggle-switch') && 
-           !e.target.closest('.toggle-label') &&
-           !e.target.closest('.theme-btn')){
-          csvDropdown.classList.remove('active');
-        }
+    }
+    initScheduleSettingsTabs();
+    if(btnAppearance){
+      btnAppearance.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        openAppearanceModal();
       });
-
-      // 選單項目事件
-      if(menuImport){
-        menuImport.addEventListener('click', ()=>{
-          csvDropdown.classList.remove('active');
-          scheduleImportModal.classList.remove('hidden');
-        });
-      }
-      if(menuExport){
-        menuExport.addEventListener('click', ()=>{
-          csvDropdown.classList.remove('active');
-          exportScheduleData();
-        });
-      }
-      if(menuSample){
-        menuSample.addEventListener('click', ()=>{
-          csvDropdown.classList.remove('active');
-          downloadSampleCsv();
-        });
-      }
+    }
+    if(btnAppearanceClose){
+      btnAppearanceClose.addEventListener('click', ()=>closeAppearanceModal());
+    }
+    if(appearanceModal){
+      appearanceModal.addEventListener('click', (e)=>{
+        if(e.target===appearanceModal) closeAppearanceModal();
+      });
     }
 
     // 主題切換按鈕事件
@@ -1719,21 +2371,80 @@
 	});
 
 
-    document.getElementById('btn-schedule-cancel').addEventListener('click', ()=>scheduleImportModal.classList.add('hidden'));
     document.getElementById('btn-schedule-confirm').addEventListener('click', ()=>{
       const csv=scheduleImportDataTextarea.value.trim();
-      scheduleImportModal.classList.add('hidden');
       if(!csv) return showStatusMessage('排程匯入取消或無資料。',true);
       try{
-        const newSchedules=parseCsv(csv);
-        if(!Object.keys(newSchedules).length) throw new Error('解析後未得到任何有效的排程資料。');
-        initialSchedules=newSchedules;
-        const first=Object.keys(initialSchedules).sort()[0];
-        loadSchedule(first);
+        applySchedules(parseCsv(csv),{silent:true});
         showStatusMessage(`排程匯入成功！已載入 ${Object.keys(initialSchedules).length} 天排程。`);
-        localStorage.setItem('schedulesCSV', csv);
       }catch(e){ console.error(e); showStatusMessage(`排程匯入失敗：${e.message}`,true); }
     });
+
+    const btnSheetsUseDefault=el('btn-sheets-use-default');
+    if(btnSheetsUseDefault){
+      btnSheetsUseDefault.addEventListener('click', ()=>{
+        applyDefaultSheetsTemplate({syncNow:true});
+      });
+    }
+
+    if(btnSheetsCancel){
+      btnSheetsCancel.addEventListener('click', ()=>{
+        saveSheetsSettings();
+        sheetsSyncModal.classList.add('hidden');
+      });
+    }
+    if(btnSheetsSyncNow){
+      btnSheetsSyncNow.addEventListener('click', async ()=>{
+        saveSheetsSettings();
+        await syncFromGoogleSheets({manual:true});
+      });
+    }
+    if(btnSheetsTemplate){
+      btnSheetsTemplate.addEventListener('click', ()=>{
+        exportScheduleData();
+      });
+    }
+    if(sheetsAutoSyncToggle){
+      sheetsAutoSyncToggle.addEventListener('change', ()=>{
+        saveSheetsSettings();
+        if(sheetsAutoSyncToggle.checked){
+          startSheetsAutoSync();
+          showStatusMessage('已啟用 Google Sheets 自動同步');
+        }else{
+          stopSheetsAutoSync();
+          showStatusMessage('已關閉 Google Sheets 自動同步');
+        }
+      });
+    }
+    if(sheetsSyncIntervalSelect){
+      sheetsSyncIntervalSelect.addEventListener('change', ()=>{
+        saveSheetsSettings();
+        if(localStorage.getItem(SHEETS_LS_KEYS.autoSync)==='true'){
+          startSheetsAutoSync();
+          showStatusMessage(`自動同步間隔已設為 ${sheetsSyncIntervalSelect.value} 分鐘`);
+        }
+      });
+    }
+    if(sheetsUrlInput){
+      sheetsUrlInput.addEventListener('change', saveSheetsSettings);
+    }
+    if(toggleAutoDay){
+      toggleAutoDay.checked=autoSwitchDay;
+      toggleAutoDay.addEventListener('change', ()=>{
+        autoSwitchDay=toggleAutoDay.checked;
+        localStorage.setItem('autoSwitchDay', autoSwitchDay ? 'true' : 'false');
+        if(autoSwitchDay){
+          dayManuallySelected=false;
+          localStorage.removeItem('dayManuallySelected');
+          localStorage.removeItem('forcedDayKey');
+          maybeAutoSwitchDay(new Date());
+          updateDisplay();
+          showStatusMessage('已啟用自動切換今日場次');
+        }else{
+          showStatusMessage('已關閉自動切換，可點日期按鈕強制切換場次');
+        }
+      });
+    }
 
     btnOpenExpected.addEventListener('click', ()=>{ el('expected-modal').classList.remove('hidden'); expectedInput.value=String(expectedCount); setTimeout(()=>expectedInput.select(),0); });
     btnExpectedCancel.addEventListener('click', ()=>el('expected-modal').classList.add('hidden'));
@@ -1774,6 +2485,18 @@
     /* === 鍵盤快捷鍵：保留 F / X；C 在鎖定時無效 === */
     document.addEventListener('keydown', (e)=>{
       const tag=(e.target&&e.target.tagName)||''; const typing=['INPUT','TEXTAREA'].includes(tag)||(e.target&&e.target.isContentEditable);
+
+      if(e.key==='Escape'){
+        if(sheetsSyncModal&&!sheetsSyncModal.classList.contains('hidden')){
+          saveSheetsSettings();
+          sheetsSyncModal.classList.add('hidden');
+          return;
+        }
+        if(appearanceModal&&!appearanceModal.classList.contains('hidden')){
+          closeAppearanceModal();
+          return;
+        }
+      }
 
       // F：全螢幕
       if(!typing && (e.key==='f'||e.key==='F')){
