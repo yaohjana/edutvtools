@@ -276,13 +276,84 @@
     .error { width: min(760px, 100%); margin: 0 auto; justify-content: center; }
     .error h1 { font-size: clamp(2.2rem, 6vw, 4rem); }
     .retry { flex: none; min-width: min(100%, 18rem); align-self: flex-start; }
+
+    .settle {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .35rem;
+      padding: calc(1rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right)) calc(1rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left));
+      background: #9f2d3c;
+      text-align: center;
+    }
+    .settle[hidden] { display: none !important; }
+    .settle-ask {
+      margin: 0;
+      font-size: clamp(2rem, 6.2vw, 4.4rem);
+      font-weight: 900;
+      letter-spacing: .08em;
+      line-height: 1.15;
+    }
+    .settle-count-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      margin: 0;
+      line-height: .82;
+    }
+    #settle-count {
+      font-size: min(18rem, 32vw, 46vh);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.04em;
+    }
+    #settle-count.tick { animation: settle-pop .35s ease; }
+    .settle-unit {
+      margin-left: .12em;
+      font-size: clamp(2rem, 6vw, 4.2rem);
+      font-weight: 900;
+    }
+    .settle-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: .55rem;
+      height: clamp(3.4rem, 12vh, 6rem);
+      margin: .35rem 0 .15rem;
+    }
+    .settle-bars span {
+      width: clamp(1.05rem, 3.2vw, 1.9rem);
+      border-radius: .5rem;
+      background: rgba(255, 255, 255, .94);
+      transform-origin: bottom center;
+      transition: transform .35s ease, opacity .35s ease;
+    }
+    .settle-bars span:nth-child(1) { height: 38%; }
+    .settle-bars span:nth-child(2) { height: 54%; }
+    .settle-bars span:nth-child(3) { height: 70%; }
+    .settle-bars span:nth-child(4) { height: 86%; }
+    .settle-bars span:nth-child(5) { height: 100%; }
+    .settle-bars span.down { transform: scaleY(.18); opacity: .28; }
+    .settle-line {
+      margin: .15rem 0 0;
+      font-size: clamp(1.35rem, 3.6vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+    @keyframes settle-pop { from { transform: scale(.92); } to { transform: scale(1); } }
+    @media (prefers-reduced-motion: reduce) {
+      #settle-count.tick, .settle-bars span { animation: none; transition: none; }
+    }
   </style>
 </head>
 <body class="tone-setup">
   <section id="panel-setup" class="panel setup">
     <div>
       <h1>音量約定</h1>
-      <p class="lead">選一個情境，一起看音量。超過約定時，畫面會換顏色，提醒我們自己調回來。</p>
+      <p class="lead">選一個情境，一起看音量。超過約定時，畫面會停下數秒，請大家把聲音放輕。</p>
       <p class="place">把平板放在教室中段、螢幕朝外。聲音只留在這台裝置上，用來換成音量高低。</p>
     </div>
     <div id="scene-grid" class="scene-grid"></div>
@@ -358,6 +429,13 @@
     </div>
   </section>
 
+  <section id="panel-settle" class="settle" hidden>
+    <p class="settle-ask">請把聲音放輕</p>
+    <p class="settle-count-row"><span id="settle-count" aria-live="polite">5</span><span class="settle-unit">秒</span></p>
+    <div class="settle-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+    <p class="settle-line">我們一起回到約定</p>
+  </section>
+
   <section id="panel-error" class="panel error" hidden>
     <h1 id="error-title"></h1>
     <p id="error-body" class="error-body"></p>
@@ -373,7 +451,8 @@
       { id: 'play', name: '活動', agreement: '參與聲，玩得開心，指示還聽得見', limit: 0.36 },
       { id: 'chorus', name: '齊讀', agreement: '齊讀聲，聲音齊，不另外加油添醋', limit: 0.52 }
     ];
-    const CHIME_GAP_MS = 8000;
+    const SETTLE_MS = 5000;
+    const LISTEN_GAP_MS = 450;
     const THANKS_MS = 2000;
     const NEAR_RATIO = 0.8;
     const LINE_AT = 0.72;
@@ -416,6 +495,9 @@
     const holdInput = document.getElementById('hold-input');
     const countClassBtn = document.getElementById('count-class');
     const standardNowBtn = document.getElementById('standard-now');
+    const settlePanel = document.getElementById('panel-settle');
+    const settleCount = document.getElementById('settle-count');
+    const settleBars = [...settlePanel.querySelectorAll('.settle-bars span')];
 
     let sceneId = 'talk';
     let threshold = 0.14;
@@ -435,9 +517,11 @@
     let overMs = 0;
     let quietSince = 0;
     let lastFrameAt = 0;
-    let lastChimeAt = -CHIME_GAP_MS;
-    let chimeUntil = 0;
     let chimeUrl = '';
+    let settling = false;
+    let settleUntil = 0;
+    let settleShown = 0;
+    let resumeListenAt = 0;
     const chimeAudio = new Audio();
     chimeAudio.preload = 'auto';
     chimeAudio.setAttribute('playsinline', '');
@@ -627,13 +711,14 @@
       });
       if (document.activeElement !== holdInput) holdInput.value = (holdMs / 1000).toFixed(1);
       countClassBtn.setAttribute('aria-pressed', countOnClass ? 'true' : 'false');
-      waveHint.textContent = '白線是音量標準。敏感度最高可放大 8 倍。波形要連續留在白線外 ' + formatSeconds(holdMs) + '，才會提醒。';
+      waveHint.textContent = '白線是音量標準。敏感度最高可放大 8 倍。波形要連續留在白線外 ' + formatSeconds(holdMs) + '，才會全畫面提醒。提醒的這幾秒先不偵測。';
       const shown = Math.round((threshold / AMP_MAX) * 100);
       waveCanvas.setAttribute('aria-valuenow', String(Math.max(2, Math.min(90, shown))));
       renderCount();
     }
 
     function selectScene(id) {
+      if (settling) cancelSettle();
       const scene = sceneById(id);
       sceneId = scene.id;
       threshold = scene.limit;
@@ -657,7 +742,10 @@
     }
 
     function setChime(on) {
+      const was = chimeOn;
       chimeOn = !!on;
+      if (settling && was && !chimeOn) stopCue();
+      if (settling && !was && chimeOn) playChime();
       saveSettings();
       renderSceneUi();
     }
@@ -675,6 +763,7 @@
     function stopMeter() {
       running = false;
       paused = false;
+      endSettleScreen();
       if (rafId) cancelAnimationFrame(rafId);
       rafId = 0;
       if (stream) {
@@ -740,13 +829,16 @@
 
     function makeBellWav() {
       const rate = 22050;
-      const dur = 1.7;
+      const dur = 4.65;
       const length = Math.floor(rate * dur);
       const data = new Float32Array(length);
       const notes = [
         { f: 784, t: 0, a: 0.9, d: 1.15 },
         { f: 659.25, t: 0.32, a: 0.75, d: 1.2 },
-        { f: 523.25, t: 0.64, a: 0.62, d: 1.05 }
+        { f: 523.25, t: 0.64, a: 0.62, d: 1.05 },
+        { f: 659.25, t: 1.9, a: 0.5, d: 0.7 },
+        { f: 523.25, t: 2.9, a: 0.44, d: 0.7 },
+        { f: 392, t: 3.9, a: 0.38, d: 0.7 }
       ];
       const partials = [[1, 1], [2.01, 0.4], [2.76, 0.2], [3.95, 0.08]];
       notes.forEach((note) => {
@@ -834,11 +926,13 @@
       strike(783.99, t, 0.42, 1.15);
       strike(659.25, t + 0.34, 0.34, 1.25);
       strike(523.25, t + 0.68, 0.28, 1.45);
+      strike(659.25, t + 1.9, 0.22, 0.7);
+      strike(523.25, t + 2.9, 0.18, 0.7);
+      strike(392, t + 3.9, 0.16, 0.7);
     }
 
     function playChime() {
       prepareChime();
-      chimeUntil = performance.now() + 2000;
       chimeAudio.muted = false;
       chimeAudio.volume = 1;
       try { chimeAudio.currentTime = 0; } catch (e) {}
@@ -846,17 +940,74 @@
       if (pending && pending.catch) pending.catch(() => playChimeWebAudio());
     }
 
+    function stopCue() {
+      try {
+        chimeAudio.pause();
+        chimeAudio.currentTime = 0;
+      } catch (e) {}
+    }
+
+    function renderSettle(now) {
+      const sec = Math.max(1, Math.ceil((settleUntil - now) / 1000));
+      if (settleShown === sec) return;
+      settleShown = sec;
+      settleCount.textContent = String(sec);
+      settleCount.classList.remove('tick');
+      void settleCount.offsetWidth;
+      settleCount.classList.add('tick');
+      settleBars.forEach((bar, index) => bar.classList.toggle('down', index >= sec));
+    }
+
+    function beginSettle(now) {
+      settling = true;
+      settleUntil = now + SETTLE_MS;
+      settleShown = 0;
+      settlePanel.hidden = false;
+      renderSettle(now);
+      if (chimeOn) playChime();
+    }
+
+    function endSettleScreen() {
+      settling = false;
+      settleUntil = 0;
+      settleShown = 0;
+      settlePanel.hidden = true;
+      stopCue();
+      overMs = 0;
+      quietSince = 0;
+      phase = 'ok';
+    }
+
+    function finishSettle(now) {
+      endSettleScreen();
+      pendingThanks = true;
+      thanksUntil = now + THANKS_MS;
+      resumeListenAt = now + LISTEN_GAP_MS;
+    }
+
+    function cancelSettle() {
+      if (!settling) return;
+      endSettleScreen();
+      pendingThanks = false;
+      resumeListenAt = 0;
+    }
+
     function frame(now) {
       if (!running) return;
-      const hearingBell = now < chimeUntil;
-      if (!hearingBell) {
-        const raw = Math.max(0, readRms() - NOISE_FLOOR) * sensitivity;
-        recent.push({ t: now, v: raw });
-        while (recent.length && now - recent[0].t > 700) recent.shift();
-        if (raw > smoothed) smoothed += (raw - smoothed) * 0.42;
-        else smoothed += (raw - smoothed) * 0.14;
-        haveLevel = true;
+      if (settling) {
+        if (now >= settleUntil) finishSettle(now);
+        else renderSettle(now);
       }
+      if (settling || now < resumeListenAt) {
+        rafId = requestAnimationFrame(frame);
+        return;
+      }
+      const raw = Math.max(0, readRms() - NOISE_FLOOR) * sensitivity;
+      recent.push({ t: now, v: raw });
+      while (recent.length && now - recent[0].t > 700) recent.shift();
+      if (raw > smoothed) smoothed += (raw - smoothed) * 0.42;
+      else smoothed += (raw - smoothed) * 0.14;
+      haveLevel = true;
       history.push({ t: now, v: smoothed });
       while (history.length && now - history[0].t > HISTORY_MS) history.shift();
       standardNowBtn.disabled = !haveLevel;
@@ -886,15 +1037,17 @@
       if (phase !== 'over' && next === 'over') {
         overCount += 1;
         renderCount();
+        beginSettle(now);
       }
-      if (phase === 'over' && next !== 'over') {
+      if (!settling && phase === 'over' && next !== 'over') {
         pendingThanks = true;
         thanksUntil = now + THANKS_MS;
       }
       if (next === 'over') pendingThanks = false;
-      if (next === 'over' && chimeOn && now - lastChimeAt >= CHIME_GAP_MS) {
-        playChime();
-        lastChimeAt = now;
+      if (settling) {
+        phase = 'over';
+        rafId = requestAnimationFrame(frame);
+        return;
       }
 
       phase = next;
@@ -1066,6 +1219,9 @@
         lastFrameAt = 0;
         phase = 'ok';
         thanksUntil = 0;
+        pendingThanks = false;
+        resumeListenAt = 0;
+        endSettleScreen();
         paused = false;
         pauseBtn.textContent = '暫停';
         wavePauseBtn.textContent = '暫停';
@@ -1099,6 +1255,7 @@
     }
 
     function togglePause() {
+      if (settling) cancelSettle();
       paused = !paused;
       overMs = 0;
       quietSince = 0;
