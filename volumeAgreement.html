@@ -20,13 +20,16 @@
     html, body { height: 100%; }
     body {
       margin: 0;
-      min-height: 100dvh;
+      height: 100vh;
       height: 100dvh;
       overflow: hidden;
       font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
       color: var(--ink);
       background: var(--setup);
       transition: background-color .45s ease;
+    }
+    @supports (height: 100svh) {
+      body { height: 100svh; }
     }
     body.tone-setup { background: var(--setup); }
     body.tone-ok { background: var(--ok); }
@@ -35,15 +38,24 @@
     body.tone-paused, body.tone-error { background: var(--paused); }
     button, input { font-family: inherit; }
     button { cursor: pointer; border: 0; color: inherit; }
-    .panel { display: flex; flex-direction: column; min-height: 100dvh; }
+    .panel { display: flex; flex-direction: column; height: 100%; min-height: 0; max-height: 100%; }
     .panel[hidden] { display: none !important; }
 
     .setup, .error {
       padding: calc(1.1rem + env(safe-area-inset-top)) calc(1.1rem + env(safe-area-inset-right)) calc(1.1rem + env(safe-area-inset-bottom)) calc(1.1rem + env(safe-area-inset-left));
-      overflow: auto;
       gap: .9rem;
     }
-    .setup { width: min(920px, 100%); margin: 0 auto; }
+    .setup { width: min(920px, 100%); margin: 0 auto; overflow: hidden; }
+    .error { overflow: auto; -webkit-overflow-scrolling: touch; }
+    .setup-scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      flex-direction: column;
+      gap: .9rem;
+    }
     h1 {
       margin: 0;
       font-size: clamp(2rem, 5vw, 3.1rem);
@@ -83,7 +95,7 @@
     }
     .scene-name { display: block; font-size: 1.35rem; font-weight: 800; }
     .scene-line { display: block; margin-top: .2rem; font-size: 1.02rem; line-height: 1.4; color: rgba(248, 250, 252, .88); }
-    .setup-actions { display: flex; flex-wrap: wrap; gap: .7rem; align-items: stretch; }
+    .setup-actions { display: flex; flex-wrap: wrap; gap: .7rem; align-items: stretch; flex: 0 0 auto; }
     .toggle, .primary, .ghost, .retry {
       border-radius: 1rem;
       font-weight: 800;
@@ -101,7 +113,7 @@
       flex: 1 1 16rem;
     }
     .foot {
-      margin-top: auto;
+      margin: .75rem 0 0;
       text-align: right;
       color: rgba(248, 250, 252, .55);
       font-size: .85rem;
@@ -110,7 +122,17 @@
     .live {
       padding: calc(.75rem + env(safe-area-inset-top)) calc(.9rem + env(safe-area-inset-right)) calc(.8rem + env(safe-area-inset-bottom)) calc(.9rem + env(safe-area-inset-left));
       gap: .55rem;
+      overflow: hidden;
+    }
+    .live-main {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      flex-direction: column;
       justify-content: space-between;
+      gap: .55rem;
     }
     .live-head { text-align: center; }
     #scene-label { margin: 0; font-size: clamp(1.15rem, 2.5vw, 1.5rem); font-weight: 800; }
@@ -128,7 +150,7 @@
     @media (prefers-reduced-motion: reduce) {
       body, body.tone-over #status-text { transition: none; animation: none; }
     }
-    .meter-wrap { position: relative; margin: 2.6rem .2rem .4rem; }
+    .meter-wrap { position: relative; margin: .35rem .2rem .4rem; padding-top: 1.8rem; }
     .meter {
       height: clamp(4.4rem, 18vh, 8.2rem);
       border-radius: 1.5rem;
@@ -144,7 +166,7 @@
     .meter-line {
       position: absolute;
       left: 72%;
-      top: -1.7rem;
+      top: 1.8rem;
       bottom: -.15rem;
       width: 4px;
       margin-left: -2px;
@@ -154,7 +176,7 @@
     }
     .meter-line span {
       position: absolute;
-      top: -1.15rem;
+      top: -1.35rem;
       left: 50%;
       transform: translateX(-50%);
       font-weight: 900;
@@ -174,7 +196,7 @@
       font-weight: 800;
     }
     .pill[aria-pressed="true"] { background: #fff; color: #10261f; border-color: #fff; }
-    .live-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+    .live-actions { display: flex; flex-wrap: wrap; gap: .65rem; flex: 0 0 auto; }
     .live-actions button {
       flex: 1 1 11rem;
       min-height: 3.5rem;
@@ -270,8 +292,32 @@
     #gain-readout { font-variant-numeric: tabular-nums; }
     @media (min-width: 980px) and (max-height: 860px) {
       .wave { overflow: hidden; }
-      .wave-body { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr); flex: 1; }
-      .wave-tools { overflow: auto; }
+      .wave-body { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr); flex: 1; min-height: 0; }
+      .wave-tools { overflow: auto; min-height: 0; }
+    }
+    @media (max-width: 720px), (max-height: 520px) {
+      h1 { font-size: 1.65rem; }
+      .lead, .error-body { font-size: 1rem; }
+      .place { font-size: .92rem; }
+      .scene-card { min-height: 0; padding: .6rem .75rem; }
+      .scene-name { font-size: 1.12rem; }
+      .scene-line { font-size: .95rem; }
+      .toggle, .primary, .ghost, .retry { font-size: 1.05rem; min-height: 3.1rem; }
+      #status-text { font-size: clamp(1.55rem, 7.5vw, 2.4rem); margin-bottom: .2rem; }
+      .meter-wrap { margin: .7rem .1rem .15rem; padding-top: 1.35rem; }
+      .meter { height: clamp(2.2rem, 11vh, 3.6rem); }
+      .meter-line { top: 1.35rem; }
+      .meter-line span { font-size: .85rem; top: -1.15rem; }
+      .pill { min-width: 0; min-height: 2.45rem; padding: .25rem .65rem; font-size: .98rem; }
+      .live-actions button { flex: 1 1 7rem; min-height: 2.9rem; font-size: 1rem; }
+      .wave { gap: .4rem; }
+      .wave-stage, #wave-canvas { min-height: 132px; flex-basis: 132px; }
+      .wave-top { position: sticky; top: 0; z-index: 2; background: #0b1220; }
+      .hold-presets .toggle { min-height: 2.5rem; padding: .3rem .55rem; }
+      .settle-ask { font-size: clamp(1.45rem, 7vw, 2.4rem); letter-spacing: .04em; }
+      #settle-count { font-size: min(12rem, 34vw, 34vh); }
+      .settle-line { font-size: clamp(1.05rem, 4vw, 1.6rem); }
+      .settle-bars { height: clamp(2.2rem, 8vh, 3.4rem); }
     }
     .error { width: min(760px, 100%); margin: 0 auto; justify-content: center; }
     .error h1 { font-size: clamp(2.2rem, 6vw, 4rem); }
@@ -351,35 +397,39 @@
 </head>
 <body class="tone-setup">
   <section id="panel-setup" class="panel setup">
-    <div>
-      <h1>音量約定</h1>
-      <p class="lead">選一個情境，一起看音量。超過約定時，畫面會停下數秒，請大家把聲音放輕。</p>
-      <p class="place">把平板放在教室中段、螢幕朝外。聲音只留在這台裝置上，用來換成音量高低。</p>
+    <div class="setup-scroll">
+      <div>
+        <h1>音量約定</h1>
+        <p class="lead">選一個情境，一起看音量。超過約定時，畫面會停下數秒，請大家把聲音放輕。</p>
+        <p class="place">把平板放在教室中段、螢幕朝外。聲音只留在這台裝置上，用來換成音量高低。</p>
+      </div>
+      <div id="scene-grid" class="scene-grid"></div>
+      <p class="foot">Developed by DennisZ</p>
     </div>
-    <div id="scene-grid" class="scene-grid"></div>
     <div class="setup-actions">
       <button id="setup-chime" class="toggle" type="button" aria-pressed="true">輕聲提醒 · 開</button>
       <button id="start-btn" class="primary" type="button">開始一起看音量</button>
     </div>
-    <p class="foot">Developed by DennisZ</p>
   </section>
 
   <section id="panel-live" class="panel live" hidden>
-    <div class="live-head">
-      <p id="scene-label">討論</p>
-      <p id="agreement-text">小組聲，讓鄰組也能討論</p>
-      <p id="class-count" hidden>本節超過 0 次</p>
-    </div>
-    <div>
-      <p id="status-text" aria-live="polite">維持這個音量</p>
-      <div class="meter-wrap">
-        <div class="meter-line" aria-hidden="true"><span>約定</span></div>
-        <div id="meter" class="meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="維持這個音量">
-          <div id="meter-fill" class="meter-fill"></div>
+    <div class="live-main">
+      <div class="live-head">
+        <p id="scene-label">討論</p>
+        <p id="agreement-text">小組聲，讓鄰組也能討論</p>
+        <p id="class-count" hidden>本節超過 0 次</p>
+      </div>
+      <div>
+        <p id="status-text" aria-live="polite">維持這個音量</p>
+        <div class="meter-wrap">
+          <div class="meter-line" aria-hidden="true"><span>約定</span></div>
+          <div id="meter" class="meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="維持這個音量">
+            <div id="meter-fill" class="meter-fill"></div>
+          </div>
         </div>
       </div>
+      <div id="pills" class="pills"></div>
     </div>
-    <div id="pills" class="pills"></div>
     <div class="live-actions">
       <button id="pause-btn" type="button">暫停</button>
       <button id="wave-open-btn" type="button">調整波形</button>
@@ -525,6 +575,8 @@
     const chimeAudio = new Audio();
     chimeAudio.preload = 'auto';
     chimeAudio.setAttribute('playsinline', '');
+    let cueToken = 0;
+    let cueGain = null;
     let phase = 'ok';
     let thanksUntil = 0;
     let pendingThanks = false;
@@ -888,27 +940,27 @@
 
     function unlockChime() {
       prepareChime();
-      chimeAudio.muted = true;
+      const token = ++cueToken;
+      chimeAudio.muted = false;
+      chimeAudio.volume = 0.001;
       const pending = chimeAudio.play();
       if (!pending || !pending.then) return;
       pending.then(() => {
+        if (token !== cueToken) return;
         chimeAudio.pause();
-        chimeAudio.currentTime = 0;
-        chimeAudio.muted = false;
-      }).catch(() => { chimeAudio.muted = false; });
+        try { chimeAudio.currentTime = 0; } catch (e) {}
+      }).catch(() => {});
     }
 
-    function playChimeWebAudio() {
-      if (!audioCtx || audioCtx.state === 'closed') return;
-      resumeAudio();
-      const t = audioCtx.currentTime;
-      const master = audioCtx.createGain();
+    function scheduleChime(context, t) {
+      const master = context.createGain();
+      cueGain = master;
       master.gain.setValueAtTime(0.9, t);
-      master.connect(audioCtx.destination);
+      master.connect(context.destination);
       const strike = (freq, start, peak, dur) => {
         [[1, 1], [2.01, 0.42], [2.76, 0.22], [3.95, 0.1]].forEach(([ratio, weight]) => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
+          const osc = context.createOscillator();
+          const gain = context.createGain();
           osc.type = 'sine';
           const f = freq * ratio;
           osc.frequency.setValueAtTime(f, start);
@@ -931,16 +983,52 @@
       strike(392, t + 3.9, 0.16, 0.7);
     }
 
+    function playChimeWebAudio(token) {
+      if (token !== cueToken || !settling) return;
+      if (playChimeWebAudio.token === token) return;
+      playChimeWebAudio.token = token;
+      if (!audioCtx || audioCtx.state === 'closed') {
+        try { audioCtx = new AudioContext(); } catch (e) { return; }
+      }
+      const run = () => {
+        if (token !== cueToken || !settling || !audioCtx || audioCtx.state !== 'running') return;
+        scheduleChime(audioCtx, audioCtx.currentTime);
+      };
+      if (audioCtx.state === 'running') run();
+      else audioCtx.resume().then(run).catch(() => {});
+    }
+
+    function cueIsAudible() {
+      return !chimeAudio.paused && chimeAudio.currentTime > 0.05 && chimeAudio.volume > 0.2;
+    }
+
     function playChime() {
       prepareChime();
+      const token = ++cueToken;
+      if (audioCtx && audioCtx.state !== 'running' && audioCtx.state !== 'closed') audioCtx.resume().catch(() => {});
       chimeAudio.muted = false;
       chimeAudio.volume = 1;
       try { chimeAudio.currentTime = 0; } catch (e) {}
+      const fallback = () => {
+        if (token !== cueToken || !settling || cueIsAudible()) return;
+        try { chimeAudio.pause(); } catch (e) {}
+        playChimeWebAudio(token);
+      };
       const pending = chimeAudio.play();
-      if (pending && pending.catch) pending.catch(() => playChimeWebAudio());
+      if (pending && pending.catch) pending.catch(() => fallback());
+      window.setTimeout(fallback, 320);
     }
 
     function stopCue() {
+      cueToken += 1;
+      if (cueGain && audioCtx) {
+        try {
+          const now = audioCtx.currentTime;
+          cueGain.gain.cancelScheduledValues(now);
+          cueGain.gain.setValueAtTime(0, now);
+        } catch (e) {}
+      }
+      cueGain = null;
       try {
         chimeAudio.pause();
         chimeAudio.currentTime = 0;
@@ -968,11 +1056,12 @@
     }
 
     function endSettleScreen() {
+      const stopSound = settling;
       settling = false;
       settleUntil = 0;
       settleShown = 0;
       settlePanel.hidden = true;
-      stopCue();
+      if (stopSound) stopCue();
       overMs = 0;
       quietSince = 0;
       phase = 'ok';
