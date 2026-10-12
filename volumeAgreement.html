@@ -723,21 +723,32 @@
 
     function playChime() {
       if (!audioCtx || audioCtx.state === 'closed') return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
       const t = audioCtx.currentTime;
-      [523.25, 784].forEach((freq, index) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        const start = t + index * 0.03;
-        gain.gain.setValueAtTime(0.0001, start);
-        gain.gain.exponentialRampToValueAtTime(index === 0 ? 0.06 : 0.035, start + 0.03);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.55);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(start);
-        osc.stop(start + 0.58);
-      });
+      const master = audioCtx.createGain();
+      master.gain.setValueAtTime(0.9, t);
+      master.connect(audioCtx.destination);
+      const strike = (freq, start, peak, dur) => {
+        [[1, 1], [2.01, 0.42], [2.76, 0.22], [3.95, 0.1]].forEach(([ratio, weight]) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          const f = freq * ratio;
+          osc.frequency.setValueAtTime(f, start);
+          osc.frequency.exponentialRampToValueAtTime(Math.max(1, f * 0.985), start + dur);
+          const level = Math.max(0.001, peak * weight);
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.exponentialRampToValueAtTime(level, start + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+          osc.connect(gain);
+          gain.connect(master);
+          osc.start(start);
+          osc.stop(start + dur + 0.04);
+        });
+      };
+      strike(783.99, t, 0.42, 1.15);
+      strike(659.25, t + 0.34, 0.34, 1.25);
+      strike(523.25, t + 0.68, 0.28, 1.45);
     }
 
     function frame(now) {
