@@ -196,15 +196,34 @@
       font-weight: 800;
     }
     .pill[aria-pressed="true"] { background: #fff; color: #10261f; border-color: #fff; }
-    .live-actions { display: flex; flex-wrap: wrap; gap: .65rem; flex: 0 0 auto; }
-    .live-actions button {
-      flex: 1 1 11rem;
-      min-height: 3.5rem;
+    .live-actions { display: flex; flex-wrap: nowrap; justify-content: center; gap: .5rem; flex: 0 0 auto; }
+    .live-actions .icon-btn {
+      flex: 1 1 0;
+      max-width: 8.5rem;
+      min-width: 0;
+      min-height: 4.4rem;
       border-radius: 1rem;
       background: rgba(255, 255, 255, .16);
       border: 2px solid rgba(255, 255, 255, .72);
-      font-size: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .15rem;
+      padding: .35rem .25rem;
+      font-size: .95rem;
       font-weight: 800;
+      line-height: 1.1;
+    }
+    .live-actions .icon-btn svg { width: 1.7rem; height: 1.7rem; display: block; }
+    .live-actions .icon-btn .icon-play,
+    .live-actions .icon-btn.is-paused .icon-pause { display: none; }
+    .live-actions .icon-btn.is-paused .icon-play { display: block; }
+    .live-actions .icon-btn[aria-pressed="true"] .icon-slash { display: none; }
+    .live-actions .icon-btn[aria-pressed="true"] {
+      background: #fff;
+      color: #10261f;
+      border-color: #fff;
     }
     #class-count { margin: .2rem 0 0; font-size: 1.05rem; font-weight: 800; opacity: .9; }
     #class-count[hidden] { display: none !important; }
@@ -309,7 +328,8 @@
       .meter-line { top: 1.35rem; }
       .meter-line span { font-size: .85rem; top: -1.15rem; }
       .pill { min-width: 0; min-height: 2.45rem; padding: .25rem .65rem; font-size: .98rem; }
-      .live-actions button { flex: 1 1 7rem; min-height: 2.9rem; font-size: 1rem; }
+      .live-actions .icon-btn { min-height: 4rem; font-size: .88rem; }
+      .live-actions .icon-btn svg { width: 1.45rem; height: 1.45rem; }
       .wave { gap: .4rem; }
       .wave-stage, #wave-canvas { min-height: 132px; flex-basis: 132px; }
       .wave-top { position: sticky; top: 0; z-index: 2; background: #0b1220; }
@@ -431,9 +451,30 @@
       <div id="pills" class="pills"></div>
     </div>
     <div class="live-actions">
-      <button id="pause-btn" type="button">暫停</button>
-      <button id="wave-open-btn" type="button">調整波形</button>
-      <button id="live-chime" class="ghost" type="button" aria-pressed="true">輕聲提醒 · 開</button>
+      <button id="pause-btn" class="icon-btn" type="button" aria-label="暫停">
+        <svg class="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M8 5v14"/><path d="M16 5v14"/>
+        </svg>
+        <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 5.5v13l11-6.5-11-6.5z" fill="currentColor"/>
+        </svg>
+        <span id="pause-label">暫停</span>
+      </button>
+      <button id="wave-open-btn" class="icon-btn" type="button" aria-label="設定">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" fill-rule="evenodd" d="M9.7 2.6h4.6l.4 2.2c.6.2 1.2.5 1.7.9l2-1 2.9 2.9-1 2c.4.5.7 1.1.9 1.7l2.2.4v4.6l-2.2.4c-.2.6-.5 1.2-.9 1.7l1 2-2.9 2.9-2-1c-.5.4-1.1.7-1.7.9l-.4 2.2H9.7l-.4-2.2c-.6-.2-1.2-.5-1.7-.9l-2 1-2.9-2.9 1-2c-.4-.5-.7-1.1-.9-1.7l-2.2-.4V9.7l2.2-.4c.2-.6.5-1.2.9-1.7l-1-2 2.9-2.9 2 1c.5-.4 1.1-.7 1.7-.9l.4-2.2zM12 9.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z"/>
+        </svg>
+        <span>設定</span>
+      </button>
+      <button id="live-chime" class="icon-btn ghost" type="button" aria-pressed="true" aria-label="輕聲提醒，目前開著">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 16.5h12"/>
+          <path d="M7.1 16.5c.7-1.5 1.1-2.7 1.1-4.2V9a3.8 3.8 0 0 1 7.6 0v3.3c0 1.5.4 2.7 1.1 4.2"/>
+          <path d="M10 16.7a2 2 0 0 0 4 0"/>
+          <path class="icon-slash" d="M5 19.2 19 5.2"/>
+        </svg>
+        <span id="chime-label">提醒開</span>
+      </button>
     </div>
   </section>
 
@@ -454,9 +495,9 @@
       </div>
       <div class="wave-tools">
         <button id="standard-now" type="button">以現在為標準</button>
-        <label class="slider-label" for="gain-slider">敏感度 · <span id="gain-readout">1 倍</span>
-          <input id="gain-slider" type="range" min="0.5" max="8" step="0.1" value="1" aria-label="敏感度">
-          <span class="slider-ends"><span>0.5 倍</span><span>8 倍</span></span>
+        <label class="slider-label" for="gain-slider">敏感度 · <span id="gain-readout">8 倍</span>
+          <input id="gain-slider" type="range" min="0.5" max="16" step="0.1" value="8" aria-label="敏感度">
+          <span class="slider-ends"><span>0.5 倍</span><span>16 倍</span></span>
         </label>
         <div class="hold-block">
           <div class="hold-row" role="group" aria-label="持續時間">
@@ -508,6 +549,9 @@
     const LINE_AT = 0.72;
     const NOISE_FLOOR = 0.008;
     const AMP_MAX = 0.85;
+    const GAIN_MIN = 0.5;
+    const GAIN_MAX = 16;
+    const GAIN_DEFAULT = 8;
     const HISTORY_MS = 8000;
     const HOLD_PRESETS = [300, 400, 500, 600, 800, 1000, 1500, 2000];
     const HOLD_MIN = 200;
@@ -523,6 +567,8 @@
     const setupChime = document.getElementById('setup-chime');
     const liveChime = document.getElementById('live-chime');
     const pauseBtn = document.getElementById('pause-btn');
+    const pauseLabel = document.getElementById('pause-label');
+    const chimeLabel = document.getElementById('chime-label');
     const wavePauseBtn = document.getElementById('wave-pause');
     const retryBtn = document.getElementById('retry-btn');
     const sceneLabel = document.getElementById('scene-label');
@@ -553,7 +599,7 @@
     let threshold = 0.14;
     let customKind = '0';
     let chimeOn = true;
-    let sensitivity = 1;
+    let sensitivity = GAIN_DEFAULT;
     let holdMs = 600;
     let countOnClass = false;
     let overCount = 0;
@@ -653,7 +699,7 @@
       const stored = parseFloat(localStorage.getItem('va-threshold'));
       threshold = isCustom() && stored > 0 ? stored : scene.limit;
       const gain = parseFloat(localStorage.getItem('va-gain'));
-      sensitivity = gain >= 0.5 && gain <= 8 ? gain : 1;
+      sensitivity = gain >= GAIN_MIN && gain <= GAIN_MAX ? gain : GAIN_DEFAULT;
       const hold = parseInt(localStorage.getItem('va-hold'), 10);
       holdMs = hold >= HOLD_MIN && hold <= HOLD_MAX ? hold : 600;
       countOnClass = localStorage.getItem('va-count-class') === '1';
@@ -751,11 +797,12 @@
       });
       sceneLabel.textContent = customLabel(scene.name);
       agreementText.textContent = scene.agreement;
-      const chimeLabel = chimeOn ? '輕聲提醒 · 開' : '輕聲提醒 · 關';
-      setupChime.textContent = chimeLabel;
-      liveChime.textContent = chimeLabel;
+      const setupChimeLabel = chimeOn ? '輕聲提醒 · 開' : '輕聲提醒 · 關';
+      setupChime.textContent = setupChimeLabel;
+      chimeLabel.textContent = chimeOn ? '提醒開' : '提醒關';
       setupChime.setAttribute('aria-pressed', chimeOn ? 'true' : 'false');
       liveChime.setAttribute('aria-pressed', chimeOn ? 'true' : 'false');
+      liveChime.setAttribute('aria-label', chimeOn ? '輕聲提醒，目前開著' : '輕聲提醒，目前關著');
       gainSlider.value = String(sensitivity);
       gainReadout.textContent = formatGain(sensitivity);
       document.querySelectorAll('[data-hold]').forEach((btn) => {
@@ -763,7 +810,7 @@
       });
       if (document.activeElement !== holdInput) holdInput.value = (holdMs / 1000).toFixed(1);
       countClassBtn.setAttribute('aria-pressed', countOnClass ? 'true' : 'false');
-      waveHint.textContent = '白線是音量標準。敏感度最高可放大 8 倍。波形要連續留在白線外 ' + formatSeconds(holdMs) + '，才會全畫面提醒。提醒的這幾秒先不偵測。';
+      waveHint.textContent = '白線是音量標準。敏感度最高可放大 16 倍。波形要連續留在白線外 ' + formatSeconds(holdMs) + '，才會全畫面提醒。提醒的這幾秒先不偵測。';
       const shown = Math.round((threshold / AMP_MAX) * 100);
       waveCanvas.setAttribute('aria-valuenow', String(Math.max(2, Math.min(90, shown))));
       renderCount();
@@ -1312,8 +1359,7 @@
         resumeListenAt = 0;
         endSettleScreen();
         paused = false;
-        pauseBtn.textContent = '暫停';
-        wavePauseBtn.textContent = '暫停';
+        renderPause();
         overCount = 0;
         history = [];
         running = true;
@@ -1343,14 +1389,20 @@
       saveSettings();
     }
 
+    function renderPause() {
+      const label = paused ? '繼續' : '暫停';
+      pauseBtn.classList.toggle('is-paused', paused);
+      pauseBtn.setAttribute('aria-label', label);
+      pauseLabel.textContent = label;
+      wavePauseBtn.textContent = label;
+    }
+
     function togglePause() {
       if (settling) cancelSettle();
       paused = !paused;
       overMs = 0;
       quietSince = 0;
-      const label = paused ? '繼續' : '暫停';
-      pauseBtn.textContent = label;
-      wavePauseBtn.textContent = label;
+      renderPause();
       if (paused) paint(threshold > 0 ? smoothed / threshold : 0, 'paused', '暫停中');
     }
 
@@ -1394,7 +1446,7 @@
     });
     gainSlider.addEventListener('input', () => {
       const next = parseFloat(gainSlider.value);
-      sensitivity = next >= 0.5 && next <= 8 ? next : 1;
+      sensitivity = next >= GAIN_MIN && next <= GAIN_MAX ? next : GAIN_DEFAULT;
       saveSettings();
       renderSceneUi();
     });
