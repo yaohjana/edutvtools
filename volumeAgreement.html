@@ -83,19 +83,50 @@
     }
     .scene-card {
       text-align: left;
-      background: rgba(255, 255, 255, .08);
+      color: #10261f;
+      background: #e7f6ef;
       border: 3px solid transparent;
       border-radius: 1.1rem;
       padding: .85rem 1rem;
       min-height: 4.8rem;
     }
-    .scene-card[aria-pressed="true"] {
+    .scene-card[data-scene="exam"] { background: #e7f6ef; }
+    .scene-card[data-scene="study"] { background: #c9eadc; }
+    .scene-card[data-scene="talk"] { background: #a6dcc6; }
+    .scene-card[data-scene="make"] { background: #7ec9ab; }
+    .scene-card[data-scene="play"] { background: #58b490; }
+    .scene-card[data-scene="chorus"] { background: #3a9e78; }
+    .scene-card[aria-pressed="true"] { border-color: #fff; }
+    .scene-name { display: block; font-size: 1.35rem; font-weight: 800; }
+    .scene-line { display: block; margin-top: .2rem; font-size: 1.02rem; line-height: 1.4; color: rgba(16, 38, 31, .82); }
+    .setup-actions { display: flex; flex-wrap: nowrap; justify-content: center; gap: .5rem; flex: 0 0 auto; }
+    .setup-actions .icon-btn {
+      flex: 1 1 0;
+      max-width: 8.5rem;
+      min-width: 0;
+      min-height: 4.4rem;
+      border-radius: 1rem;
       background: rgba(255, 255, 255, .16);
+      border: 2px solid rgba(255, 255, 255, .72);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .15rem;
+      padding: .35rem .25rem;
+      font-size: .95rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+    .setup-actions .icon-btn svg { width: 1.7rem; height: 1.7rem; display: block; }
+    .setup-actions .icon-btn[aria-pressed="true"],
+    .setup-actions .icon-btn-primary {
+      background: #fff;
+      color: #10261f;
       border-color: #fff;
     }
-    .scene-name { display: block; font-size: 1.35rem; font-weight: 800; }
-    .scene-line { display: block; margin-top: .2rem; font-size: 1.02rem; line-height: 1.4; color: rgba(248, 250, 252, .88); }
-    .setup-actions { display: flex; flex-wrap: wrap; gap: .7rem; align-items: stretch; flex: 0 0 auto; }
+    .setup-actions .icon-btn[aria-pressed="true"] .icon-slash { display: none; }
+    .setup-actions .icon-btn:disabled { opacity: .65; }
     .toggle, .primary, .ghost, .retry {
       border-radius: 1rem;
       font-weight: 800;
@@ -113,10 +144,12 @@
       flex: 1 1 16rem;
     }
     .foot {
-      margin: .75rem 0 0;
-      text-align: right;
+      margin: .55rem 0 0;
+      text-align: center;
       color: rgba(248, 250, 252, .55);
-      font-size: .85rem;
+      font-size: .8rem;
+      letter-spacing: .02em;
+      flex: 0 0 auto;
     }
 
     .live {
@@ -328,8 +361,10 @@
       .meter-line { top: 1.35rem; }
       .meter-line span { font-size: .85rem; top: -1.15rem; }
       .pill { min-width: 0; min-height: 2.45rem; padding: .25rem .65rem; font-size: .98rem; }
-      .live-actions .icon-btn { min-height: 4rem; font-size: .88rem; }
-      .live-actions .icon-btn svg { width: 1.45rem; height: 1.45rem; }
+      .live-actions .icon-btn,
+      .setup-actions .icon-btn { min-height: 4rem; font-size: .88rem; }
+      .live-actions .icon-btn svg,
+      .setup-actions .icon-btn svg { width: 1.45rem; height: 1.45rem; }
       .wave { gap: .4rem; }
       .wave-stage, #wave-canvas { min-height: 132px; flex-basis: 132px; }
       .wave-top { position: sticky; top: 0; z-index: 2; background: #0b1220; }
@@ -424,12 +459,25 @@
         <p class="place">把平板放在教室中段、螢幕朝外。聲音只留在這台裝置上，用來換成音量高低。</p>
       </div>
       <div id="scene-grid" class="scene-grid"></div>
-      <p class="foot">Developed by DennisZ</p>
     </div>
     <div class="setup-actions">
-      <button id="setup-chime" class="toggle" type="button" aria-pressed="true">輕聲提醒 · 開</button>
-      <button id="start-btn" class="primary" type="button">開始一起看音量</button>
+      <button id="setup-chime" class="icon-btn" type="button" aria-pressed="true" aria-label="輕聲提醒，目前開著">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 16.5h12"/>
+          <path d="M7.1 16.5c.7-1.5 1.1-2.7 1.1-4.2V9a3.8 3.8 0 0 1 7.6 0v3.3c0 1.5.4 2.7 1.1 4.2"/>
+          <path d="M10 16.7a2 2 0 0 0 4 0"/>
+          <path class="icon-slash" d="M5 19.2 19 5.2"/>
+        </svg>
+        <span id="setup-chime-label">提醒開</span>
+      </button>
+      <button id="start-btn" class="icon-btn icon-btn-primary" type="button" aria-label="開始一起看音量">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 5.5v13l11-6.5-11-6.5z" fill="currentColor"/>
+        </svg>
+        <span id="start-label">開始</span>
+      </button>
     </div>
+    <p class="foot">Developed by Dennis.z 2026 v1.0.0</p>
   </section>
 
   <section id="panel-live" class="panel live" hidden>
@@ -565,6 +613,8 @@
     const wavePills = document.getElementById('wave-pills');
     const startBtn = document.getElementById('start-btn');
     const setupChime = document.getElementById('setup-chime');
+    const setupChimeText = document.getElementById('setup-chime-label');
+    const startLabel = document.getElementById('start-label');
     const liveChime = document.getElementById('live-chime');
     const pauseBtn = document.getElementById('pause-btn');
     const pauseLabel = document.getElementById('pause-label');
@@ -797,12 +847,14 @@
       });
       sceneLabel.textContent = customLabel(scene.name);
       agreementText.textContent = scene.agreement;
-      const setupChimeLabel = chimeOn ? '輕聲提醒 · 開' : '輕聲提醒 · 關';
-      setupChime.textContent = setupChimeLabel;
-      chimeLabel.textContent = chimeOn ? '提醒開' : '提醒關';
+      const chimeWord = chimeOn ? '提醒開' : '提醒關';
+      const chimeAria = chimeOn ? '輕聲提醒，目前開著' : '輕聲提醒，目前關著';
+      setupChimeText.textContent = chimeWord;
+      chimeLabel.textContent = chimeWord;
       setupChime.setAttribute('aria-pressed', chimeOn ? 'true' : 'false');
       liveChime.setAttribute('aria-pressed', chimeOn ? 'true' : 'false');
-      liveChime.setAttribute('aria-label', chimeOn ? '輕聲提醒，目前開著' : '輕聲提醒，目前關著');
+      setupChime.setAttribute('aria-label', chimeAria);
+      liveChime.setAttribute('aria-label', chimeAria);
       gainSlider.value = String(sensitivity);
       gainReadout.textContent = formatGain(sensitivity);
       document.querySelectorAll('[data-hold]').forEach((btn) => {
@@ -1326,7 +1378,8 @@
       }
       opening = true;
       startBtn.disabled = true;
-      startBtn.textContent = '正在開啟麥克風…';
+      startLabel.textContent = '開啟中';
+      startBtn.setAttribute('aria-label', '正在開啟麥克風');
       unlockChime();
       setAudioRoute('auto');
       try {
@@ -1377,7 +1430,8 @@
       } finally {
         opening = false;
         startBtn.disabled = false;
-        startBtn.textContent = '開始一起看音量';
+        startLabel.textContent = '開始';
+        startBtn.setAttribute('aria-label', '開始一起看音量');
       }
     }
 
