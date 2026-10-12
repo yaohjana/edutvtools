@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>音量約定</title>
+  <style>
+    :root {
+      --ok: #166534;
+      --near: #b45309;
+      --over: #be3a4a;
+      --paused: #1e293b;
+      --setup: #10261f;
+      --ink: #f8fafc;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--setup);
+      transition: background-color .45s ease;
+    }
+    body.tone-setup { background: var(--setup); }
+    body.tone-ok { background: var(--ok); }
+    body.tone-near { background: var(--near); }
+    body.tone-over { background: var(--over); }
+    body.tone-paused, body.tone-error { background: var(--paused); }
+    button, input { font-family: inherit; }
+    button { cursor: pointer; border: 0; color: inherit; }
+    .panel { display: flex; flex-direction: column; min-height: 100dvh; }
+    .panel[hidden] { display: none !important; }
+
+    .setup, .error {
+      padding: calc(1.1rem + env(safe-area-inset-top)) calc(1.1rem + env(safe-area-inset-right)) calc(1.1rem + env(safe-area-inset-bottom)) calc(1.1rem + env(safe-area-inset-left));
+      overflow: auto;
+      gap: .9rem;
+    }
+    .setup { width: min(920px, 100%); margin: 0 auto; }
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3.1rem);
+      letter-spacing: .04em;
+      line-height: 1.15;
+    }
+    .lead, .error-body {
+      margin: .35rem 0 0;
+      font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+      line-height: 1.55;
+      color: rgba(248, 250, 252, .92);
+    }
+    .place {
+      margin: 0;
+      font-size: 1rem;
+      color: rgba(248, 250, 252, .78);
+    }
+    .scene-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: .65rem;
+    }
+    @media (min-width: 700px) {
+      .scene-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .scene-card {
+      text-align: left;
+      background: rgba(255, 255, 255, .08);
+      border: 3px solid transparent;
+      border-radius: 1.1rem;
+      padding: .85rem 1rem;
+      min-height: 4.8rem;
+    }
+    .scene-card[aria-pressed="true"] {
+      background: rgba(255, 255, 255, .16);
+      border-color: #fff;
+    }
+    .scene-name { display: block; font-size: 1.35rem; font-weight: 800; }
+    .scene-line { display: block; margin-top: .2rem; font-size: 1.02rem; line-height: 1.4; color: rgba(248, 250, 252, .88); }
+    .setup-actions { display: flex; flex-wrap: wrap; gap: .7rem; align-items: stretch; }
+    .toggle, .primary, .ghost, .retry {
+      border-radius: 1rem;
+      font-weight: 800;
+      font-size: 1.2rem;
+      min-height: 3.6rem;
+      padding: .75rem 1.1rem;
+    }
+    .toggle, .ghost {
+      background: rgba(255, 255, 255, .14);
+    }
+    .toggle[aria-pressed="true"], .ghost[aria-pressed="true"] { background: #fff; color: #10261f; }
+    .primary, .retry {
+      background: #fff;
+      color: #10261f;
+      flex: 1 1 16rem;
+    }
+    .foot {
+      margin-top: auto;
+      text-align: right;
+      color: rgba(248, 250, 252, .55);
+      font-size: .85rem;
+    }
+
+    .live {
+      padding: calc(.75rem + env(safe-area-inset-top)) calc(.9rem + env(safe-area-inset-right)) calc(.8rem + env(safe-area-inset-bottom)) calc(.9rem + env(safe-area-inset-left));
+      gap: .55rem;
+      justify-content: space-between;
+    }
+    .live-head { text-align: center; }
+    #scene-label { margin: 0; font-size: clamp(1.15rem, 2.5vw, 1.5rem); font-weight: 800; }
+    #agreement-text { margin: .2rem 0 0; font-size: clamp(1rem, 2.2vw, 1.35rem); line-height: 1.4; }
+    #status-text {
+      margin: 0;
+      text-align: center;
+      font-size: clamp(2.7rem, 8vw, 5.6rem);
+      font-weight: 900;
+      letter-spacing: .04em;
+      line-height: 1.12;
+    }
+    body.tone-over #status-text { animation: arrive .45s ease; }
+    @keyframes arrive { from { transform: scale(.97); } to { transform: scale(1); } }
+    @media (prefers-reduced-motion: reduce) {
+      body, body.tone-over #status-text { transition: none; animation: none; }
+    }
+    .meter-wrap { position: relative; margin: 2.6rem .2rem .4rem; }
+    .meter {
+      height: clamp(4.4rem, 18vh, 8.2rem);
+      border-radius: 1.5rem;
+      background: rgba(255, 255, 255, .22);
+      overflow: hidden;
+    }
+    .meter-fill {
+      height: 100%;
+      width: 0;
+      background: rgba(255, 255, 255, .94);
+      border-radius: inherit;
+    }
+    .meter-line {
+      position: absolute;
+      left: 72%;
+      top: -1.7rem;
+      bottom: -.15rem;
+      width: 4px;
+      margin-left: -2px;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, .28);
+      border-radius: 999px;
+    }
+    .meter-line span {
+      position: absolute;
+      top: -1.15rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 900;
+      font-size: 1rem;
+      letter-spacing: .12em;
+      white-space: nowrap;
+    }
+    .pills { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; }
+    .pill {
+      min-width: 4.5rem;
+      min-height: 2.9rem;
+      padding: .35rem .85rem;
+      border-radius: 999px;
+      background: transparent;
+      border: 2px solid rgba(255, 255, 255, .75);
+      font-size: 1.08rem;
+      font-weight: 800;
+    }
+    .pill[aria-pressed="true"] { background: #fff; color: #10261f; border-color: #fff; }
+    .live-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+    .live-actions button {
+      flex: 1 1 11rem;
+      min-height: 3.5rem;
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, .16);
+      border: 2px solid rgba(255, 255, 255, .72);
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+    .error { width: min(760px, 100%); margin: 0 auto; justify-content: center; }
+    .error h1 { font-size: clamp(2.2rem, 6vw, 4rem); }
+    .retry { flex: none; min-width: min(100%, 18rem); align-self: flex-start; }
+  </style>
+</head>
+<body class="tone-setup">
+  <section id="panel-setup" class="panel setup">
+    <div>
+      <h1>音量約定</h1>
+      <p class="lead">選一個情境，一起看音量。超過約定時，畫面會換顏色，提醒我們自己調回來。</p>
+      <p class="place">把平板放在教室中段、螢幕朝外。聲音只留在這台裝置上，用來換成音量高低。</p>
+    </div>
+    <div id="scene-grid" class="scene-grid"></div>
+    <div class="setup-actions">
+      <button id="setup-chime" class="toggle" type="button" aria-pressed="true">輕聲提醒 · 開</button>
+      <button id="start-btn" class="primary" type="button">開始一起看音量</button>
+    </div>
+    <p class="foot">Developed by DennisZ</p>
+  </section>
+
+  <section id="panel-live" class="panel live" hidden>
+    <div class="live-head">
+      <p id="scene-label">討論</p>
+      <p id="agreement-text">小組聲，讓鄰組也能討論</p>
+    </div>
+    <div>
+      <p id="status-text" aria-live="polite">維持這個音量</p>
+      <div class="meter-wrap">
+        <div class="meter-line" aria-hidden="true"><span>約定</span></div>
+        <div id="meter" class="meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="維持這個音量">
+          <div id="meter-fill" class="meter-fill"></div>
+        </div>
+      </div>
+    </div>
+    <div id="pills" class="pills"></div>
+    <div class="live-actions">
+      <button id="pause-btn" type="button">暫停</button>
+      <button id="capture-btn" type="button">把現在訂成約定</button>
+      <button id="live-chime" class="ghost" type="button" aria-pressed="true">輕聲提醒 · 開</button>
+    </div>
+  </section>
+
+  <section id="panel-error" class="panel error" hidden>
+    <h1 id="error-title"></h1>
+    <p id="error-body" class="error-body"></p>
+    <button id="retry-btn" class="retry" type="button">再試一次</button>
+  </section>
+
+  <script>
+    const SCENES = [
+      { id: 'exam', name: '測驗', agreement: '安靜作答，只留筆聲和翻頁', limit: 0.035 },
+      { id: 'study', name: '自習', agreement: '輕聲，讓每個人都能想', limit: 0.07 },
+      { id: 'talk', name: '討論', agreement: '小組聲，讓鄰組也能討論', limit: 0.14 },
+      { id: 'make', name: '實作', agreement: '工作聲，說得清楚，也聽得見老師', limit: 0.24 },
+      { id: 'play', name: '活動', agreement: '參與聲，玩得開心，指示還聽得見', limit: 0.36 },
+      { id: 'chorus', name: '齊讀', agreement: '齊讀聲，聲音齊，不另外加油添醋', limit: 0.52 }
+    ];
+    const HOLD_MS = 1500;
+    const CHIME_GAP_MS = 8000;
+    const THANKS_MS = 2000;
+    const NEAR_RATIO = 0.8;
+    const LINE_AT = 0.72;
+    const NOISE_FLOOR = 0.008;
+
+    const setupPanel = document.getElementById('panel-setup');
+    const livePanel = document.getElementById('panel-live');
+    const errorPanel = document.getElementById('panel-error');
+    const sceneGrid = document.getElementById('scene-grid');
+    const pills = document.getElementById('pills');
+    const startBtn = document.getElementById('start-btn');
+    const setupChime = document.getElementById('setup-chime');
+    const liveChime = document.getElementById('live-chime');
+    const pauseBtn = document.getElementById('pause-btn');
+    const captureBtn = document.getElementById('capture-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    const sceneLabel = document.getElementById('scene-label');
+    const agreementText = document.getElementById('agreement-text');
+    const statusText = document.getElementById('status-text');
+    const meter = document.getElementById('meter');
+    const meterFill = document.getElementById('meter-fill');
+    const errorTitle = document.getElementById('error-title');
+    const errorBody = document.getElementById('error-body');
+
+    let sceneId = 'talk';
+    let threshold = 0.14;
+    let custom = false;
+    let chimeOn = true;
+    let paused = false;
+    let running = false;
+    let opening = false;
+    let smoothed = 0;
+    let haveLevel = false;
+    let overMs = 0;
+    let quietSince = 0;
+    let lastFrameAt = 0;
+    let lastChimeAt = -CHIME_GAP_MS;
+    let phase = 'ok';
+    let thanksUntil = 0;
+    let pendingThanks = false;
+    let rafId = 0;
+    let recent = [];
+    let audioCtx = null;
+    let stream = null;
+    let analyser = null;
+    let timeBuf = null;
+    let wakeLock = null;
+
+    function sceneById(id) {
+      return SCENES.find((scene) => scene.id === id) || SCENES[2];
+    }
+
+    function isAppleTouch() {
+      const ua = navigator.userAgent || '';
+      if (/iPad|iPhone|iPod/.test(ua)) return true;
+      return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    }
+
+    function micCopy(kind, appleTouch) {
+      if (kind === 'insecure') {
+        return {
+          title: '請用網址開啟',
+          body: '直接打開檔案時，平板不會允許使用麥克風。請用學校提供的網址開啟這個畫面。'
+        };
+      }
+      if (kind === 'denied') {
+        return appleTouch
+          ? {
+              title: '請允許麥克風',
+              body: '打開 iPad 的「設定」，點 Safari，再點麥克風，改成允許。回到這個畫面後，按再試一次。'
+            }
+          : {
+              title: '請允許麥克風',
+              body: '點網址列旁的麥克風圖示，改成允許。若系統的隱私權設定關閉了麥克風，請一併打開，再按再試一次。'
+            };
+      }
+      if (kind === 'notfound') {
+        return {
+          title: '這台電腦沒有麥克風',
+          body: '請改用平板開啟，或接上麥克風後再試一次。'
+        };
+      }
+      if (kind === 'unsupported') {
+        return {
+          title: '這個瀏覽器無法使用麥克風',
+          body: '請改用 iPad 的 Safari，或電腦上的 Chrome、Edge 開啟。'
+        };
+      }
+      return {
+        title: '麥克風目前接不上',
+        body: '請確認沒有其他程式正在使用麥克風，或重新接上後再試一次。'
+      };
+    }
+
+    function classifyMicError(err) {
+      const name = err && err.name ? err.name : '';
+      if (name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError') return 'denied';
+      if (name === 'NotFoundError' || name === 'DevicesNotFoundError') return 'notfound';
+      if (name === 'NotReadableError' || name === 'TrackStartError' || name === 'AbortError') return 'unreadable';
+      return 'unreadable';
+    }
+
+    function loadSettings() {
+      const saved = localStorage.getItem('va-scene');
+      const scene = sceneById(saved || 'talk');
+      sceneId = scene.id;
+      chimeOn = localStorage.getItem('va-chime') !== '0';
+      custom = localStorage.getItem('va-custom') === '1';
+      const stored = parseFloat(localStorage.getItem('va-threshold'));
+      threshold = custom && stored > 0 ? stored : scene.limit;
+    }
+
+    function saveSettings() {
+      localStorage.setItem('va-scene', sceneId);
+      localStorage.setItem('va-threshold', String(threshold));
+      localStorage.setItem('va-custom', custom ? '1' : '0');
+      localStorage.setItem('va-chime', chimeOn ? '1' : '0');
+    }
+
+    function buildChoices() {
+      SCENES.forEach((scene) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'scene-card';
+        card.dataset.scene = scene.id;
+        card.innerHTML = '<span class="scene-name"></span><span class="scene-line"></span>';
+        card.querySelector('.scene-name').textContent = scene.name;
+        card.querySelector('.scene-line').textContent = scene.agreement;
+        card.addEventListener('click', () => selectScene(scene.id));
+        sceneGrid.appendChild(card);
+
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'pill';
+        pill.dataset.scene = scene.id;
+        pill.textContent = scene.name;
+        pill.addEventListener('click', () => selectScene(scene.id));
+        pills.appendChild(pill);
+      });
+    }
+
+    function renderSceneUi() {
+      const scene = sceneById(sceneId);
+      document.querySelectorAll('[data-scene]').forEach((el) => {
+        el.setAttribute('aria-pressed', el.dataset.scene === sceneId ? 'true' : 'false');
+      });
+      sceneLabel.textContent = custom ? scene.name + ' · 已依現在調整' : scene.name;
+      agreementText.textContent = scene.agreement;
+      const chimeLabel = chimeOn ? '輕聲提醒 · 開' : '輕聲提醒 · 關';
+      setupChime.textContent = chimeLabel;
+      liveChime.textContent = chimeLabel;
+      setupChime.setAttribute('aria-pressed', chimeOn ? 'true' : 'false');
+      liveChime.setAttribute('aria-pressed', chimeOn ? 'true' : 'false');
+    }
+
+    function selectScene(id) {
+      const scene = sceneById(id);
+      sceneId = scene.id;
+      threshold = scene.limit;
+      custom = false;
+      overMs = 0;
+      quietSince = 0;
+      saveSettings();
+      renderSceneUi();
+    }
+
+    function setChime(on) {
+      chimeOn = !!on;
+      saveSettings();
+      renderSceneUi();
+    }
+
+    function showPanel(name) {
+      setupPanel.hidden = name !== 'setup';
+      livePanel.hidden = name !== 'live';
+      errorPanel.hidden = name !== 'error';
+    }
+
+    function applyTone(tone) {
+      document.body.className = 'tone-' + tone;
+    }
+
+    function stopMeter() {
+      running = false;
+      paused = false;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = 0;
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        stream = null;
+      }
+      if (wakeLock) {
+        wakeLock.release().catch(() => {});
+        wakeLock = null;
+      }
+    }
+
+    function showMicMessage(kind) {
+      stopMeter();
+      const copy = micCopy(kind, isAppleTouch());
+      errorTitle.textContent = copy.title;
+      errorBody.textContent = copy.body;
+      showPanel('error');
+      applyTone('error');
+      retryBtn.hidden = kind === 'insecure';
+      if (!retryBtn.hidden) retryBtn.focus();
+    }
+
+    function setStatus(text) {
+      if (statusText.textContent !== text) statusText.textContent = text;
+      meter.setAttribute('aria-valuetext', text);
+    }
+
+    function paint(ratio, tone, sentence) {
+      const width = Math.max(0, Math.min(100, (ratio / (1 / LINE_AT)) * 100));
+      meterFill.style.width = width + '%';
+      const shown = Math.max(0, Math.min(100, Math.round(ratio * 100)));
+      meter.setAttribute('aria-valuenow', String(shown));
+      applyTone(tone);
+      setStatus(sentence);
+    }
+
+    function readRms() {
+      if (!analyser || !timeBuf) return 0;
+      analyser.getByteTimeDomainData(timeBuf);
+      let sum = 0;
+      for (let i = 0; i < timeBuf.length; i++) {
+        const v = (timeBuf[i] - 128) / 128;
+        sum += v * v;
+      }
+      return Math.sqrt(sum / timeBuf.length);
+    }
+
+    function playChime() {
+      if (!audioCtx || audioCtx.state === 'closed') return;
+      const t = audioCtx.currentTime;
+      [523.25, 784].forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const start = t + index * 0.03;
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(index === 0 ? 0.06 : 0.035, start + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.55);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(start);
+        osc.stop(start + 0.58);
+      });
+    }
+
+    function frame(now) {
+      if (!running) return;
+      const raw = Math.max(0, readRms() - NOISE_FLOOR);
+      recent.push({ t: now, v: raw });
+      while (recent.length && now - recent[0].t > 700) recent.shift();
+      if (raw > smoothed) smoothed += (raw - smoothed) * 0.42;
+      else smoothed += (raw - smoothed) * 0.14;
+      haveLevel = true;
+      const ratio = threshold > 0 ? smoothed / threshold : 0;
+      const delta = lastFrameAt ? Math.min(80, now - lastFrameAt) : 16;
+      lastFrameAt = now;
+
+      if (paused) {
+        if (!running) return;
+        paint(ratio, 'paused', '暫停中');
+        rafId = requestAnimationFrame(frame);
+        return;
+      }
+
+      if (ratio >= 1) quietSince = 0;
+      else if (!quietSince) quietSince = now;
+      const quietFor = quietSince ? now - quietSince : 0;
+      if (quietFor >= 350) overMs = 0;
+      else if (ratio >= 1 && phase !== 'over') overMs += delta;
+
+      let next = 'ok';
+      if (overMs >= HOLD_MS || (phase === 'over' && quietFor < 350)) next = 'over';
+      else if (ratio >= NEAR_RATIO || overMs > 0) next = 'near';
+
+      if (phase === 'over' && next !== 'over') {
+        pendingThanks = true;
+        thanksUntil = now + THANKS_MS;
+      }
+      if (next === 'over') pendingThanks = false;
+      if (next === 'over' && chimeOn && now - lastChimeAt >= CHIME_GAP_MS) {
+        playChime();
+        lastChimeAt = now;
+      }
+
+      phase = next;
+      let sentence = '維持這個音量';
+      let tone = 'ok';
+      if (next === 'over') {
+        sentence = '請回到我們的約定';
+        tone = 'over';
+      } else if (next === 'near') {
+        sentence = '我們可以再輕一點';
+        tone = 'near';
+      } else if (pendingThanks && now < thanksUntil) {
+        sentence = '謝謝，回到約定了';
+        tone = 'ok';
+      } else {
+        pendingThanks = false;
+      }
+      if (!running) return;
+      paint(ratio, tone, sentence);
+      rafId = requestAnimationFrame(frame);
+    }
+
+    async function keepAwake() {
+      if (!navigator.wakeLock) return;
+      try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+    }
+
+    async function startMic() {
+      if (opening || running) return;
+      if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showMicMessage(window.isSecureContext ? 'unsupported' : 'insecure');
+        return;
+      }
+      opening = true;
+      startBtn.disabled = true;
+      startBtn.textContent = '正在開啟麥克風…';
+      try {
+        if (!audioCtx) audioCtx = new AudioContext();
+        await audioCtx.resume();
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: { ideal: false },
+            noiseSuppression: { ideal: false },
+            autoGainControl: { ideal: false }
+          }
+        });
+        const track = stream.getAudioTracks()[0];
+        if (track) track.addEventListener('ended', () => { if (running) showMicMessage('unreadable'); });
+        const source = audioCtx.createMediaStreamSource(stream);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = 0;
+        source.connect(analyser);
+        timeBuf = new Uint8Array(analyser.fftSize);
+        smoothed = 0;
+        haveLevel = false;
+        overMs = 0;
+        quietSince = 0;
+        lastFrameAt = 0;
+        phase = 'ok';
+        thanksUntil = 0;
+        paused = false;
+        pauseBtn.textContent = '暫停';
+        running = true;
+        showPanel('live');
+        renderSceneUi();
+        paint(0, 'ok', '維持這個音量');
+        await keepAwake();
+        rafId = requestAnimationFrame(frame);
+      } catch (err) {
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+          stream = null;
+        }
+        showMicMessage(classifyMicError(err));
+      } finally {
+        opening = false;
+        startBtn.disabled = false;
+        startBtn.textContent = '開始一起看音量';
+      }
+    }
+
+    function setAgreementFromNow() {
+      if (!haveLevel) return;
+      let peak = smoothed;
+      recent.forEach((sample) => { if (sample.v > peak) peak = sample.v; });
+      const basis = Math.max(peak, 0.02);
+      threshold = basis / 0.62;
+      custom = true;
+      overMs = 0;
+      quietSince = 0;
+      saveSettings();
+      renderSceneUi();
+    }
+
+    function togglePause() {
+      paused = !paused;
+      overMs = 0;
+      quietSince = 0;
+      pauseBtn.textContent = paused ? '繼續' : '暫停';
+      if (paused) paint(threshold > 0 ? smoothed / threshold : 0, 'paused', '暫停中');
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!running || document.visibilityState !== 'visible') return;
+      const track = stream && stream.getAudioTracks()[0];
+      if (!track || track.readyState === 'ended') {
+        showMicMessage('unreadable');
+        return;
+      }
+      keepAwake();
+    });
+
+    if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+      navigator.mediaDevices.addEventListener('devicechange', () => {
+        if (!running) return;
+        const track = stream && stream.getAudioTracks()[0];
+        if (!track || track.readyState === 'ended') showMicMessage('unreadable');
+      });
+    }
+
+    loadSettings();
+    buildChoices();
+    renderSceneUi();
+    setupChime.addEventListener('click', () => setChime(!chimeOn));
+    liveChime.addEventListener('click', () => setChime(!chimeOn));
+    startBtn.addEventListener('click', startMic);
+    retryBtn.addEventListener('click', startMic);
+    pauseBtn.addEventListener('click', togglePause);
+    captureBtn.addEventListener('click', setAgreementFromNow);
+  </script>
+</body>
+</html>
