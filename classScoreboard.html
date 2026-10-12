@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,43 +8,52 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg-1: #0a1020;
-      --bg-2: #121a2e;
-      --bg-3: #1a2744;
-      --panel: rgba(255, 255, 255, 0.08);
-      --panel-border: rgba(255, 255, 255, 0.22);
-      --text: #f4f7fb;
-      --muted: rgba(244, 247, 251, 0.72);
+      --bg-1: #070b14;
+      --bg-2: #0f172a;
+      --bg-3: #172554;
+      --panel: rgba(255, 255, 255, 0.07);
+      --panel-border: rgba(255, 255, 255, 0.2);
+      --text: #ffffff;
+      --muted: rgba(255, 255, 255, 0.72);
       --accent: #38bdf8;
       --accent-strong: #0ea5e9;
       --success: #4ade80;
       --danger: #fb7185;
       --gold: #fbbf24;
-      --tie: #a78bfa;
-      --shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
-      --team-1: #ef4444;
+      --tie: #c4b5fd;
+      --shadow: 0 20px 44px rgba(0, 0, 0, 0.5);
+      /* 高對比組色：深底＋亮邊，文字永遠用白 */
+      --team-1: #ff4d4f;
       --team-2: #3b82f6;
       --team-3: #22c55e;
       --team-4: #f59e0b;
       --team-5: #a855f7;
       --team-6: #06b6d4;
+      --team-7: #ec4899;
+      --team-8: #84cc16;
+      --card-bg: #111827;
+      --ink: #ffffff;
       font-family: "Segoe UI", "Noto Sans TC", sans-serif;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
       min-height: 100dvh;
       color: var(--text);
       background:
-        radial-gradient(circle at 12% 10%, rgba(56, 189, 248, 0.18), transparent 42%),
-        radial-gradient(circle at 88% 18%, rgba(251, 191, 36, 0.12), transparent 38%),
-        linear-gradient(150deg, var(--bg-1), var(--bg-2) 55%, var(--bg-3));
+        radial-gradient(circle at 10% 8%, rgba(56, 189, 248, 0.14), transparent 40%),
+        radial-gradient(circle at 90% 12%, rgba(251, 191, 36, 0.1), transparent 36%),
+        linear-gradient(155deg, var(--bg-1), var(--bg-2) 52%, var(--bg-3));
       overflow: hidden;
     }
 
-    button, input, select {
+    button,
+    input,
+    select {
       font: inherit;
       color: inherit;
     }
@@ -58,15 +68,15 @@
       min-height: 100dvh;
       display: grid;
       grid-template-rows: auto auto 1fr auto;
-      padding: clamp(0.6rem, 1.4vh, 1.1rem) clamp(0.8rem, 1.6vw, 1.4rem);
-      gap: clamp(0.5rem, 1.2vh, 0.9rem);
+      padding: clamp(0.55rem, 1.3vh, 1rem) clamp(0.7rem, 1.5vw, 1.25rem);
+      gap: clamp(0.45rem, 1.1vh, 0.85rem);
     }
 
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.75rem;
+      gap: 0.7rem;
       flex-wrap: wrap;
     }
 
@@ -74,164 +84,230 @@
     .topbar-right {
       display: flex;
       align-items: center;
-      gap: 0.55rem;
+      gap: 0.5rem;
       flex-wrap: wrap;
     }
 
     .pill {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      min-height: 2.6rem;
-      padding: 0.35rem 0.9rem;
+      gap: 0.35rem;
+      min-height: 2.55rem;
+      padding: 0.3rem 0.85rem;
       border-radius: 999px;
       background: var(--panel);
       border: 1px solid var(--panel-border);
       backdrop-filter: blur(12px);
-      font-size: clamp(0.95rem, 1.8vh, 1.15rem);
+      font-size: clamp(0.92rem, 1.7vh, 1.1rem);
       color: var(--muted);
     }
 
     .pill strong {
-      color: var(--text);
-      font-weight: 700;
-      letter-spacing: 0.04em;
+      color: var(--ink);
+      font-weight: 800;
+      letter-spacing: 0.03em;
     }
 
     .timer-pill {
       font-variant-numeric: tabular-nums;
-      font-size: clamp(1.2rem, 3vh, 1.85rem);
-      font-weight: 700;
-      color: var(--text);
-      min-width: 7.5rem;
+      font-size: clamp(1.25rem, 3.2vh, 1.95rem);
+      font-weight: 800;
+      color: var(--ink);
+      min-width: 7.8rem;
       justify-content: center;
     }
 
     .timer-pill.is-low {
-      color: #fecaca;
-      border-color: rgba(251, 113, 133, 0.55);
-      background: rgba(251, 113, 133, 0.16);
+      color: #fee2e2;
+      border-color: rgba(248, 113, 113, 0.65);
+      background: rgba(127, 29, 29, 0.55);
     }
 
     .timer-pill.is-off {
-      opacity: 0.45;
+      opacity: 0.4;
     }
 
-    .mode-pill[data-mode="live"] strong { color: var(--success); }
-    .mode-pill[data-mode="locked"] strong { color: var(--gold); }
-    .mode-pill[data-mode="setup"] strong { color: var(--accent); }
+    .mode-pill[data-mode="live"] strong {
+      color: #86efac;
+    }
+
+    .mode-pill[data-mode="locked"] strong {
+      color: #fde68a;
+    }
+
+    .mode-pill[data-mode="setup"] strong {
+      color: #7dd3fc;
+    }
+
+    .hint-pill {
+      color: #e2e8f0;
+      border-color: rgba(56, 189, 248, 0.35);
+      background: rgba(14, 165, 233, 0.12);
+    }
 
     .icon-btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.4rem;
       min-height: 2.75rem;
       padding: 0.4rem 0.85rem;
       border-radius: 14px;
       background: var(--panel);
       border: 1px solid var(--panel-border);
-      color: var(--text);
+      color: var(--ink);
       transition: background 160ms ease, border-color 160ms ease;
     }
 
     .icon-btn:hover,
     .icon-btn:focus-visible {
-      background: rgba(56, 189, 248, 0.16);
-      border-color: rgba(56, 189, 248, 0.55);
+      background: rgba(56, 189, 248, 0.18);
+      border-color: rgba(56, 189, 248, 0.6);
       outline: none;
     }
 
     .icon-btn.active {
-      background: rgba(56, 189, 248, 0.22);
-      border-color: rgba(56, 189, 248, 0.7);
+      background: rgba(56, 189, 248, 0.24);
+      border-color: rgba(56, 189, 248, 0.75);
     }
 
     .icon-btn svg {
-      width: 1.35rem;
-      height: 1.35rem;
+      width: 1.3rem;
+      height: 1.3rem;
     }
 
-    .fs-toggle .fs-exit { display: none; }
-    .fs-toggle.active .fs-expand { display: none; }
-    .fs-toggle.active .fs-exit { display: block; }
+    .fs-toggle .fs-exit {
+      display: none;
+    }
+
+    .fs-toggle.active .fs-expand {
+      display: none;
+    }
+
+    .fs-toggle.active .fs-exit {
+      display: block;
+    }
 
     .kbd {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 1.35rem;
-      padding: 0.1rem 0.35rem;
+      min-width: 1.3rem;
+      padding: 0.08rem 0.32rem;
       border-radius: 6px;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      font-size: 0.78rem;
-      color: var(--muted);
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.76rem;
+      color: #cbd5e1;
+    }
+
+    .locked-banner {
+      display: none;
+      justify-self: center;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      background: rgba(120, 53, 15, 0.7);
+      border: 1px solid rgba(251, 191, 36, 0.65);
+      color: #fef3c7;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      font-size: clamp(0.9rem, 1.8vh, 1.1rem);
+    }
+
+    body.is-locked .locked-banner {
+      display: inline-flex;
     }
 
     .board {
       min-height: 0;
       display: grid;
-      gap: clamp(0.55rem, 1.2vh, 1rem);
+      gap: clamp(0.5rem, 1.1vh, 0.9rem);
       align-content: stretch;
     }
 
-    .board[data-count="2"] { grid-template-columns: repeat(2, 1fr); }
-    .board[data-count="3"] { grid-template-columns: repeat(3, 1fr); }
-    .board[data-count="4"] { grid-template-columns: repeat(2, 1fr); }
-    .board[data-count="5"] { grid-template-columns: repeat(3, 1fr); }
-    .board[data-count="6"] { grid-template-columns: repeat(3, 1fr); }
+    .board[data-count="2"] {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .board[data-count="3"] {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .board[data-count="4"] {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .board[data-count="5"],
+    .board[data-count="6"] {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .board[data-count="7"],
+    .board[data-count="8"] {
+      grid-template-columns: repeat(4, 1fr);
+    }
 
     .team-card {
       position: relative;
       display: grid;
       grid-template-rows: auto 1fr auto;
-      gap: 0.35rem;
+      gap: 0.3rem;
       min-height: 0;
-      padding: clamp(0.7rem, 1.6vh, 1.2rem);
-      border-radius: 22px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 3px solid color-mix(in srgb, var(--team-color) 70%, white 10%);
+      padding: clamp(0.55rem, 1.4vh, 1rem);
+      border-radius: 20px;
+      background: var(--card-bg);
+      border: 3px solid var(--team-color);
       box-shadow: var(--shadow);
       overflow: hidden;
-      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+      transition: transform 140ms ease, box-shadow 140ms ease, border-width 140ms ease;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
+      color: var(--ink);
     }
 
     .team-card::before {
       content: "";
       position: absolute;
+      inset: 0 auto 0 0;
+      width: 0.55rem;
+      background: var(--team-color);
+    }
+
+    .team-card::after {
+      content: "";
+      position: absolute;
       inset: 0;
-      background: linear-gradient(
-        160deg,
-        color-mix(in srgb, var(--team-color) 28%, transparent),
-        transparent 55%
-      );
+      background: linear-gradient(145deg,
+          color-mix(in srgb, var(--team-color) 18%, transparent),
+          transparent 48%);
       pointer-events: none;
     }
 
-    .team-card > * { position: relative; z-index: 1; }
+    .team-card>* {
+      position: relative;
+      z-index: 1;
+    }
 
     .team-card.is-selected {
       transform: translateY(-2px);
       box-shadow:
-        0 0 0 3px color-mix(in srgb, var(--accent) 70%, white),
+        0 0 0 3px #f8fafc,
+        0 0 0 6px color-mix(in srgb, var(--team-color) 70%, white),
         var(--shadow);
     }
 
     .team-card.is-leader {
       border-color: var(--gold);
       box-shadow:
-        0 0 0 2px rgba(251, 191, 36, 0.55),
-        0 18px 40px rgba(251, 191, 36, 0.18),
+        0 0 0 3px rgba(251, 191, 36, 0.75),
+        0 16px 36px rgba(251, 191, 36, 0.22),
         var(--shadow);
     }
 
     .team-card.is-tie {
       border-color: var(--tie);
       box-shadow:
-        0 0 0 2px rgba(167, 139, 250, 0.5),
-        0 18px 40px rgba(167, 139, 250, 0.14),
+        0 0 0 3px rgba(196, 181, 253, 0.65),
+        0 16px 36px rgba(167, 139, 250, 0.18),
         var(--shadow);
     }
 
@@ -244,44 +320,79 @@
     }
 
     @keyframes flashPlus {
-      0% { background: rgba(74, 222, 128, 0.28); }
-      100% { background: rgba(255, 255, 255, 0.06); }
+      0% {
+        background: #14532d;
+      }
+
+      100% {
+        background: var(--card-bg);
+      }
     }
 
     @keyframes flashMinus {
-      0% { background: rgba(251, 113, 133, 0.3); }
-      100% { background: rgba(255, 255, 255, 0.06); }
+      0% {
+        background: #7f1d1d;
+      }
+
+      100% {
+        background: var(--card-bg);
+      }
     }
 
     .team-head {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 0.5rem;
+      gap: 0.4rem;
+      padding-left: 0.35rem;
+    }
+
+    .team-title {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-width: 0;
+    }
+
+    .team-index {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.85rem;
+      height: 1.85rem;
+      border-radius: 999px;
+      background: #000;
+      border: 2px solid var(--team-color);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 900;
     }
 
     .team-name {
       margin: 0;
-      font-size: clamp(1.15rem, 2.6vh, 2rem);
+      font-size: clamp(1.05rem, 2.3vh, 1.75rem);
       font-weight: 800;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.04em;
       line-height: 1.15;
       word-break: break-word;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
     }
 
     .team-badges {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 0.3rem;
+      gap: 0.25rem;
     }
 
     .badge {
       display: none;
-      padding: 0.2rem 0.55rem;
+      padding: 0.18rem 0.5rem;
       border-radius: 999px;
-      font-size: clamp(0.75rem, 1.5vh, 0.95rem);
-      font-weight: 700;
+      font-size: clamp(0.72rem, 1.4vh, 0.9rem);
+      font-weight: 800;
       letter-spacing: 0.04em;
       white-space: nowrap;
     }
@@ -292,55 +403,64 @@
     }
 
     .badge-lead {
-      background: rgba(251, 191, 36, 0.22);
-      color: #fde68a;
-      border: 1px solid rgba(251, 191, 36, 0.55);
+      background: #78350f;
+      color: #fef3c7;
+      border: 1px solid #fbbf24;
     }
 
     .badge-tie {
-      background: rgba(167, 139, 250, 0.2);
-      color: #ddd6fe;
-      border: 1px solid rgba(167, 139, 250, 0.5);
+      background: #4c1d95;
+      color: #ede9fe;
+      border: 1px solid #c4b5fd;
     }
 
     .round-score {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(3.6rem, 16vh, 9.5rem);
+      font-size: clamp(3.2rem, 14vh, 8.5rem);
       font-weight: 900;
       font-variant-numeric: tabular-nums;
       line-height: 0.95;
       letter-spacing: -0.03em;
-      text-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      color: #fff;
+      text-shadow:
+        0 2px 0 rgba(0, 0, 0, 0.35),
+        0 10px 28px rgba(0, 0, 0, 0.45);
+    }
+
+    .board[data-count="7"] .round-score,
+    .board[data-count="8"] .round-score {
+      font-size: clamp(2.6rem, 11vh, 6.2rem);
     }
 
     .total-score {
       text-align: center;
-      font-size: clamp(0.95rem, 2vh, 1.25rem);
-      color: var(--muted);
+      font-size: clamp(0.9rem, 1.9vh, 1.15rem);
+      color: #cbd5e1;
       font-variant-numeric: tabular-nums;
     }
 
     .total-score strong {
-      color: var(--text);
+      color: #fff;
       font-size: 1.15em;
     }
 
     .score-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.55rem;
-      margin-top: 0.25rem;
+      gap: 0.5rem;
+      margin-top: 0.2rem;
+      padding-left: 0.2rem;
     }
 
     .score-btn {
-      min-height: 3.6rem;
-      border-radius: 16px;
-      font-size: clamp(1.6rem, 3.5vh, 2.4rem);
-      font-weight: 800;
+      min-height: 3.5rem;
+      border-radius: 14px;
+      font-size: clamp(1.55rem, 3.2vh, 2.25rem);
+      font-weight: 900;
       border: 2px solid transparent;
-      transition: transform 120ms ease, filter 120ms ease, opacity 120ms ease;
+      transition: transform 120ms ease, opacity 120ms ease;
     }
 
     .score-btn:active:not(:disabled) {
@@ -348,89 +468,103 @@
     }
 
     .score-btn.plus {
-      background: rgba(74, 222, 128, 0.18);
-      border-color: rgba(74, 222, 128, 0.45);
-      color: #bbf7d0;
+      background: #166534;
+      border-color: #4ade80;
+      color: #dcfce7;
     }
 
     .score-btn.minus {
-      background: rgba(251, 113, 133, 0.16);
-      border-color: rgba(251, 113, 133, 0.45);
-      color: #fecdd3;
+      background: #9f1239;
+      border-color: #fb7185;
+      color: #ffe4e6;
     }
 
-    .score-btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
-
+    .score-btn:disabled,
     body.is-locked .score-btn {
-      opacity: 0.35;
+      opacity: 0.32;
       pointer-events: none;
-    }
-
-    .locked-banner {
-      display: none;
-      justify-self: center;
-      padding: 0.4rem 1rem;
-      border-radius: 999px;
-      background: rgba(251, 191, 36, 0.16);
-      border: 1px solid rgba(251, 191, 36, 0.5);
-      color: #fde68a;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      font-size: clamp(0.9rem, 1.8vh, 1.1rem);
-    }
-
-    body.is-locked .locked-banner {
-      display: inline-flex;
     }
 
     .toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.55rem;
+      gap: 0.5rem;
       align-items: center;
       justify-content: center;
+    }
+
+    .toolbar .btn {
+      display: none;
+    }
+
+    body.is-setup .toolbar .btn-when-setup {
+      display: inline-flex;
+    }
+
+    body.is-live .toolbar .btn-when-live {
+      display: inline-flex;
+    }
+
+    body.is-locked .toolbar .btn-when-locked {
+      display: inline-flex;
+    }
+
+    body.is-live.has-timer .toolbar .btn-when-timer {
+      display: inline-flex;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.45rem;
-      min-height: 3.1rem;
+      gap: 0.4rem;
+      min-height: 3.15rem;
       padding: 0.55rem 1.15rem;
       border-radius: 16px;
       font-size: clamp(1rem, 2vh, 1.2rem);
-      font-weight: 700;
+      font-weight: 800;
       border: 1px solid transparent;
-      transition: transform 120ms ease, filter 120ms ease, opacity 120ms ease;
+      transition: transform 120ms ease, filter 120ms ease;
     }
 
-    .btn:active:not(:disabled) { transform: scale(0.97); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
       color: #041018;
+      min-width: 9rem;
     }
 
     .btn-secondary {
-      background: var(--panel);
-      border-color: var(--panel-border);
+      background: rgba(30, 41, 59, 0.9);
+      border-color: rgba(255, 255, 255, 0.22);
+      color: #f8fafc;
     }
 
     .btn-warning {
-      background: rgba(251, 191, 36, 0.18);
-      border-color: rgba(251, 191, 36, 0.45);
-      color: #fde68a;
+      background: #92400e;
+      border-color: #fbbf24;
+      color: #fef3c7;
+      min-width: 8rem;
     }
 
     .btn-danger {
-      background: rgba(251, 113, 133, 0.16);
-      border-color: rgba(251, 113, 133, 0.45);
-      color: #fecdd3;
+      background: #9f1239;
+      border-color: #fb7185;
+      color: #ffe4e6;
+    }
+
+    .btn-hero {
+      min-height: 3.5rem;
+      font-size: clamp(1.1rem, 2.3vh, 1.35rem);
+      padding: 0.65rem 1.5rem;
     }
 
     .setup-drawer {
@@ -439,8 +573,8 @@
       z-index: 40;
       display: grid;
       place-items: center;
-      padding: 1rem;
-      background: rgba(4, 10, 20, 0.62);
+      padding: 0.85rem;
+      background: rgba(2, 6, 23, 0.72);
       opacity: 0;
       pointer-events: none;
       transition: opacity 180ms ease;
@@ -452,161 +586,273 @@
     }
 
     .setup-panel {
-      width: min(920px, 100%);
-      max-height: min(92dvh, 900px);
+      width: min(980px, 100%);
+      max-height: min(94dvh, 920px);
       overflow: auto;
-      padding: clamp(1.1rem, 2.4vh, 1.7rem);
+      padding: clamp(1rem, 2.2vh, 1.55rem);
       border-radius: 24px;
-      background: rgba(15, 23, 42, 0.96);
-      border: 1px solid var(--panel-border);
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.18);
       box-shadow: var(--shadow);
+      color: #f8fafc;
     }
 
     .setup-panel h1 {
-      margin: 0 0 0.35rem;
-      font-size: clamp(1.5rem, 3vh, 2rem);
-      letter-spacing: 0.08em;
+      margin: 0 0 0.25rem;
+      font-size: clamp(1.45rem, 2.8vh, 1.9rem);
+      letter-spacing: 0.06em;
+      color: #fff;
     }
 
     .setup-lead {
-      margin: 0 0 1.1rem;
-      color: var(--muted);
-      line-height: 1.55;
+      margin: 0 0 1rem;
+      color: #cbd5e1;
+      line-height: 1.5;
     }
 
-    .setup-grid {
+    .setup-steps {
       display: grid;
       gap: 1rem;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     }
 
-    .field {
-      display: grid;
+    .step {
+      padding: 0.9rem 1rem;
+      border-radius: 18px;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .step-label {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-bottom: 0.7rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.7rem;
+      height: 1.7rem;
+      border-radius: 999px;
+      background: #0284c7;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
       gap: 0.45rem;
     }
 
-    .field label {
-      font-size: 0.95rem;
-      color: var(--muted);
-    }
-
-    .field input[type="number"],
-    .field input[type="text"],
-    .field select {
+    .chip {
       min-height: 2.9rem;
-      padding: 0.45rem 0.75rem;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--panel-border);
+      min-width: 3.2rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      background: #0f172a;
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      color: #e2e8f0;
+      font-weight: 800;
+      font-size: 1.05rem;
     }
 
-    .field input:focus,
-    .field select:focus {
-      outline: 2px solid rgba(56, 189, 248, 0.55);
-      outline-offset: 1px;
+    .chip:hover,
+    .chip:focus-visible {
+      border-color: #38bdf8;
+      outline: none;
+    }
+
+    .chip.is-active {
+      background: #0369a1;
+      border-color: #7dd3fc;
+      color: #fff;
+    }
+
+    .chip.is-off.is-active {
+      background: #334155;
+      border-color: #94a3b8;
     }
 
     .team-names {
       display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 0.55rem;
     }
 
     .team-name-row {
       display: grid;
-      grid-template-columns: 0.7rem 1fr;
-      gap: 0.55rem;
+      grid-template-columns: 2rem 1fr;
+      gap: 0.5rem;
       align-items: center;
     }
 
     .swatch {
-      width: 0.7rem;
-      height: 2.4rem;
-      border-radius: 999px;
+      width: 2rem;
+      height: 2.55rem;
+      border-radius: 10px;
       background: var(--team-color);
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
     }
 
-    .check-row {
-      display: flex;
-      align-items: center;
+    .team-name-row input {
+      min-height: 2.7rem;
+      padding: 0.4rem 0.7rem;
+      border-radius: 12px;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    .team-name-row input:focus {
+      outline: 2px solid rgba(56, 189, 248, 0.65);
+      outline-offset: 1px;
+    }
+
+    .custom-time {
+      display: none;
+      grid-template-columns: 1fr 1fr;
       gap: 0.55rem;
-      min-height: 2.6rem;
+      margin-top: 0.65rem;
     }
 
-    .check-row input {
-      width: 1.25rem;
-      height: 1.25rem;
+    .custom-time.open {
+      display: grid;
+    }
+
+    .custom-time label {
+      display: grid;
+      gap: 0.3rem;
+      color: #cbd5e1;
+      font-size: 0.9rem;
+    }
+
+    .custom-time input {
+      min-height: 2.7rem;
+      padding: 0.4rem 0.7rem;
+      border-radius: 12px;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
     }
 
     .setup-actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.55rem;
-      margin-top: 1.15rem;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .name-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .name-tools .chip {
+      min-height: 2.4rem;
+      font-size: 0.92rem;
+      font-weight: 700;
     }
 
     .hotkey-help {
-      margin-top: 1rem;
-      padding-top: 0.9rem;
+      margin-top: 0.9rem;
+      padding-top: 0.8rem;
       border-top: 1px solid rgba(255, 255, 255, 0.12);
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.65;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      line-height: 1.6;
     }
 
     .hotkey-help code {
       display: inline-block;
-      padding: 0.05rem 0.35rem;
+      padding: 0.05rem 0.32rem;
       border-radius: 6px;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      color: var(--text);
+      background: #020617;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #e2e8f0;
       font-size: 0.85em;
     }
 
     .toast-area {
       position: fixed;
       left: 50%;
-      bottom: 5.5rem;
+      bottom: 5.4rem;
       transform: translateX(-50%);
       z-index: 50;
       display: grid;
-      gap: 0.45rem;
+      gap: 0.4rem;
       pointer-events: none;
     }
 
     .toast {
       padding: 0.7rem 1.1rem;
       border-radius: 14px;
-      background: rgba(15, 23, 42, 0.92);
-      border: 1px solid rgba(56, 189, 248, 0.45);
+      background: #0f172a;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: #fff;
       box-shadow: var(--shadow);
-      font-weight: 700;
+      font-weight: 800;
       animation: toastIn 180ms ease;
     }
 
     @keyframes toastIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1100px) {
+
+      .board[data-count="7"],
+      .board[data-count="8"] {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
 
     @media (max-width: 900px) {
+
       .board[data-count="3"],
       .board[data-count="5"],
       .board[data-count="6"] {
         grid-template-columns: repeat(2, 1fr);
       }
+
+      .board[data-count="7"],
+      .board[data-count="8"] {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
       .round-score {
-        font-size: clamp(3rem, 12vh, 6rem);
+        font-size: clamp(2.8rem, 11vh, 5.5rem);
       }
     }
 
     @media (max-height: 700px) {
-      .score-btn { min-height: 3.1rem; }
-      .round-score { font-size: clamp(2.8rem, 14vh, 6.5rem); }
+      .score-btn {
+        min-height: 3rem;
+      }
+
+      .round-score {
+        font-size: clamp(2.4rem, 12vh, 5.8rem);
+      }
     }
   </style>
 </head>
-<body>
+
+<body class="is-setup">
   <div class="app">
     <header class="topbar">
       <div class="topbar-left">
@@ -615,25 +861,32 @@
         </div>
         <div class="pill">第 <strong id="round-label">1</strong> 輪</div>
         <div class="pill timer-pill is-off" id="timer-pill" aria-live="polite">--:--</div>
+        <div class="pill hint-pill" id="hint-pill">點組牌上的 ＋／− 直接加減</div>
       </div>
       <div class="topbar-right">
+        <button type="button" class="icon-btn active" id="btn-sound" title="音效與語音 (M)" aria-pressed="true">
+          <span id="sound-label">音效開</span>
+          <span class="kbd">M</span>
+        </button>
         <button type="button" class="icon-btn" id="btn-setup" title="設定 (S)">
           <span>設定</span>
           <span class="kbd">S</span>
         </button>
-        <button type="button" class="icon-btn fs-toggle" id="fullscreen-toggle-btn" title="全螢幕 (F)" aria-pressed="false">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <button type="button" class="icon-btn fs-toggle" id="fullscreen-toggle-btn" title="全螢幕 (F)"
+          aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true">
             <g class="fs-expand">
-              <path d="M4.6 9.1V5.4a.8.8 0 0 1 .8-.8h3.7"/>
-              <path d="M14.9 4.6h3.7a.8.8 0 0 1 .8.8v3.7"/>
-              <path d="M19.4 14.9v3.7a.8.8 0 0 1-.8.8h-3.7"/>
-              <path d="M9.1 19.4H5.4a.8.8 0 0 1-.8-.8v-3.7"/>
+              <path d="M4.6 9.1V5.4a.8.8 0 0 1 .8-.8h3.7" />
+              <path d="M14.9 4.6h3.7a.8.8 0 0 1 .8.8v3.7" />
+              <path d="M19.4 14.9v3.7a.8.8 0 0 1-.8.8h-3.7" />
+              <path d="M9.1 19.4H5.4a.8.8 0 0 1-.8-.8v-3.7" />
             </g>
             <g class="fs-exit">
-              <path d="M9.2 4.6v3.2a.8.8 0 0 1-.8.8H5.2"/>
-              <path d="M14.8 4.6v3.2a.8.8 0 0 0 .8.8h3.2"/>
-              <path d="M19.4 14.8h-3.2a.8.8 0 0 0-.8.8v3.2"/>
-              <path d="M9.2 19.4v-3.2a.8.8 0 0 0-.8-.8H5.2"/>
+              <path d="M9.2 4.6v3.2a.8.8 0 0 1-.8.8H5.2" />
+              <path d="M14.8 4.6v3.2a.8.8 0 0 0 .8.8h3.2" />
+              <path d="M19.4 14.8h-3.2a.8.8 0 0 0-.8.8v3.2" />
+              <path d="M9.2 19.4v-3.2a.8.8 0 0 0-.8-.8H5.2" />
             </g>
           </svg>
           <span id="fullscreen-label">全螢幕</span>
@@ -642,73 +895,78 @@
       </div>
     </header>
 
-    <div class="locked-banner" id="locked-banner">本輪結束 · 分數已鎖定</div>
+    <div class="locked-banner" id="locked-banner">本輪結束 · 分數已鎖定 · 按「下一輪」繼續</div>
     <main class="board" id="board" data-count="4" aria-label="記分板"></main>
 
     <footer class="toolbar">
-      <button type="button" class="btn btn-primary" id="btn-start-round">開始本輪</button>
-      <button type="button" class="btn btn-secondary" id="btn-toggle-timer" disabled>
-        <span id="timer-toggle-label">開始倒數</span>
+      <button type="button" class="btn btn-primary btn-hero btn-when-setup" id="btn-start-round">開始本輪</button>
+      <button type="button" class="btn btn-secondary btn-when-timer" id="btn-toggle-timer">
+        <span id="timer-toggle-label">暫停倒數</span>
         <span class="kbd">空白</span>
       </button>
-      <button type="button" class="btn btn-warning" id="btn-lock" disabled>
-        <span>鎖分</span>
+      <button type="button" class="btn btn-warning btn-hero btn-when-live" id="btn-lock">
+        <span>鎖分結束本輪</span>
         <span class="kbd">L</span>
       </button>
-      <button type="button" class="btn btn-primary" id="btn-next-round" disabled>
+      <button type="button" class="btn btn-primary btn-hero btn-when-locked" id="btn-next-round">
         <span>下一輪</span>
         <span class="kbd">N</span>
       </button>
-      <button type="button" class="btn btn-secondary" id="btn-reset-round" disabled>
+      <button type="button" class="btn btn-secondary btn-when-locked" id="btn-reset-round">
         <span>本輪歸零</span>
         <span class="kbd">R</span>
       </button>
+      <button type="button" class="btn btn-secondary btn-when-setup" id="btn-open-setup-again">調整設定</button>
     </footer>
   </div>
 
   <div class="setup-drawer" id="setup-drawer" aria-hidden="true">
     <div class="setup-panel" role="dialog" aria-labelledby="setup-title">
       <h1 id="setup-title">班級即時記分板</h1>
-      <p class="setup-lead">2–6 組大數字即時加減分。適合英語單字對抗、實驗站、辯論與班會積分；後排也要看得懂。</p>
+      <p class="setup-lead">三步就好：選組數 → 選時間 → 開始。課堂上直接點各組 ＋／−，不必先選組。</p>
 
-      <div class="setup-grid">
-        <div class="field">
-          <label for="team-count">組數</label>
-          <select id="team-count">
-            <option value="2">2 組</option>
-            <option value="3">3 組</option>
-            <option value="4" selected>4 組</option>
-            <option value="5">5 組</option>
-            <option value="6">6 組</option>
-          </select>
-        </div>
+      <div class="setup-steps">
+        <section class="step">
+          <div class="step-label"><span class="step-num">1</span> 幾組比賽？</div>
+          <div class="chip-row" id="team-count-chips" role="group" aria-label="組數"></div>
+        </section>
 
-        <div class="field">
-          <label class="check-row" for="timer-enabled">
-            <input type="checkbox" id="timer-enabled" checked />
-            <span>本輪啟用倒數（結束自動鎖分）</span>
-          </label>
-          <label for="timer-minutes">倒數分鐘</label>
-          <input type="number" id="timer-minutes" min="0" max="99" value="3" inputmode="numeric" />
-          <label for="timer-seconds">倒數秒數（加總）</label>
-          <input type="number" id="timer-seconds" min="0" max="59" value="0" inputmode="numeric" />
-        </div>
-
-        <div class="field" style="grid-column: 1 / -1;">
-          <label>組名</label>
+        <section class="step">
+          <div class="step-label"><span class="step-num">2</span> 組名（可改）</div>
+          <div class="name-tools">
+            <button type="button" class="chip" id="btn-names-number">用「第N組」</button>
+            <button type="button" class="chip" id="btn-names-color">用顏色當組名</button>
+          </div>
           <div class="team-names" id="team-names"></div>
-        </div>
+        </section>
+
+        <section class="step">
+          <div class="step-label"><span class="step-num">3</span> 本輪時間</div>
+          <div class="chip-row" id="timer-chips" role="group" aria-label="倒數時間"></div>
+          <div class="custom-time" id="custom-time">
+            <label>
+              分鐘
+              <input type="number" id="timer-minutes" min="0" max="99" value="3" inputmode="numeric" />
+            </label>
+            <label>
+              秒
+              <input type="number" id="timer-seconds" min="0" max="59" value="0" inputmode="numeric" />
+            </label>
+          </div>
+        </section>
       </div>
 
       <div class="setup-actions">
-        <button type="button" class="btn btn-primary" id="btn-apply-start">套用並開始本輪</button>
-        <button type="button" class="btn btn-secondary" id="btn-close-setup">關閉設定</button>
+        <button type="button" class="btn btn-primary btn-hero" id="btn-apply-start">開始記分</button>
+        <button type="button" class="btn btn-secondary" id="btn-close-setup">先關閉</button>
         <button type="button" class="btn btn-danger" id="btn-reset-totals">重設總分</button>
       </div>
 
       <div class="hotkey-help">
-        <div><code>1</code>–<code>6</code> 選組 · <code>+</code>/<code>-</code> 加減 · 方向向鍵選組 · <code>Enter</code> +1 · <code>Backspace</code> -1</div>
-        <div><code>空白</code> 倒數開始/暫停 · <code>L</code> 鎖分 · <code>N</code> 下一輪 · <code>R</code> 本輪歸零 · <code>S</code> 設定 · <code>F</code> 全螢幕</div>
+        <div>觸控：直接點各組 <code>＋</code> / <code>−</code> · 鍵盤：<code>1</code>–<code>8</code> 選組 ·
+          <code>+</code>/<code>-</code> 加減</div>
+        <div>加分有歡呼語音、扣分有加油語音 · <code>M</code> 開關音效 · <code>空白</code> 倒數 · <code>L</code> 鎖分 · <code>N</code> 下一輪 ·
+          <code>S</code> 設定 · <code>F</code> 全螢幕</div>
       </div>
     </div>
   </div>
@@ -717,32 +975,43 @@
 
   <script>
     (() => {
-      const STORAGE_KEY = 'edutv-class-scoreboard-v1';
+      const STORAGE_KEY = 'edutv-class-scoreboard-v2';
+      const MAX_TEAMS = 8;
       const TEAM_COLORS = [
-        'var(--team-1)',
-        'var(--team-2)',
-        'var(--team-3)',
-        'var(--team-4)',
-        'var(--team-5)',
-        'var(--team-6)',
+        'var(--team-1)', 'var(--team-2)', 'var(--team-3)', 'var(--team-4)',
+        'var(--team-5)', 'var(--team-6)', 'var(--team-7)', 'var(--team-8)',
       ];
+      const COLOR_NAMES = ['紅組', '藍組', '綠組', '橙組', '紫組', '青組', '粉組', '萊姆組'];
       const MODE_LABELS = { setup: '設定', live: '進行中', locked: '已鎖分' };
+      const TIMER_PRESETS = [
+        { id: 'off', label: '無倒數', sec: 0, enabled: false },
+        { id: '60', label: '1 分', sec: 60, enabled: true },
+        { id: '120', label: '2 分', sec: 120, enabled: true },
+        { id: '180', label: '3 分', sec: 180, enabled: true },
+        { id: '300', label: '5 分', sec: 300, enabled: true },
+        { id: '600', label: '10 分', sec: 600, enabled: true },
+        { id: 'custom', label: '自訂', sec: null, enabled: true },
+      ];
 
       const boardEl = document.getElementById('board');
       const modePill = document.getElementById('mode-pill');
       const modeLabel = document.getElementById('mode-label');
       const roundLabel = document.getElementById('round-label');
       const timerPill = document.getElementById('timer-pill');
+      const hintPill = document.getElementById('hint-pill');
       const setupDrawer = document.getElementById('setup-drawer');
-      const teamCountSelect = document.getElementById('team-count');
+      const teamCountChips = document.getElementById('team-count-chips');
+      const timerChips = document.getElementById('timer-chips');
+      const customTimeEl = document.getElementById('custom-time');
       const teamNamesEl = document.getElementById('team-names');
-      const timerEnabledEl = document.getElementById('timer-enabled');
       const timerMinutesEl = document.getElementById('timer-minutes');
       const timerSecondsEl = document.getElementById('timer-seconds');
       const fullscreenBtn = document.getElementById('fullscreen-toggle-btn');
       const fullscreenLabel = document.getElementById('fullscreen-label');
       const toastArea = document.getElementById('toast-area');
       const btnSetup = document.getElementById('btn-setup');
+      const btnSound = document.getElementById('btn-sound');
+      const soundLabel = document.getElementById('sound-label');
       const btnStartRound = document.getElementById('btn-start-round');
       const btnToggleTimer = document.getElementById('btn-toggle-timer');
       const timerToggleLabel = document.getElementById('timer-toggle-label');
@@ -752,25 +1021,41 @@
       const btnApplyStart = document.getElementById('btn-apply-start');
       const btnCloseSetup = document.getElementById('btn-close-setup');
       const btnResetTotals = document.getElementById('btn-reset-totals');
+      const btnOpenSetupAgain = document.getElementById('btn-open-setup-again');
+      const btnNamesNumber = document.getElementById('btn-names-number');
+      const btnNamesColor = document.getElementById('btn-names-color');
 
       let audioContext = null;
       let timerRaf = null;
       let lastTickAt = 0;
       let builtCount = 0;
       let setupOpen = false;
+      let draftCount = 4;
+      let draftTimerId = '180';
+      let soundEnabled = true;
+      let cheerPhraseIndex = 0;
+      let zhVoice = null;
 
-      function defaultTeams(count) {
-        return Array.from({ length: count }, (_, i) => ({
+      const CHEER_PHRASES = [
+        (name) => `恭喜${name}！太棒了！`,
+        (name) => `${name}加分！繼續加油！`,
+        (name) => `哇賽！${name}得分囉！`,
+        (name) => `厲害！為${name}鼓掌！`,
+        (name) => `${name}表現超優！`,
+      ];
+
+      function makeTeam(i, name) {
+        return {
           id: `t${i + 1}`,
-          name: `第${i + 1}組`,
+          name: name || `第${i + 1}組`,
           color: TEAM_COLORS[i],
           roundScore: 0,
           totalScore: 0,
-        }));
+        };
       }
 
       function createSession() {
-        const teams = defaultTeams(4);
+        const teams = Array.from({ length: MAX_TEAMS }, (_, i) => makeTeam(i));
         return {
           teamCount: 4,
           teams,
@@ -781,6 +1066,7 @@
             durationSec: 180,
             remainingMs: 180000,
             running: false,
+            presetId: '180',
           },
           roundIndex: 1,
           updatedAt: new Date().toISOString(),
@@ -795,6 +1081,10 @@
 
       function findTeam(id) {
         return session.teams.find((t) => t.id === id) || null;
+      }
+
+      function clampCount(n) {
+        return Math.min(MAX_TEAMS, Math.max(2, Number(n) || 4));
       }
 
       function formatTime(ms) {
@@ -821,45 +1111,153 @@
           }
         }
         if (audioContext && audioContext.state === 'suspended') {
-          audioContext.resume().catch(() => {});
+          audioContext.resume().catch(() => { });
         }
       }
 
+      function tone(freq, start, dur, type, peak) {
+        if (!audioContext) return;
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(peak || 0.2, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start(start);
+        osc.stop(start + dur + 0.02);
+        return osc;
+      }
+
       function playLockChime() {
+        if (!soundEnabled) return;
         initAudioContext();
         if (!audioContext) return;
         const t0 = audioContext.currentTime;
-        const notes = [523.25, 659.25, 783.99];
-        notes.forEach((freq, i) => {
-          const osc = audioContext.createOscillator();
-          const gain = audioContext.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, t0 + i * 0.12);
-          gain.gain.setValueAtTime(0, t0 + i * 0.12);
-          gain.gain.linearRampToValueAtTime(0.22, t0 + i * 0.12 + 0.04);
-          gain.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.12 + 0.35);
-          osc.connect(gain);
-          gain.connect(audioContext.destination);
-          osc.start(t0 + i * 0.12);
-          osc.stop(t0 + i * 0.12 + 0.4);
+        [523.25, 659.25, 783.99].forEach((freq, i) => {
+          tone(freq, t0 + i * 0.12, 0.35, 'sine', 0.22);
         });
+      }
+
+      function playCheerSound() {
+        if (!soundEnabled) return;
+        initAudioContext();
+        if (!audioContext) return;
+        const t0 = audioContext.currentTime;
+        // 上行大調琶音 + 高八度叮
+        [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+          tone(freq, t0 + i * 0.08, 0.28, i === 3 ? 'triangle' : 'sine', i === 3 ? 0.28 : 0.18);
+        });
+        tone(1318.5, t0 + 0.36, 0.22, 'triangle', 0.16);
+      }
+
+      function playJeerSound() {
+        if (!soundEnabled) return;
+        initAudioContext();
+        if (!audioContext) return;
+        const t0 = audioContext.currentTime;
+        // 往下滑的「唉唷」感 + 低沉嗡聲
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(320, t0);
+        osc.frequency.exponentialRampToValueAtTime(90, t0 + 0.55);
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.exponentialRampToValueAtTime(0.14, t0 + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6);
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start(t0);
+        osc.stop(t0 + 0.65);
+        tone(180, t0 + 0.08, 0.35, 'square', 0.06);
+        tone(140, t0 + 0.28, 0.4, 'triangle', 0.08);
+      }
+
+      function pickZhVoice() {
+        if (!window.speechSynthesis) return null;
+        const voices = window.speechSynthesis.getVoices();
+        zhVoice =
+          voices.find((v) => v.lang === 'zh-TW') ||
+          voices.find((v) => v.lang === 'zh-HK') ||
+          voices.find((v) => v.lang === 'zh-CN') ||
+          voices.find((v) => /^zh/i.test(v.lang)) ||
+          null;
+        return zhVoice;
+      }
+
+      if (window.speechSynthesis) {
+        pickZhVoice();
+        window.speechSynthesis.onvoiceschanged = pickZhVoice;
+      }
+
+      function speakText(text, { rate = 1.05, pitch = 1.1 } = {}) {
+        if (!soundEnabled || !text || !window.speechSynthesis) return;
+        try {
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(text);
+          const voice = zhVoice || pickZhVoice();
+          if (voice) u.voice = voice;
+          u.lang = voice?.lang || 'zh-TW';
+          u.rate = rate;
+          u.pitch = pitch;
+          u.volume = 1;
+          window.speechSynthesis.speak(u);
+        } catch (_) { }
+      }
+
+      function teamNumber(team) {
+        const idx = session.teams.findIndex((t) => t.id === team.id);
+        return idx >= 0 ? idx + 1 : 1;
+      }
+
+      function announceScore(team, delta) {
+        if (delta > 0) {
+          playCheerSound();
+          const phrase = CHEER_PHRASES[cheerPhraseIndex % CHEER_PHRASES.length](team.name);
+          cheerPhraseIndex += 1;
+          speakText(phrase, { rate: 1.08, pitch: 1.2 });
+        } else {
+          playJeerSound();
+          speakText(`第${teamNumber(team)}組你怎麼被扣分，要加油喔`, { rate: 1.0, pitch: 0.85 });
+        }
+      }
+
+      function setSoundEnabled(on) {
+        soundEnabled = !!on;
+        btnSound.classList.toggle('active', soundEnabled);
+        btnSound.setAttribute('aria-pressed', soundEnabled ? 'true' : 'false');
+        soundLabel.textContent = soundEnabled ? '音效開' : '音效關';
+        try {
+          localStorage.setItem('edutv-scoreboard-sound', soundEnabled ? '1' : '0');
+        } catch (_) { }
+        if (!soundEnabled && window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+        }
+      }
+
+      function toggleSound() {
+        setSoundEnabled(!soundEnabled);
+        showToast(soundEnabled ? '音效與語音已開啟' : '音效與語音已關閉');
       }
 
       function persist() {
         session.updatedAt = new Date().toISOString();
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-        } catch (_) {}
+        } catch (_) { }
       }
 
       function restore() {
         try {
-          const raw = localStorage.getItem(STORAGE_KEY);
+          let raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) raw = localStorage.getItem('edutv-class-scoreboard-v1');
           if (!raw) return;
           const data = JSON.parse(raw);
           if (!data || !Array.isArray(data.teams)) return;
           const next = createSession();
-          next.teamCount = Math.min(6, Math.max(2, Number(data.teamCount) || 4));
+          next.teamCount = clampCount(data.teamCount);
           next.mode = ['setup', 'live', 'locked'].includes(data.mode) ? data.mode : 'setup';
           next.roundIndex = Math.max(1, Number(data.roundIndex) || 1);
           next.selectedTeamId = data.selectedTeamId || next.teams[0].id;
@@ -868,8 +1266,9 @@
             durationSec: Math.max(0, Number(data.timer?.durationSec) || 180),
             remainingMs: Math.max(0, Number(data.timer?.remainingMs) || 0),
             running: false,
+            presetId: data.timer?.presetId || guessPresetId(data.timer),
           };
-          for (let i = 0; i < 6; i++) {
+          for (let i = 0; i < MAX_TEAMS; i++) {
             const src = data.teams[i] || {};
             next.teams[i] = {
               id: `t${i + 1}`,
@@ -883,7 +1282,14 @@
             next.selectedTeamId = next.teams[0].id;
           }
           session = next;
-        } catch (_) {}
+        } catch (_) { }
+      }
+
+      function guessPresetId(timer) {
+        if (!timer || timer.enabled === false) return 'off';
+        const sec = Number(timer.durationSec) || 0;
+        const hit = TIMER_PRESETS.find((p) => p.enabled && p.sec === sec);
+        return hit ? hit.id : 'custom';
       }
 
       function rankInfo() {
@@ -891,18 +1297,30 @@
         const scores = teams.map((t) => t.roundScore);
         const max = Math.max(...scores);
         const leaders = teams.filter((t) => t.roundScore === max);
-        const isTie = leaders.length > 1 && !(max === 0 && teams.every((t) => t.roundScore === 0));
-        const hasLead = max !== 0 || teams.some((t) => t.roundScore !== 0);
-        return { max, isTie, hasLead, leaderIds: new Set(leaders.map((t) => t.id)) };
+        const allZero = teams.every((t) => t.roundScore === 0);
+        const isTie = leaders.length > 1 && !allZero;
+        const hasLead = !allZero;
+        return { isTie, hasLead, leaderIds: new Set(leaders.map((t) => t.id)) };
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
       }
 
       function rebuildBoard() {
         const teams = activeTeams();
         boardEl.dataset.count = String(session.teamCount);
         boardEl.innerHTML = teams.map((team, index) => `
-          <article class="team-card" data-team-id="${team.id}" style="--team-color: ${team.color}" tabindex="0" role="group" aria-label="${team.name}">
+          <article class="team-card" data-team-id="${team.id}" style="--team-color: ${team.color}" tabindex="0" role="group" aria-label="${escapeHtml(team.name)}">
             <div class="team-head">
-              <h2 class="team-name">${escapeHtml(team.name)}</h2>
+              <div class="team-title">
+                <span class="team-index" aria-hidden="true">${index + 1}</span>
+                <h2 class="team-name">${escapeHtml(team.name)}</h2>
+              </div>
               <div class="team-badges">
                 <span class="badge badge-lead">第一名</span>
                 <span class="badge badge-tie">平手</span>
@@ -911,8 +1329,8 @@
             <div class="round-score" data-round>${team.roundScore}</div>
             <div class="total-score">總分 <strong data-total>${team.totalScore}</strong></div>
             <div class="score-actions">
-              <button type="button" class="score-btn minus" data-delta="-1" data-team-id="${team.id}" aria-label="${team.name} 扣 1 分">−</button>
-              <button type="button" class="score-btn plus" data-delta="1" data-team-id="${team.id}" aria-label="${team.name} 加 1 分">＋</button>
+              <button type="button" class="score-btn minus" data-delta="-1" data-team-id="${team.id}" aria-label="${escapeHtml(team.name)} 扣 1 分">−</button>
+              <button type="button" class="score-btn plus" data-delta="1" data-team-id="${team.id}" aria-label="${escapeHtml(team.name)} 加 1 分">＋</button>
             </div>
           </article>
         `).join('');
@@ -932,18 +1350,8 @@
         });
       }
 
-      function escapeHtml(str) {
-        return String(str)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      }
-
       function updateBoardScores() {
         const { isTie, hasLead, leaderIds } = rankInfo();
-        const locked = session.mode === 'locked';
-
         activeTeams().forEach((team) => {
           const card = boardEl.querySelector(`.team-card[data-team-id="${team.id}"]`);
           if (!card) return;
@@ -953,73 +1361,150 @@
           const isLeader = hasLead && leaderIds.has(team.id);
           card.classList.toggle('is-leader', isLeader && !isTie);
           card.classList.toggle('is-tie', isLeader && isTie);
-          card.querySelectorAll('.score-btn').forEach((btn) => {
-            btn.disabled = locked;
-          });
         });
       }
 
+      function buildCountChips() {
+        teamCountChips.innerHTML = '';
+        for (let n = 2; n <= MAX_TEAMS; n++) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'chip';
+          btn.dataset.count = String(n);
+          btn.textContent = `${n} 組`;
+          btn.addEventListener('click', () => {
+            draftCount = n;
+            syncCountChips();
+            renderSetupNames();
+          });
+          teamCountChips.appendChild(btn);
+        }
+      }
+
+      function syncCountChips() {
+        teamCountChips.querySelectorAll('.chip').forEach((chip) => {
+          chip.classList.toggle('is-active', Number(chip.dataset.count) === draftCount);
+        });
+      }
+
+      function buildTimerChips() {
+        timerChips.innerHTML = '';
+        TIMER_PRESETS.forEach((preset) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `chip${preset.id === 'off' ? ' is-off' : ''}`;
+          btn.dataset.preset = preset.id;
+          btn.textContent = preset.label;
+          btn.addEventListener('click', () => {
+            draftTimerId = preset.id;
+            syncTimerChips();
+          });
+          timerChips.appendChild(btn);
+        });
+      }
+
+      function syncTimerChips() {
+        timerChips.querySelectorAll('.chip').forEach((chip) => {
+          chip.classList.toggle('is-active', chip.dataset.preset === draftTimerId);
+        });
+        customTimeEl.classList.toggle('open', draftTimerId === 'custom');
+        if (draftTimerId !== 'custom' && draftTimerId !== 'off') {
+          const preset = TIMER_PRESETS.find((p) => p.id === draftTimerId);
+          if (preset && preset.sec != null) {
+            timerMinutesEl.value = String(Math.floor(preset.sec / 60));
+            timerSecondsEl.value = String(preset.sec % 60);
+          }
+        }
+      }
+
       function renderSetupNames() {
+        const existing = {};
+        teamNamesEl.querySelectorAll('input[data-team-index]').forEach((input) => {
+          existing[input.dataset.teamIndex] = input.value;
+        });
         teamNamesEl.innerHTML = '';
-        for (let i = 0; i < session.teamCount; i++) {
+        for (let i = 0; i < draftCount; i++) {
           const team = session.teams[i];
+          const value = existing[i] != null ? existing[i] : team.name;
           const row = document.createElement('div');
           row.className = 'team-name-row';
           row.innerHTML = `
-            <span class="swatch" style="--team-color: ${team.color}"></span>
-            <input type="text" maxlength="16" data-team-index="${i}" value="${escapeHtml(team.name)}" aria-label="第 ${i + 1} 組名稱" />
+            <span class="swatch" style="--team-color: ${team.color}" title="${COLOR_NAMES[i]}"></span>
+            <input type="text" maxlength="12" data-team-index="${i}" value="${escapeHtml(value)}" aria-label="第 ${i + 1} 組名稱" />
           `;
           teamNamesEl.appendChild(row);
         }
       }
 
+      function applyNamePreset(kind) {
+        teamNamesEl.querySelectorAll('input[data-team-index]').forEach((input) => {
+          const i = Number(input.dataset.teamIndex);
+          input.value = kind === 'color' ? COLOR_NAMES[i] : `第${i + 1}組`;
+        });
+      }
+
       function syncSetupForm() {
-        teamCountSelect.value = String(session.teamCount);
-        timerEnabledEl.checked = !!session.timer.enabled;
+        draftCount = session.teamCount;
+        draftTimerId = session.timer.presetId || guessPresetId(session.timer);
         const mins = Math.floor(session.timer.durationSec / 60);
         const secs = session.timer.durationSec % 60;
         timerMinutesEl.value = String(mins);
         timerSecondsEl.value = String(secs);
+        syncCountChips();
+        syncTimerChips();
         renderSetupNames();
       }
 
-      function readSetupFormIntoSession(opts = {}) {
-        const keepTotals = opts.keepTotals !== false;
-        const count = Math.min(6, Math.max(2, Number(teamCountSelect.value) || 4));
+      function readSetupFormIntoSession() {
+        const count = clampCount(draftCount);
         const prevTotals = session.teams.map((t) => t.totalScore);
         const prevRounds = session.teams.map((t) => t.roundScore);
         const names = Array.from(teamNamesEl.querySelectorAll('input[data-team-index]'))
           .sort((a, b) => Number(a.dataset.teamIndex) - Number(b.dataset.teamIndex))
-          .map((input, i) => {
-            const v = input.value.trim();
-            return v || `第${i + 1}組`;
-          });
+          .map((input, i) => input.value.trim() || `第${i + 1}組`);
 
         session.teamCount = count;
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < MAX_TEAMS; i++) {
           session.teams[i].name = names[i] || `第${i + 1}組`;
           session.teams[i].color = TEAM_COLORS[i];
-          if (!keepTotals) {
-            session.teams[i].totalScore = 0;
-            session.teams[i].roundScore = 0;
-          } else {
-            session.teams[i].totalScore = prevTotals[i] || 0;
-            session.teams[i].roundScore = prevRounds[i] || 0;
-          }
+          session.teams[i].totalScore = prevTotals[i] || 0;
+          session.teams[i].roundScore = prevRounds[i] || 0;
         }
 
-        const mins = Math.max(0, Number(timerMinutesEl.value) || 0);
-        const secs = Math.min(59, Math.max(0, Number(timerSecondsEl.value) || 0));
-        let durationSec = mins * 60 + secs;
-        if (timerEnabledEl.checked && durationSec <= 0) durationSec = 60;
-        session.timer.enabled = !!timerEnabledEl.checked;
+        const preset = TIMER_PRESETS.find((p) => p.id === draftTimerId) || TIMER_PRESETS[3];
+        let enabled = !!preset.enabled;
+        let durationSec = preset.sec == null ? 0 : preset.sec;
+        if (preset.id === 'custom') {
+          const mins = Math.max(0, Number(timerMinutesEl.value) || 0);
+          const secs = Math.min(59, Math.max(0, Number(timerSecondsEl.value) || 0));
+          durationSec = mins * 60 + secs;
+          enabled = durationSec > 0;
+          if (enabled && durationSec <= 0) durationSec = 60;
+        }
+        if (preset.id === 'off') {
+          enabled = false;
+          durationSec = 0;
+        }
+
+        session.timer.enabled = enabled;
         session.timer.durationSec = durationSec;
+        session.timer.presetId = draftTimerId;
         if (!session.timer.running) {
           session.timer.remainingMs = durationSec * 1000;
         }
 
         if (!activeTeams().some((t) => t.id === session.selectedTeamId)) {
           session.selectedTeamId = session.teams[0].id;
+        }
+      }
+
+      function updateHint() {
+        if (session.mode === 'setup') {
+          hintPill.textContent = '先按「開始本輪」，或打開設定三步完成';
+        } else if (session.mode === 'live') {
+          hintPill.textContent = '直接點各組 ＋／− · 數字鍵 1–8 選組';
+        } else {
+          hintPill.textContent = '本輪已鎖分 · 按「下一輪」繼續累計總分';
         }
       }
 
@@ -1030,23 +1515,14 @@
         document.body.classList.toggle('is-locked', session.mode === 'locked');
         document.body.classList.toggle('is-live', session.mode === 'live');
         document.body.classList.toggle('is-setup', session.mode === 'setup');
+        document.body.classList.toggle('has-timer', !!(session.timer.enabled && session.mode === 'live'));
 
         const timerOn = session.timer.enabled;
         timerPill.classList.toggle('is-off', !timerOn);
         timerPill.classList.toggle('is-low', timerOn && session.timer.remainingMs <= 10000 && session.timer.remainingMs > 0);
-        timerPill.textContent = timerOn ? formatTime(session.timer.remainingMs) : '--:--';
-
-        const live = session.mode === 'live';
-        const locked = session.mode === 'locked';
-        const setup = session.mode === 'setup';
-
-        btnStartRound.disabled = !setup;
-        btnStartRound.textContent = '開始本輪';
-        btnToggleTimer.disabled = !timerOn || !live;
-        timerToggleLabel.textContent = session.timer.running ? '暫停倒數' : '開始倒數';
-        btnLock.disabled = !live;
-        btnNextRound.disabled = !locked;
-        btnResetRound.disabled = !(setup || locked);
+        timerPill.textContent = timerOn ? formatTime(session.timer.remainingMs) : '無倒數';
+        timerToggleLabel.textContent = session.timer.running ? '暫停倒數' : '繼續倒數';
+        updateHint();
       }
 
       function render() {
@@ -1076,12 +1552,12 @@
           return;
         }
         const team = findTeam(teamId);
-        if (!team) return;
-        if (!activeTeams().some((t) => t.id === teamId)) return;
+        if (!team || !activeTeams().some((t) => t.id === teamId)) return;
         team.roundScore += delta;
         team.totalScore += delta;
         session.selectedTeamId = teamId;
         flashTeam(teamId, delta);
+        announceScore(team, delta);
         render();
       }
 
@@ -1143,7 +1619,7 @@
 
       function toggleTimer() {
         if (!session.timer.enabled) {
-          showToast('尚未啟用倒數');
+          showToast('本輪未啟用倒數');
           return;
         }
         if (session.mode !== 'live') {
@@ -1155,7 +1631,7 @@
       }
 
       function beginRound({ fromSetup = false } = {}) {
-        if (fromSetup) readSetupFormIntoSession({ keepTotals: true });
+        if (fromSetup) readSetupFormIntoSession();
         session.mode = 'live';
         session.timer.running = false;
         stopTimerLoop();
@@ -1164,7 +1640,7 @@
         }
         closeSetup();
         render();
-        showToast(`第 ${session.roundIndex} 輪開始`);
+        showToast(`第 ${session.roundIndex} 輪開始 · 直接點 ＋／−`);
         if (session.timer.enabled && session.timer.durationSec > 0) startTimer();
       }
 
@@ -1291,6 +1767,11 @@
           toggleSetup();
           return;
         }
+        if (key === 'm' || key === 'M') {
+          e.preventDefault();
+          toggleSound();
+          return;
+        }
         if (key === 'l' || key === 'L') {
           e.preventDefault();
           if (session.mode === 'live') lockRound('手動鎖分');
@@ -1306,7 +1787,7 @@
           resetRoundScores();
           return;
         }
-        if (key >= '1' && key <= '6') {
+        if (key >= '1' && key <= '8') {
           const idx = Number(key) - 1;
           if (idx < session.teamCount) {
             e.preventDefault();
@@ -1345,26 +1826,19 @@
         }
       }
 
-      teamCountSelect.addEventListener('change', () => {
-        const count = Math.min(6, Math.max(2, Number(teamCountSelect.value) || 4));
-        session.teamCount = count;
-        if (!activeTeams().some((t) => t.id === session.selectedTeamId)) {
-          session.selectedTeamId = session.teams[0].id;
-        }
-        renderSetupNames();
-      });
+      buildCountChips();
+      buildTimerChips();
 
       btnSetup.addEventListener('click', toggleSetup);
+      btnSound.addEventListener('click', toggleSound);
+      btnOpenSetupAgain.addEventListener('click', openSetup);
       btnCloseSetup.addEventListener('click', closeSetup);
       setupDrawer.addEventListener('click', (e) => {
         if (e.target === setupDrawer) closeSetup();
       });
       btnApplyStart.addEventListener('click', () => beginRound({ fromSetup: true }));
       btnStartRound.addEventListener('click', () => {
-        if (session.mode !== 'setup') {
-          showToast(session.mode === 'locked' ? '請按下一輪繼續' : '本輪進行中');
-          return;
-        }
+        if (session.mode !== 'setup') return;
         beginRound({ fromSetup: setupOpen });
       });
       btnToggleTimer.addEventListener('click', toggleTimer);
@@ -1374,11 +1848,21 @@
       btnNextRound.addEventListener('click', nextRound);
       btnResetRound.addEventListener('click', resetRoundScores);
       btnResetTotals.addEventListener('click', resetTotals);
+      btnNamesNumber.addEventListener('click', () => applyNamePreset('number'));
+      btnNamesColor.addEventListener('click', () => applyNamePreset('color'));
       fullscreenBtn.addEventListener('click', toggleFullscreen);
       document.addEventListener('fullscreenchange', () => setFullscreenButton(!!document.fullscreenElement));
       document.addEventListener('keydown', handleHotkeys);
       document.addEventListener('click', initAudioContext, { once: true });
       document.addEventListener('keydown', initAudioContext, { once: true });
+
+      try {
+        const savedSound = localStorage.getItem('edutv-scoreboard-sound');
+        if (savedSound === '0') setSoundEnabled(false);
+        else setSoundEnabled(true);
+      } catch (_) {
+        setSoundEnabled(true);
+      }
 
       restore();
       rebuildBoard();
@@ -1387,4 +1871,5 @@
     })();
   </script>
 </body>
+
 </html>
