@@ -20,7 +20,7 @@
   </script>
   <style>
     /* === v1.0.1 新增/調整樣式區 === */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto+Mono:wght@500;700&display=swap');
     :root{
       --bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e5e7eb;--ring:#22d3ee;
       --accent:#38bdf8;--accent-2:#a78bfa;--good:#34d399;--warn:#fbbf24;--bad:#f87171;
@@ -81,8 +81,42 @@
       padding:clamp(.5rem,1.2vh,1.25rem);padding-bottom:clamp(.35rem,.8vh,.75rem);overflow:hidden;box-sizing:border-box;
     }
     #top-toolbar{flex-shrink:0;padding:clamp(.5rem,1.2vh,1rem)!important}
-    #page-title{line-height:1.2;max-width:min(36rem,42vw)}
-    #day-out-of-schedule-hint{font-size:.75rem;color:rgba(252,211,77,.9);white-space:nowrap;flex-shrink:0}
+    #page-title{line-height:1.2;max-width:min(36rem,42vw);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #page-title:focus{overflow:visible;text-overflow:clip}
+    #day-buttons-container{display:flex;gap:.5rem;flex-wrap:nowrap;overflow-x:auto;max-width:min(34rem,40vw);scrollbar-width:thin}
+    #day-out-of-schedule-hint{font-size:.75rem;font-weight:700;color:#fbbf24;white-space:nowrap;flex-shrink:0}
+    .preview-banner{
+      display:none;width:100%;flex-shrink:0;box-sizing:border-box;
+      margin:0 0 .7rem;padding:.6rem 1rem;border-radius:.8rem;text-align:center;
+      background:linear-gradient(90deg,#b45309,#d97706);color:#fffbeb;
+      font-weight:800;letter-spacing:.03em;line-height:1.35;
+      font-size:clamp(1rem,2.2vh,1.45rem);
+      box-shadow:inset 0 0 0 2px rgba(254,243,199,.45);
+    }
+    .preview-banner.is-visible{display:block}
+    .pres-preview-banner{font-size:clamp(1.25rem,3vh,2.05rem);margin:0 0 .85rem;padding:.7rem 1.1rem}
+    .schedule-title-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:clamp(.35rem,.7vh,.75rem);flex-shrink:0}
+    .restore-now-btn{border:1px solid rgba(251,191,36,.5);background:rgba(180,83,9,.28);color:#fde68a;border-radius:.5rem;font-size:.75rem;font-weight:800;padding:.28rem .6rem;white-space:nowrap;flex-shrink:0}
+    .restore-now-btn:hover{background:rgba(217,119,6,.4)}
+    #schedule-timeline{position:relative}
+    .time-sim-line{
+      position:absolute;left:0;right:.25rem;height:0;z-index:6;margin:0!important;
+      pointer-events:none;
+    }
+    .time-sim-line.hidden{display:none}
+    .time-sim-hit{position:absolute;left:0;right:0;top:-10px;height:20px;cursor:ns-resize;pointer-events:auto}
+    .time-sim-rule{position:absolute;left:0;right:0;top:-1px;height:2px;background:#f59e0b;box-shadow:0 0 0 1px rgba(0,0,0,.45);pointer-events:none}
+    .time-sim-readout{
+      position:absolute;right:0;top:-.85rem;background:#b45309;color:#fffbeb;
+      font-size:.75rem;font-weight:800;line-height:1.2;padding:.12rem .42rem;border-radius:.35rem;
+      pointer-events:none;font-variant-numeric:tabular-nums;box-shadow:0 2px 8px rgba(0,0,0,.28);
+    }
+    .time-sim-line.is-below .time-sim-readout{top:.4rem}
+    [data-theme="light"] .restore-now-btn,[data-theme="light-soft"] .restore-now-btn{color:#92400e;background:#fffbeb;border-color:#d97706}
+    [data-theme="high-contrast"] .time-sim-rule{background:#ffaa00;box-shadow:none}
+    [data-theme="high-contrast"] .time-sim-readout{background:#000;color:#fff;box-shadow:inset 0 0 0 2px #ffaa00}
+    .day-pin-btn{border:1px solid rgba(251,191,36,.45);background:rgba(251,191,36,.12);color:#fde68a;border-radius:.5rem;font-size:.75rem;font-weight:800;padding:.2rem .55rem;white-space:nowrap;flex-shrink:0}
+    .day-pin-btn:hover{background:rgba(251,191,36,.22)}
     .dashboard-content{flex:1;min-height:0;overflow:hidden;gap:clamp(.35rem,.8vh,1rem)!important}
     .dashboard-left{
       min-height:0;overflow:hidden;
@@ -94,12 +128,12 @@
       min-height:0;overflow:hidden;padding:clamp(.75rem,1.5vh,1.5rem)!important;
       display:flex;flex-direction:column;
     }
-    .dashboard-sidebar #schedule-title{font-size:clamp(1.125rem,2vh,1.5rem);margin-bottom:clamp(.35rem,.7vh,.75rem)!important;flex-shrink:0}
+    .dashboard-sidebar #schedule-title{font-size:clamp(1.125rem,2vh,1.5rem);margin-bottom:0!important;flex:1;min-width:0;border-bottom:0;padding-bottom:0}
     .dashboard-sidebar .schedule-list{flex:1;min-height:0;overflow-y:auto}
     #hero{min-height:0;padding:clamp(.75rem,2vh,2rem)!important}
     #hero .hero-body{flex:1 1 0;min-height:0;overflow:hidden;width:100%}
     #hero h2{font-size:clamp(1.125rem,2.2vh,1.875rem);margin-bottom:clamp(.35rem,.8vh,1rem)}
-    #current-subject{font-size:clamp(3.5rem,11vh,7.5rem)!important;line-height:1.1;word-break:break-word;max-width:100%}
+    #current-subject{--subject-chars:4;font-size:clamp(1.7rem,10vh,7.5rem)!important;font-size:clamp(1.7rem, min(10vh, calc(34vw / var(--subject-chars))), 7.5rem)!important;line-height:1.12;overflow-wrap:anywhere;word-break:break-word;max-width:100%}
     #hero .rounded-2xl.shadow-inner{padding:clamp(.5rem,1.2vh,1.25rem) clamp(.75rem,1.8vh,1.5rem)!important}
     #subject-time-range{font-size:clamp(1.125rem,2.8vh,2.25rem)!important;margin-top:clamp(.35rem,.8vh,1rem)!important}
     #subject-progress-container{margin-top:clamp(.5rem,1.2vh,1.5rem)!important;max-width:min(36rem,100%)}
@@ -108,7 +142,7 @@
     #absent-section.absent-section--sidebar .absent-stat-value{font-size:clamp(1.25rem,2.5vh,2rem)!important}
     #absent-section.absent-section--sidebar .absent-stat-grid{margin-bottom:clamp(.25rem,.5vh,.5rem)!important}
     #absent-section.absent-section--sidebar .absent-seat-box{margin-top:clamp(.15rem,.35vh,.35rem)!important;padding:clamp(.3rem,.6vh,.5rem)!important}
-    #absent-section.absent-section--sidebar #absent-seat-display{max-height:2.75rem;overflow-y:auto;font-size:clamp(.75rem,1.2vh,.875rem)!important;line-height:1.3}
+    #absent-section.absent-section--sidebar #absent-seat-display{max-height:min(7.5rem,20vh);overflow-y:auto;font-size:clamp(.95rem,1.8vh,1.2rem)!important;line-height:1.45}
     #absent-section.absent-section--sidebar .btn{padding:.2rem .45rem;font-size:.7rem}
     #absent-section .absent-section-head{margin-bottom:clamp(.35rem,.7vh,.75rem)!important;padding:.25rem!important}
     #absent-section .absent-section-head h2{font-size:clamp(1rem,1.8vh,1.5rem)}
@@ -125,8 +159,10 @@
     }
     @media (max-height:700px){
       #hero h2{display:none}
-      #subject-progress-container{height:.65rem!important}
+      #subject-progress-container .progress-track{height:.65rem!important}
     }
+    .absent-warning{margin-top:.4rem;font-size:.78rem;font-weight:800;color:#fb7185;line-height:1.35}
+    .dashboard-left,.dashboard-sidebar{min-width:0}
 
     /* === 訊息發布（無框、無訊息時完全不佔位） === */
     .broadcast-dock{
@@ -152,15 +188,18 @@
     .broadcast-msg-body{flex:1;min-width:0;display:flex;align-items:baseline;justify-content:space-between;gap:.5rem}
     .broadcast-msg-text{flex:1;min-width:0}
     .broadcast-msg-countdown{
-      flex-shrink:0;font-size:.68rem;font-weight:600;color:rgba(148,163,184,.5);
-      font-variant-numeric:tabular-nums;letter-spacing:.02em;opacity:.9;
+      flex-shrink:0;font-size:clamp(.85rem,1.6vh,1.05rem);font-weight:800;color:var(--text);
+      font-variant-numeric:tabular-nums;letter-spacing:.02em;opacity:.82;
     }
     .broadcast-msg-confirm-btn{
-      flex-shrink:0;width:2.35rem;height:2.35rem;border-radius:.55rem;cursor:pointer;
-      border:2px solid rgba(248,113,113,.45);background:rgba(239,68,68,.08);
-      padding:0;appearance:none;-webkit-appearance:none;
+      flex-shrink:0;min-width:3.4rem;height:2.15rem;border-radius:.55rem;cursor:pointer;
+      border:2px solid rgba(248,113,113,.55);background:rgba(239,68,68,.12);
+      padding:0 .45rem;appearance:none;-webkit-appearance:none;
+      display:inline-flex;align-items:center;justify-content:center;
+      color:#fecaca;font-size:.78rem;font-weight:800;letter-spacing:.04em;
       transition:background .2s,border-color .2s,transform .15s;
     }
+    .broadcast-msg-confirm-btn::before{content:'確認'}
     .broadcast-msg-confirm-btn:hover{background:rgba(239,68,68,.18);border-color:rgba(248,113,113,.75);transform:scale(1.06)}
     .broadcast-msg-confirm-btn:active{transform:scale(.96)}
     .broadcast-msg-confirm{
@@ -207,60 +246,61 @@
       border-color:rgba(253,164,175,.4);color:#ffe4e6;
       box-shadow:0 4px 22px rgba(244,63,94,.15),inset 0 1px 0 rgba(255,255,255,.1);
     }
-    .broadcast-msg-card--shake{animation:broadcast-shake 2.8s ease-in-out infinite}
-    @keyframes broadcast-shake{
-      0%,100%{transform:translateX(0)}
-      15%{transform:translateX(-3px) rotate(-.3deg)}
-      30%{transform:translateX(3px) rotate(.3deg)}
-      45%{transform:translateX(-2px)}
-      60%{transform:translateX(2px)}
-      75%{transform:translateX(-1px)}
+    .broadcast-msg-card--shake{animation:broadcast-pulse 1.5s ease-in-out 4}
+    @keyframes broadcast-pulse{
+      0%,100%{box-shadow:0 4px 24px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.06)}
+      50%{box-shadow:0 0 0 3px rgba(251,191,36,.55),0 4px 24px rgba(0,0,0,.14)}
+    }
+    @media (prefers-reduced-motion:reduce){
+      .broadcast-msg-card--shake,.broadcast-msg-confirm--animate{animation:none}
     }
     .pres-broadcast-dock .broadcast-msg-card{font-size:clamp(1.1rem,2.4vh,1.65rem)}
     .pres-broadcast-dock .broadcast-messages-stack{padding:0 .85rem .65rem}
-    .pres-layout{display:grid;grid-template-rows:auto 1fr;height:100%;min-height:0}
-    .pres-layout.pres-layout--messages-active{grid-template-rows:auto 1fr 30%}
+    .pres-layout{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100%;min-height:0}
+    .pres-layout.pres-layout--messages-active{grid-template-rows:auto minmax(0,1fr) auto minmax(5.5rem,26%)}
     .pres-header{
-      display:flex;align-items:center;gap:.75rem 1rem;flex-wrap:wrap;
-      padding:clamp(.75rem,1.5vh,1.1rem) 1rem;border-bottom:1px solid rgba(100,116,139,.35);
-      background:rgba(15,23,42,.75);flex-shrink:0;
+      display:flex;align-items:center;gap:.75rem 1rem;flex-wrap:nowrap;
+      padding:clamp(.45rem,1vh,.8rem) 1rem;border-bottom:1px solid rgba(100,116,139,.35);
+      background:var(--panel);flex-shrink:0;min-width:0;
     }
-    .pres-header-hints{font-size:.75rem;color:#94a3b8;flex:1;min-width:10rem}
-    .pres-absent-grid{
-      display:grid;grid-template-columns:repeat(3,minmax(5.5rem,1fr));
-      gap:clamp(.5rem,1vh,.85rem);margin-left:auto;flex-shrink:0;
+    .pres-absent-bar{
+      display:grid;grid-template-columns:minmax(6.5rem,9.5rem) minmax(0,1fr) minmax(6.5rem,9.5rem);
+      gap:.75rem;align-items:stretch;padding:.6rem 1rem .8rem;
+      border-top:1px solid rgba(100,116,139,.28);background:var(--panel);min-height:0;
     }
     .pres-absent-box{
-      padding:clamp(.5rem,1vh,.85rem) clamp(.65rem,1.2vh,1rem);
-      border-radius:.85rem;text-align:center;min-width:5.5rem;
+      padding:clamp(.45rem,.9vh,.75rem) clamp(.6rem,1.1vh,.9rem);
+      border-radius:.85rem;text-align:center;min-width:0;
+      display:flex;flex-direction:column;justify-content:center;
     }
     .pres-absent-box--expected{background:rgba(30,41,59,.85);border:2px solid rgba(100,116,139,.45)}
-    .pres-absent-box--absent{background:rgba(127,29,29,.35);border:2px solid rgba(244,63,94,.45)}
+    .pres-absent-box--absent{background:rgba(127,29,29,.35);border:2px solid rgba(244,63,94,.45);text-align:left}
     .pres-absent-box--actual{background:rgba(6,78,59,.35);border:2px solid rgba(52,211,153,.45)}
-    .pres-absent-box-label{font-size:1.6rem;font-weight:700;color:#cbd5e1;line-height:1.2}
-    .pres-absent-box-value{font-size:clamp(2.5rem,5vh,4rem);font-weight:800;line-height:1.05;color:#f1f5f9}
+    .pres-absent-box-label{font-size:clamp(.8rem,1.5vh,1rem);font-weight:800;color:#cbd5e1;line-height:1.2}
+    .pres-absent-box-value{font-size:clamp(1.7rem,3.6vh,2.7rem);font-weight:800;line-height:1.05;color:#f1f5f9;font-variant-numeric:tabular-nums}
     .pres-absent-box--absent .pres-absent-box-value{color:#fecdd3}
     .pres-absent-box--actual .pres-absent-box-value{color:#a7f3d0}
     .pres-absent-box-seats{
-      margin-top:.35rem;font-size:1.2rem;font-weight:700;color:#fda4af;
-      line-height:1.25;word-break:break-word;max-height:3.2rem;overflow-y:auto;
+      margin-top:.3rem;font-size:clamp(1rem,2vh,1.4rem);font-weight:800;color:#fecdd3;
+      line-height:1.35;overflow-wrap:anywhere;word-break:break-word;max-height:16vh;overflow-y:auto;
     }
+    .pres-absent-warning{margin-top:.35rem;font-size:.85rem;font-weight:800;color:#fecaca}
     .pres-main{min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:.75rem 1.25rem}
     .pres-subject-block{width:100%;max-width:56rem;text-align:center}
-    .pres-subject-block .pres-label{font-size:clamp(1rem,2vh,1.25rem);color:#7dd3fc;letter-spacing:.12em}
-    #pres-subject{font-size:clamp(3.75rem,12vh,6.75rem)!important;line-height:1.05}
+    .pres-subject-block .pres-label{font-size:clamp(1rem,2vh,1.25rem);color:var(--accent);letter-spacing:.12em}
+    #pres-subject{--subject-chars:4;font-size:clamp(2rem,12vh,6.75rem)!important;font-size:clamp(2rem, min(12vh, calc(70vw / var(--subject-chars))), 6.75rem)!important;line-height:1.08;overflow-wrap:anywhere;word-break:break-word}
     #pres-range{font-size:clamp(1.25rem,3.5vh,2.25rem)!important}
     .pres-next-hint{
-      font-size:clamp(.8rem,1.4vh,1rem)!important;color:rgba(148,163,184,.5);
-      margin-top:.65rem;font-weight:500;letter-spacing:.02em;
+      font-size:clamp(1rem,2.1vh,1.4rem)!important;color:var(--muted);
+      margin-top:.7rem;font-weight:700;letter-spacing:.02em;
     }
-    .pres-next-hint::before{content:'Next: ';color:rgba(148,163,184,.65);font-weight:600}
+    .pres-next-hint::before{content:'下一節　';color:var(--accent);font-weight:800}
     .pres-next-hint--empty::before{display:none}
-    #pres-clock.docked .clock-time{font-size:3.45rem!important}
-    #pres-clock.docked .clock-date{font-size:1.95rem!important}
-    #pres-clock.docked .clock-badge{font-size:1.875rem!important;padding:.2rem .75rem!important}
-    #pres-clock.docked{padding:.5rem 1rem!important;gap:.5rem!important}
-    #pres-clock.docked{margin-right:auto}
+    #pres-clock.docked .clock-time{font-size:clamp(1.45rem,3vh,2.15rem)!important}
+    #pres-clock.docked .clock-date{font-size:clamp(.75rem,1.5vh,.95rem)!important}
+    #pres-clock.docked .clock-badge{font-size:clamp(.7rem,1.3vh,.85rem)!important;padding:.15rem .5rem!important}
+    #pres-clock.docked{padding:.15rem .35rem!important;gap:.45rem!important}
+    #pres-clock.docked{margin-right:auto;min-width:0}
     
     /* === 淺色主題文字對比度優化 === */
     [data-theme="light"] .text-slate-300,
@@ -427,7 +467,7 @@
     .timeline-item.exam.active .text-sm{color:var(--bad)}
     #schedule-timeline .timeline-item.exam .text-sm,#schedule-timeline .timeline-item[data-type="exam"] .text-sm{font-size:1.125rem;font-weight:800}
     .modal{opacity:1}
-    #sheets-sync-modal{z-index:70;padding:max(.75rem,env(safe-area-inset-top)) max(.75rem,env(safe-area-inset-right)) max(.75rem,env(safe-area-inset-bottom)) max(.75rem,env(safe-area-inset-left))}
+    #sheets-sync-modal{z-index:80;padding:max(.75rem,env(safe-area-inset-top)) max(.75rem,env(safe-area-inset-right)) max(.75rem,env(safe-area-inset-bottom)) max(.75rem,env(safe-area-inset-left))}
     #sheets-sync-modal .schedule-settings-panel{
       width:100%;max-width:40rem;max-height:min(92dvh,100%);display:flex;flex-direction:column;overflow:hidden;
     }
@@ -638,45 +678,25 @@
       background:linear-gradient(90deg, #000000 0%, #1a1a1a 50%, #00ffff 100%);
     }
 
-    /* === Tooltip 樣式 === */
-    .tooltip-wrapper{
-      position:relative;
-      display:inline-block;
+    /* === 懸浮說明：掛在畫面最外層，避免被 overflow 裁切 === */
+    #hover-tip{
+      position:fixed;z-index:130;max-width:min(18rem,calc(100vw - 16px));
+      padding:.4rem .7rem;border-radius:.45rem;background:#0f172a;color:#f8fafc;
+      border:1px solid rgba(148,163,184,.4);font-size:.75rem;font-weight:700;line-height:1.35;
+      letter-spacing:.01em;pointer-events:none;
+      box-shadow:0 10px 28px rgba(0,0,0,.4);
     }
-    .tooltip{
-      position:absolute;
-      bottom:calc(100% + 0.5rem);
-      left:50%;
-      transform:translateX(-50%);
-      background:rgba(15,23,42,.95);
-      color:var(--text);
-      padding:0.5rem 0.75rem;
-      border-radius:0.375rem;
-      font-size:0.75rem;
-      white-space:nowrap;
-      opacity:0;
-      visibility:hidden;
-      pointer-events:none;
-      transition:opacity 0.2s ease,visibility 0.2s;
-      z-index:200;
-      border:1px solid rgba(148,163,184,.2);
+    #hover-tip[hidden]{display:none}
+    #hover-tip::after{
+      content:"";position:absolute;left:var(--arrow-left,50%);transform:translateX(-50%);
+      border:6px solid transparent;
     }
-    .tooltip-wrapper:hover .tooltip{
-      opacity:1;
-      visibility:visible;
-    }
-    .tooltip:after{
-      content:"";
-      position:absolute;
-      top:100%;
-      left:50%;
-      transform:translateX(-50%);
-      border:5px solid transparent;
-      border-top-color:rgba(15,23,42,.95);
-    }
+    #hover-tip:not(.is-above)::after{bottom:100%;border-bottom-color:#0f172a}
+    #hover-tip.is-above::after{top:100%;border-top-color:#0f172a}
 
     /* === 圖示按鈕樣式 === */
     .icon-btn{
+      position:relative;
       display:inline-flex;
       align-items:center;
       justify-content:center;
@@ -698,6 +718,15 @@
       background:#0ea5e9;
       color:#0b1220;
       border-color:#0ea5e9;
+    }
+    .icon-btn--labeled{width:auto;height:2.5rem;padding:0 .6rem;gap:.3rem;font-size:1rem}
+    .icon-btn-label{font-size:.75rem;font-weight:800;letter-spacing:.01em;line-height:1}
+    .icon-btn:focus-visible,.btn:focus-visible,.theme-btn:focus-visible,.day-pin-btn:focus-visible{
+      outline:2px solid var(--ring);outline-offset:2px;
+    }
+    @media (max-width:860px){
+      .icon-btn-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+      .icon-btn--labeled{width:2.5rem;padding:0}
     }
 
     /* === 大時鐘 HUD（原樣式，供未鎖定時使用） === */
@@ -838,9 +867,9 @@
     #presentation-overlay [class*="text-emerald"] {
       color: var(--good) !important;
     }
-    .clock-hud.docked .clock-time { font-size: 0.875rem; }
-    .clock-hud.docked .clock-date { font-size: 0.625rem; }
-    .clock-hud.docked .clock-badge { font-size: 0.625rem; padding: 0.05rem 0.3rem; }
+    .clock-hud.docked .clock-time { font-size: clamp(1.15rem, 2.1vh, 1.6rem); }
+    .clock-hud.docked .clock-date { font-size: clamp(.68rem, 1.25vh, .85rem); }
+    .clock-hud.docked .clock-badge { font-size: clamp(.62rem, 1.1vh, .75rem); padding: 0.08rem 0.35rem; }
     .clock-hud.docked .flex { gap: 0.25rem !important; }
     .clock-hud .clock-actions, .clock-hud .snap-tip { display: none !important; }
     
@@ -884,8 +913,6 @@
       border-color: rgba(236,72,153,.4) !important;
     }
 	
-	@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&display=swap');
-
 	/* 讓數字固定字寬 + 友善 fallback */
 	.clock-time,
 	#pres-clock .clock-time {
@@ -909,37 +936,113 @@
 	  text-align: center;
 	}
 
+    #status-message{z-index:100}
+    #appearance-modal,#message-role-modal,#expected-modal,#absent-setup-modal,#sheets-sync-modal{z-index:80}
+    #subject-progress-container,#pres-progress-container{display:flex;align-items:center;gap:.75rem}
+    #pres-progress-container{background:transparent!important}
+    .progress-track{flex:1;min-width:0}
+    .progress-label{flex-shrink:0;min-width:3.4rem;text-align:right;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text);font-size:clamp(.95rem,1.8vh,1.25rem)}
+    .schedule-list,.broadcast-messages-stack,#absent-seat-display,.pres-absent-box-seats,#day-buttons-container{scrollbar-width:thin;scrollbar-color:rgba(148,163,184,.75) transparent}
+    .sidebar-footnote{flex-shrink:0;margin-top:.75rem;text-align:center;font-size:.7rem;color:var(--muted);letter-spacing:.02em}
+
+    [data-theme="light"] .text-sky-200,
+    [data-theme="light"] .text-sky-300,
+    [data-theme="light"] .text-cyan-300,
+    [data-theme="light-soft"] .text-sky-200,
+    [data-theme="light-soft"] .text-sky-300,
+    [data-theme="light-soft"] .text-cyan-300{color:#be185d!important}
+    [data-theme="light"] .text-violet-300,
+    [data-theme="light-soft"] .text-violet-300{color:#6d28d9!important}
+    [data-theme="light"] .text-amber-300,
+    [data-theme="light-soft"] .text-amber-300{color:#b45309!important}
+    [data-theme="light"] .text-rose-200,
+    [data-theme="light"] .text-rose-300,
+    [data-theme="light-soft"] .text-rose-200,
+    [data-theme="light-soft"] .text-rose-300{color:#be123c!important}
+    [data-theme="light"] .text-emerald-200,
+    [data-theme="light"] .text-emerald-300,
+    [data-theme="light-soft"] .text-emerald-200,
+    [data-theme="light-soft"] .text-emerald-300{color:#047857!important}
+    [data-theme="light"] #day-out-of-schedule-hint,
+    [data-theme="light-soft"] #day-out-of-schedule-hint{color:#b45309}
+    [data-theme="high-contrast"] .preview-banner{background:#000;color:#fff;box-shadow:inset 0 0 0 3px #ffaa00}
+    [data-theme="light"] .day-pin-btn,
+    [data-theme="light-soft"] .day-pin-btn{color:#92400e;background:#fffbeb;border-color:#f59e0b}
+    [data-theme="light"] .absent-warning,
+    [data-theme="light-soft"] .absent-warning{color:#be123c}
+    [data-theme="light"] #current-subject,
+    [data-theme="light"] #pres-subject{color:#1d4ed8!important;text-shadow:none!important}
+    [data-theme="light-soft"] #pres-subject{color:var(--accent)!important}
+    [data-theme="light"] .pres-absent-box--expected,
+    [data-theme="light-soft"] .pres-absent-box--expected{background:#f8fafc;border-color:#cbd5e1}
+    [data-theme="light"] .pres-absent-box--absent,
+    [data-theme="light-soft"] .pres-absent-box--absent{background:#fff1f2;border-color:#fda4af}
+    [data-theme="light"] .pres-absent-box--actual,
+    [data-theme="light-soft"] .pres-absent-box--actual{background:#ecfdf5;border-color:#6ee7b7}
+    [data-theme="light"] .pres-absent-box-label,
+    [data-theme="light-soft"] .pres-absent-box-label{color:#334155}
+    [data-theme="light"] .pres-absent-box-value,
+    [data-theme="light-soft"] .pres-absent-box-value{color:#0f172a}
+    [data-theme="light"] .pres-absent-box--absent .pres-absent-box-value,
+    [data-theme="light"] .pres-absent-box-seats,
+    [data-theme="light-soft"] .pres-absent-box--absent .pres-absent-box-value,
+    [data-theme="light-soft"] .pres-absent-box-seats{color:#be123c}
+    [data-theme="light"] .pres-absent-box--actual .pres-absent-box-value,
+    [data-theme="light-soft"] .pres-absent-box--actual .pres-absent-box-value{color:#047857}
+    [data-theme="light"] .pres-absent-warning,
+    [data-theme="light-soft"] .pres-absent-warning{color:#be123c}
+    [data-theme="light"] .broadcast-msg-card--all,
+    [data-theme="light-soft"] .broadcast-msg-card--all{color:#78350f;background:linear-gradient(135deg,rgba(251,191,36,.5),rgba(245,158,11,.28))}
+    [data-theme="light"] .broadcast-msg-card--g7,
+    [data-theme="light-soft"] .broadcast-msg-card--g7{color:#075985;background:linear-gradient(135deg,rgba(56,189,248,.4),rgba(14,165,233,.18))}
+    [data-theme="light"] .broadcast-msg-card--g8,
+    [data-theme="light-soft"] .broadcast-msg-card--g8{color:#5b21b6;background:linear-gradient(135deg,rgba(167,139,250,.4),rgba(139,92,246,.16))}
+    [data-theme="light"] .broadcast-msg-card--g9,
+    [data-theme="light-soft"] .broadcast-msg-card--g9{color:#065f46;background:linear-gradient(135deg,rgba(52,211,153,.4),rgba(16,185,129,.16))}
+    [data-theme="light"] .broadcast-msg-card--custom,
+    [data-theme="light-soft"] .broadcast-msg-card--custom{color:#9f1239;background:linear-gradient(135deg,rgba(251,113,133,.38),rgba(244,63,94,.14))}
+    [data-theme="light"] .broadcast-msg-confirm-btn,
+    [data-theme="light-soft"] .broadcast-msg-confirm-btn{color:#9f1239;border-color:rgba(190,18,60,.45);background:rgba(255,241,242,.9)}
+    [data-theme="high-contrast"] #current-subject,
+    [data-theme="high-contrast"] #pres-subject,
+    [data-theme="high-contrast"] .text-sky-300,
+    [data-theme="high-contrast"] .text-sky-200,
+    [data-theme="high-contrast"] .text-cyan-300,
+    [data-theme="high-contrast"] .text-violet-300{color:#fff!important;text-shadow:none!important}
+    [data-theme="high-contrast"] .text-slate-400,
+    [data-theme="high-contrast"] .text-slate-500,
+    [data-theme="high-contrast"] .text-slate-300{color:#f5f5f5!important}
+    [data-theme="high-contrast"] .text-rose-200,
+    [data-theme="high-contrast"] .text-rose-300{color:#ffb4b4!important}
+    [data-theme="high-contrast"] .text-emerald-200,
+    [data-theme="high-contrast"] .text-emerald-300{color:#b6ffc8!important}
+
+    @media (max-width:1023px){
+      body{height:auto;min-height:100dvh;overflow:auto}
+      .main-container{height:auto;min-height:100dvh;overflow:visible}
+      .dashboard-content{overflow:visible}
+      .dashboard-left{min-height:46vh}
+      .dashboard-sidebar{min-height:70vh;overflow:visible}
+      .dashboard-sidebar .schedule-list{max-height:60vh}
+      #day-buttons-container{max-width:100%}
+    }
+    @media (max-width:720px){
+      .pres-absent-bar{grid-template-columns:1fr;gap:.45rem}
+      .pres-header{flex-wrap:wrap}
+    }
+
   </style>
 </head>
 <body onload="init()">
   <!-- 狀態提示 -->
-  <div id="status-message" aria-live="polite" class="fixed top-4 left-1/2 -translate-x-1/2 px-4 py-2 text-sm text-white rounded-lg shadow-xl z-50 transition-opacity duration-300 opacity-0 pointer-events-none glass">
+  <div id="status-message" aria-live="polite" class="fixed top-4 left-1/2 -translate-x-1/2 px-4 py-2 text-sm text-white rounded-lg shadow-xl z-[100] transition-opacity duration-300 opacity-0 pointer-events-none glass">
     操作成功！
-  </div>
-
-  <!-- 一般模式 大時鐘（將被嵌入頂部控制列右側） -->
-  <div id="clock-hud" class="clock-hud">
-    <div class="clock-badge">現在</div>
-    <div class="flex flex-col leading-tight">
-      <div class="clock-time">
-        <span id="hud-hh">--</span><span class="clock-dot">:</span><span id="hud-mm">--</span><span class="clock-dot">:</span><span id="hud-ss">--</span>
-      </div>
-      <div id="hud-date" class="clock-date">--</div>
-    </div>
-    <div class="clock-actions hidden md:flex gap-1">
-      <button id="hud-cycle">⇲</button>
-      <button id="hud-reset">⟳</button>
-      <button id="hud-zoom-out" title="縮小">－</button>
-      <button id="hud-zoom-in" title="放大">＋</button>
-      <button id="hud-zoom-reset" title="重設為 1x">1x</button>
-    </div>
-    <div class="snap-tip hidden md:block">可拖曳</div>
   </div>
 
   <!-- （已移除：缺考 Base64 匯入 Modal） -->
 
   <!-- 外觀設定 Modal -->
-  <div id="appearance-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[70] p-4 modal">
+  <div id="appearance-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[80] p-4 modal">
     <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
       <div class="flex items-start justify-between gap-3 mb-4">
         <h3 class="text-xl font-bold text-violet-300">外觀設定</h3>
@@ -1021,7 +1124,7 @@
   </div>
 
   <!-- 訊息接收角色 Modal -->
-  <div id="message-role-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[70] p-4 modal">
+  <div id="message-role-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[80] p-4 modal">
     <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-md">
       <div class="flex items-start justify-between gap-3 mb-4">
         <h3 class="text-xl font-bold text-amber-300">訊息接收角色</h3>
@@ -1064,7 +1167,7 @@
       <div class="schedule-settings-header">
         <div class="min-w-0">
           <h3 id="schedule-settings-title" class="text-lg sm:text-xl font-bold text-cyan-300">排程設定</h3>
-          <div id="sheets-sync-status" class="text-xs text-slate-400 min-h-[1.25rem] mt-1 truncate">尚未同步</div>
+          <div id="sheets-sync-status" class="text-xs text-slate-400 min-h-[1.25rem] mt-1 leading-snug">尚未同步</div>
         </div>
         <div class="schedule-settings-actions">
           <button type="button" id="btn-sheets-sync-now" class="btn btn-teal text-sm">立即同步</button>
@@ -1155,49 +1258,11 @@
     </div>
   </div>
 
-  <!-- 訊息接收角色 Modal -->
-  <div id="message-role-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[70] p-4 modal">
-    <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-md">
-      <div class="flex items-start justify-between gap-3 mb-4">
-        <h3 class="text-xl font-bold text-amber-300">訊息接收角色</h3>
-        <button type="button" id="btn-message-role-close" class="btn btn-gray flex-shrink-0">關閉</button>
-      </div>
-      <p class="text-xs text-slate-400 mb-3">選擇此裝置要接收的訊息對象，僅顯示全校公告與符合對象的訊息。</p>
-      <div class="space-y-1 rounded-xl border border-slate-700 bg-slate-800/40 p-2">
-        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
-          <input type="radio" name="message-role" value="all" class="message-role-radio" />
-          <span class="text-sm text-slate-200">全部</span>
-        </label>
-        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
-          <input type="radio" name="message-role" value="g7" class="message-role-radio" />
-          <span class="text-sm text-slate-200">七年級</span>
-        </label>
-        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
-          <input type="radio" name="message-role" value="g8" class="message-role-radio" />
-          <span class="text-sm text-slate-200">八年級</span>
-        </label>
-        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
-          <input type="radio" name="message-role" value="g9" class="message-role-radio" />
-          <span class="text-sm text-slate-200">九年級</span>
-        </label>
-        <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800/60 cursor-pointer">
-          <input type="radio" name="message-role" value="custom" class="message-role-radio" />
-          <span class="text-sm text-slate-200">自訂</span>
-        </label>
-      </div>
-      <input type="text" id="message-role-custom" class="hidden mt-3 w-full p-2 rounded-lg bg-slate-900/70 border border-slate-600 text-slate-100 text-sm" placeholder="例如：301教室、導師班" />
-      <div class="flex justify-end gap-2 mt-4">
-        <button type="button" id="btn-message-role-cancel" class="btn btn-gray">取消</button>
-        <button type="button" id="btn-message-role-confirm" class="btn btn-teal">確定</button>
-      </div>
-    </div>
-  </div>
-
   <!-- 排程 CSV 匯入 Modal（已併入排程設定 Modal，保留 id 供相容） -->
   <div id="schedule-import-modal" class="hidden" aria-hidden="true"></div>
 
   <!-- 應到人數設定 Modal -->
-  <div id="expected-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 modal">
+  <div id="expected-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[80] p-4 modal">
     <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-sm">
       <h3 class="text-xl font-bold text-cyan-300 mb-3">設定應到人數</h3>
       <label for="expected-input" class="text-sm text-slate-300">請輸入本次考試應到人數：</label>
@@ -1210,7 +1275,7 @@
   </div>
 
   <!-- 缺考座號設定 Modal -->
-  <div id="absent-setup-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 modal">
+  <div id="absent-setup-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[80] p-4 modal">
     <div class="card p-6 rounded-2xl shadow-2xl w-full max-w-lg">
       <h3 class="text-xl font-bold text-rose-300 mb-3">設定缺考座號</h3>
       <p class="text-xs text-slate-300 mb-2">可用逗號、空格或換行分隔；僅數字會被保留並自動排序。</p>
@@ -1232,60 +1297,63 @@
       </div>
       <div class="flex flex-wrap items-center gap-2 flex-1 min-w-0">
         <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
-          <div id="day-buttons-container" class="flex gap-2 flex-shrink-0"></div>
-          <span id="day-out-of-schedule-hint" class="hidden" role="status" aria-live="polite">目前非時程之內</span>
+          <div id="day-buttons-container" class="flex-shrink min-w-0"></div>
+          <span id="day-out-of-schedule-hint" class="hidden" role="status" aria-live="polite">非考試時段</span>
+          <button type="button" id="btn-unpin-day" class="day-pin-btn hidden">回到今日</button>
         </div>
 
         <div class="flex items-center gap-2 flex-shrink-0">
-          <div class="tooltip-wrapper">
-            <button type="button" id="btn-schedule-settings" class="icon-btn" title="排程設定">📊</button>
-            <div class="tooltip">排程設定</div>
-          </div>
-          <div class="tooltip-wrapper">
-            <button type="button" id="btn-appearance" class="icon-btn" title="外觀設定">🎨</button>
-            <div class="tooltip">外觀設定</div>
-          </div>
-          <div class="tooltip-wrapper">
-            <button type="button" id="btn-message-role" class="icon-btn" title="訊息角色">📢</button>
-            <div class="tooltip">訊息角色</div>
-          </div>
+          <button type="button" id="btn-schedule-settings" class="icon-btn icon-btn--labeled" title="排程設定">📊<span class="icon-btn-label">排程</span></button>
+          <button type="button" id="btn-appearance" class="icon-btn icon-btn--labeled" title="外觀設定">🎨<span class="icon-btn-label">外觀</span></button>
+          <button type="button" id="btn-message-role" class="icon-btn icon-btn--labeled" title="訊息角色">📢<span class="icon-btn-label">訊息</span></button>
         </div>
 
         <!-- 按鈕容器 -->
         <div class="flex items-center gap-2 flex-shrink-0">
-          <!-- 全螢幕按鈕 -->
-          <div class="tooltip-wrapper">
-            <button id="btn-fullscreen" class="icon-btn" aria-pressed="false" title="切換全螢幕">⤢</button>
-            <div class="tooltip">全螢幕 (F)</div>
-          </div>
-
-          <!-- 全畫面展示按鈕 -->
-          <div class="tooltip-wrapper">
-            <button id="btn-present" class="icon-btn" aria-pressed="false" title="全畫面展示">🖥️</button>
-            <div class="tooltip">全畫面展示 (X)</div>
-          </div>
+          <button id="btn-fullscreen" class="icon-btn icon-btn--labeled" aria-pressed="false" title="切換全螢幕 (F)">⤢<span class="icon-btn-label">全螢幕</span></button>
+          <button id="btn-present" class="icon-btn icon-btn--labeled" aria-pressed="false" title="全畫面展示 (X)">🖥️<span class="icon-btn-label">展示</span></button>
         </div>
       </div>
       
       <!-- 時鐘容器（靠右對齊） -->
-      <div id="clock-hud-holder" class="flex-shrink-0"></div>
+      <div id="clock-hud-holder" class="flex-shrink-0">
+        <div id="clock-hud" class="clock-hud docked">
+          <div class="clock-badge">現在</div>
+          <div class="flex flex-col leading-tight">
+            <div class="clock-time">
+              <span id="hud-hh">--</span><span class="clock-dot">:</span><span id="hud-mm">--</span><span class="clock-dot">:</span><span id="hud-ss">--</span>
+            </div>
+            <div id="hud-date" class="clock-date">--</div>
+          </div>
+          <div class="clock-actions hidden md:flex gap-1">
+            <button id="hud-cycle">⇲</button>
+            <button id="hud-reset">⟳</button>
+            <button id="hud-zoom-out" title="縮小">－</button>
+            <button id="hud-zoom-in" title="放大">＋</button>
+            <button id="hud-zoom-reset" title="重設為 1x">1x</button>
+          </div>
+          <div class="snap-tip hidden md:block">可拖曳</div>
+        </div>
+      </div>
     </div>
 
     <div class="dashboard-content flex flex-col lg:flex-row gap-4 min-h-0">
       <!-- 左側：考科 60% + 訊息 dock 40% -->
       <div class="dashboard-left w-full lg:w-2/3 min-h-0">
         <main id="hero" class="flex flex-col justify-center items-center rounded-2xl shadow-xl transition-colors duration-300" style="background: linear-gradient(145deg, rgba(2,132,199,.15), rgba(67,56,202,.12));">
+          <div id="preview-banner" class="preview-banner" role="status" aria-live="polite"></div>
           <div class="hero-body flex flex-col justify-center items-center w-full">
-            <h2 class="font-bold text-slate-200">目前進行考科</h2>
+            <h2 id="hero-status-label" class="font-bold text-slate-200">目前進行考科</h2>
             <div class="rounded-2xl shadow-inner bg-slate-900/60 border border-slate-700">
               <p id="current-subject" class="font-black text-center text-sky-300">-- 等待排程 --</p>
             </div>
             <p id="subject-time-range" class="font-medium text-slate-300">( --:-- 至 --:-- )</p>
           </div>
-          <div id="subject-progress-container" class="w-full flex-shrink-0 bg-slate-800 rounded-full h-4 shadow-inner overflow-hidden">
-            <div id="subject-progress-bar" class="h-full rounded-full flex items-center justify-end pr-2 font-bold transition-all duration-700 bg-amber-400 text-slate-900" style="width:0%">
-              <span id="subject-progress-text" class="text-xs">0%</span>
+          <div id="subject-progress-container" class="w-full flex-shrink-0">
+            <div class="progress-track bg-slate-800 rounded-full h-4 shadow-inner overflow-hidden">
+              <div id="subject-progress-bar" class="h-full rounded-full transition-all duration-700 bg-amber-400" style="width:0%"></div>
             </div>
+            <span id="subject-progress-text" class="progress-label">0%</span>
           </div>
         </main>
 
@@ -1323,6 +1391,7 @@
           <div class="absent-seat-box bg-slate-900/60 border border-rose-500/20 rounded-md">
             <p class="font-medium text-rose-300 mb-1">目前缺考座號：</p>
             <div id="absent-seat-display" class="font-extrabold text-rose-200">尚無缺考記錄。</div>
+            <p id="absent-warning" class="absent-warning hidden">缺考人數多於應到人數，請核對座號或應到人數。</p>
           </div>
 
           <div id="absent-input-area" class="hidden mt-4"></div>
@@ -1330,19 +1399,27 @@
           <!-- （已移除：缺考座號 匯出(Base64)/匯入 按鈕列） -->
         </section>
 
-        <h2 id="schedule-title" class="text-2xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-700 flex-shrink-0">
-          排程概覽
-        </h2>
-        <div id="schedule-timeline" class="schedule-list space-y-4">
-          <h3 class="sticky top-0 z-10 text-lg font-bold text-sky-300 p-1 border-b border-slate-700 bg-slate-900/70 backdrop-blur">☀️ 上午時段</h3>
-          <div id="morning-schedule" class="space-y-2"></div>
-          <div id="lunch-break-item" class="p-2 my-2 rounded-md text-center text-slate-200 font-semibold text-sm flex-shrink-0 bg-slate-800 border border-slate-700">
-            午休時間 (11:45 - 13:05)
-          </div>
-          <h3 class="sticky top-[38px] z-10 text-lg font-bold text-violet-300 p-1 border-b border-slate-700 bg-slate-900/70 backdrop-blur">🌙 下午時段</h3>
-          <div id="afternoon-schedule" class="space-y-2"></div>
+        <div class="schedule-title-row pb-2 border-b border-slate-700">
+          <h2 id="schedule-title" class="text-2xl font-bold text-slate-100">
+            排程概覽
+          </h2>
+          <button type="button" id="btn-restore-now" class="restore-now-btn hidden">恢復現在時間</button>
         </div>
-        <p class="text-[11px] text-slate-400 mt-3 text-center">時間持續更新中…</p>
+        <div id="schedule-timeline" class="schedule-list space-y-4">
+          <h3 id="morning-heading" class="sticky top-0 z-10 text-lg font-bold text-sky-300 p-1 border-b border-slate-700 bg-slate-900/70 backdrop-blur">☀️ 上午時段</h3>
+          <div id="morning-schedule" class="space-y-2"></div>
+          <div id="lunch-break-item" class="hidden p-2 my-2 rounded-md text-center text-slate-200 font-semibold text-sm flex-shrink-0 bg-slate-800 border border-slate-700">
+            午休時間
+          </div>
+          <h3 id="afternoon-heading" class="sticky top-[38px] z-10 text-lg font-bold text-violet-300 p-1 border-b border-slate-700 bg-slate-900/70 backdrop-blur">🌙 下午時段</h3>
+          <div id="afternoon-schedule" class="space-y-2"></div>
+          <div id="time-sim-line" class="time-sim-line hidden" role="slider" aria-orientation="vertical" aria-label="模擬時間" aria-valuemin="0" aria-valuemax="1439" tabindex="0">
+            <div id="time-sim-hit" class="time-sim-hit" title="拖曳可模擬時間"></div>
+            <div class="time-sim-rule"></div>
+            <div id="time-sim-label" class="time-sim-readout">--:--</div>
+          </div>
+        </div>
+        <p class="sidebar-footnote">時間持續更新中 · Dennis.Z</p>
       </div>
     </div>
   </div>
@@ -1485,63 +1562,57 @@
     /* === v1.0.1 新增：展示層時鐘 HUD（放在 overlay 裡） === */
   </script>
 
-  <footer class="fixed bottom-2 right-4 text-[12px] text-slate-400/60 select-none">Developed by <span class="font-semibold">Dennis.Z</span> • v2.0.0</footer>
-
   <!-- 全畫面展示覆蓋層 -->
   <div id="presentation-overlay" class="hidden fixed inset-0 z-[60] bg-slate-950 text-slate-100">
     <div class="pres-layout">
       <div id="present-toolbar" class="pres-header">
-        <div class="pres-header-hints">
-          <span>按 <span class="font-bold">X</span> 開啟/關閉展示</span>
-          <span class="mx-2">·</span>
-          <span>按 <span class="font-bold">F</span> 進入/退出全螢幕</span>
-          <span class="mx-2">·</span>
-          <span>按 <span class="font-bold">Esc</span> 關閉</span>
-        </div>
-        <div id="pres-absent-compact" class="pres-absent-grid">
-          <div class="pres-absent-box pres-absent-box--expected">
-            <div class="pres-absent-box-label">應到</div>
-            <div id="pres-expected-compact" class="pres-absent-box-value">—</div>
+        <div id="pres-clock" class="clock-hud docked">
+          <div class="clock-badge">現在時間</div>
+          <div class="flex flex-col leading-tight">
+            <div class="clock-time">
+              <span id="pres-hh">--</span><span class="clock-dot">:</span><span id="pres-mm">--</span><span class="clock-dot">:</span><span id="pres-ss">--</span>
+            </div>
+            <div id="pres-date" class="clock-date">--</div>
           </div>
-          <div class="pres-absent-box pres-absent-box--absent">
-            <div class="pres-absent-box-label">缺考</div>
-            <div id="pres-absent-count-compact" class="pres-absent-box-value">0</div>
-            <div id="pres-absent-list-compact" class="pres-absent-box-seats">—</div>
-          </div>
-          <div class="pres-absent-box pres-absent-box--actual">
-            <div class="pres-absent-box-label">實到</div>
-            <div id="pres-actual-compact" class="pres-absent-box-value">—</div>
+          <div class="clock-actions flex gap-1 ml-1">
+            <button id="pres-cycle" title="循環角落">⇲</button>
+            <button id="pres-zoom-out" title="縮小">－</button>
+            <button id="pres-zoom-in" title="放大">＋</button>
           </div>
         </div>
-        <button id="btn-close-present" class="btn btn-gray flex-shrink-0">關閉</button>
-      </div>
-
-      <div id="pres-clock" class="clock-hud hidden md:flex">
-        <div class="clock-badge">現在時間</div>
-        <div class="flex flex-col leading-tight">
-          <div class="clock-time">
-            <span id="pres-hh">--</span><span class="clock-dot">:</span><span id="pres-mm">--</span><span class="clock-dot">:</span><span id="pres-ss">--</span>
-          </div>
-          <div id="pres-date" class="clock-date">--</div>
-        </div>
-        <div class="clock-actions flex gap-1 ml-1">
-          <button id="pres-cycle" title="循環角落">⇲</button>
-          <button id="pres-zoom-out" title="縮小">－</button>
-          <button id="pres-zoom-in" title="放大">＋</button>
-        </div>
+        <button id="btn-close-present" class="btn btn-gray flex-shrink-0" title="關閉展示（Esc 或 X）">關閉</button>
       </div>
 
       <div class="pres-main">
         <div class="pres-subject-block">
-          <div class="pres-label">目前進行考科</div>
+          <div id="pres-preview-banner" class="preview-banner pres-preview-banner" role="status" aria-live="polite"></div>
+          <div id="pres-status-label" class="pres-label">目前進行考科</div>
           <div id="pres-subject" class="mt-2 font-black text-sky-300">—</div>
           <div id="pres-range" class="mt-2 text-slate-300">—</div>
-          <div id="pres-progress-container" class="w-full max-w-3xl mx-auto mt-4 bg-slate-800 rounded-full h-5 shadow-inner overflow-hidden">
-            <div id="pres-progress-bar" class="h-full rounded-full flex items-center justify-end pr-2 font-bold transition-all duration-700 bg-amber-400 text-slate-900" style="width:0%">
-              <span id="pres-progress-text" class="text-xs">0%</span>
+          <div id="pres-progress-container" class="w-full max-w-3xl mx-auto mt-4">
+            <div class="progress-track bg-slate-800 rounded-full h-5 shadow-inner overflow-hidden">
+              <div id="pres-progress-bar" class="h-full rounded-full transition-all duration-700 bg-amber-400" style="width:0%"></div>
             </div>
+            <span id="pres-progress-text" class="progress-label">0%</span>
           </div>
           <p id="pres-next" class="pres-next-hint">—</p>
+        </div>
+      </div>
+
+      <div id="pres-absent-compact" class="pres-absent-bar">
+        <div class="pres-absent-box pres-absent-box--expected">
+          <div class="pres-absent-box-label">應到</div>
+          <div id="pres-expected-compact" class="pres-absent-box-value">—</div>
+        </div>
+        <div class="pres-absent-box pres-absent-box--absent">
+          <div class="pres-absent-box-label">缺考座號</div>
+          <div id="pres-absent-count-compact" class="pres-absent-box-value">0</div>
+          <div id="pres-absent-list-compact" class="pres-absent-box-seats">—</div>
+          <div id="pres-absent-warning" class="pres-absent-warning hidden">缺考人數多於應到人數，請核對。</div>
+        </div>
+        <div class="pres-absent-box pres-absent-box--actual">
+          <div class="pres-absent-box-label">實到</div>
+          <div id="pres-actual-compact" class="pres-absent-box-value">—</div>
         </div>
       </div>
 
@@ -1604,21 +1675,57 @@
     if(!calendarDayKey) return false;
     return isNowWithinDayBounds(now,initialSchedules[calendarDayKey].data);
   }
+  function updateDayPinControl(){
+    const btn=document.getElementById('btn-unpin-day');
+    if(!btn) return;
+    btn.classList.toggle('hidden', !(dayManuallySelected&&autoSwitchDay));
+  }
   function updateDayToolbarHint(now){
+    updateDayPinControl();
     if(!dayOutOfScheduleHintEl) return;
+    const selected=currentDay&&initialSchedules[currentDay];
+    const selectedIsToday=!!(selected&&isSameCalendarDayAsName(selected.name,now));
+    if(!selected){
+      dayOutOfScheduleHintEl.classList.add('hidden');
+      return;
+    }
+    if(!selectedIsToday){
+      dayOutOfScheduleHintEl.textContent='非今日場次';
+      dayOutOfScheduleHintEl.classList.remove('hidden');
+      return;
+    }
     if(isNowInLiveExamSchedule(now)){
       dayOutOfScheduleHintEl.classList.add('hidden');
-    }else{
-      dayOutOfScheduleHintEl.classList.remove('hidden');
+      return;
     }
+    dayOutOfScheduleHintEl.textContent='非考試時段';
+    dayOutOfScheduleHintEl.classList.remove('hidden');
   }
   function getSelectedDayIdleTitle(now,dayKey){
     if(!dayKey||!initialSchedules[dayKey]) return '目前無進行中時段';
-    const data=initialSchedules[dayKey].data;
-    const bounds=getScheduleDayBounds(data);
-    if(bounds&&now<bounds.start) return '段考尚未開始';
-    if(bounds&&now>=bounds.end) return '今日段考已結束';
+    const selected=initialSchedules[dayKey];
+    const isToday=isSameCalendarDayAsName(selected.name,now);
+    const bounds=getScheduleDayBounds(selected.data);
+    if(bounds&&now<bounds.start) return isToday?'段考尚未開始':'此場次尚未開始';
+    if(bounds&&now>=bounds.end) return isToday?'今日段考已結束':'此場次已結束';
     return '目前無進行中時段';
+  }
+  function syncScheduleContext(now,hasCurrentItem){
+    const selected=currentDay&&initialSchedules[currentDay];
+    const dated=!!(selected&&parseDayNameDate(selected.name,now.getFullYear()));
+    const preview=!!(selected&&dated&&!isSameCalendarDayAsName(selected.name,now));
+    const text=preview?`預覽 ${selected.name}，不是目前場次`:'';
+    ['preview-banner','pres-preview-banner'].forEach(id=>{
+      const node=document.getElementById(id);
+      if(!node) return;
+      if(node.textContent!==text) node.textContent=text;
+      node.classList.toggle('is-visible', preview);
+    });
+    const label=preview?'預覽考科':(hasCurrentItem?'目前進行考科':'目前狀態');
+    const heroLabel=document.getElementById('hero-status-label');
+    const presLabel=document.getElementById('pres-status-label');
+    if(heroLabel&&heroLabel.textContent!==label) heroLabel.textContent=label;
+    if(presLabel&&presLabel.textContent!==label) presLabel.textContent=label;
   }
   function maybeAutoSwitchDay(now){
     if(!autoSwitchDay||dayManuallySelected) return false;
@@ -1629,9 +1736,194 @@
     }
     return false;
   }
+  function minutesOf(t){
+    const m=String(t||'').match(/^(\d{1,2}):(\d{2})/);
+    if(!m) return null;
+    return parseInt(m[1],10)*60+parseInt(m[2],10);
+  }
+  let simulatedMinutes=null;
+  let timeSimDragging=false;
+  let timeSimWasPreview=false;
+  function isPreviewingSchedule(realNow){
+    const selected=currentDay&&initialSchedules[currentDay];
+    if(!selected||!parseDayNameDate(selected.name, realNow.getFullYear())) return false;
+    return !isSameCalendarDayAsName(selected.name, realNow);
+  }
+  function getScheduleNow(){
+    const real=new Date();
+    if(simulatedMinutes==null||!isPreviewingSchedule(real)) return real;
+    const d=new Date(real);
+    d.setHours(Math.floor(simulatedMinutes/60), simulatedMinutes%60, 0, 0);
+    return d;
+  }
+  function formatClockMinutes(mins){
+    const h=Math.floor(mins/60)%24;
+    const m=((mins%60)+60)%60;
+    return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+  }
+  function visibleTimeRows(){
+    const timeline=document.getElementById('schedule-timeline');
+    if(!timeline) return [];
+    return [...timeline.querySelectorAll('.timeline-item, #lunch-break-item')].map(el=>{
+      if(el.classList.contains('hidden')||el.offsetHeight<1) return null;
+      const start=minutesOf(el.dataset.start);
+      const end=minutesOf(el.dataset.end);
+      if(start==null||end==null||end<=start) return null;
+      return {el, start, end};
+    }).filter(Boolean);
+  }
+  function minutesFromClientY(clientY){
+    const rows=visibleTimeRows();
+    if(!rows.length) return null;
+    for(const row of rows){
+      const r=row.el.getBoundingClientRect();
+      if(clientY>=r.top && clientY<=r.bottom){
+        const frac=Math.min(0.999, Math.max(0, (clientY-r.top)/Math.max(1, r.height)));
+        const span=row.end-row.start;
+        return row.start+Math.min(span-1, Math.floor(frac*span));
+      }
+    }
+    let best=null;
+    rows.forEach(row=>{
+      const r=row.el.getBoundingClientRect();
+      [[Math.abs(clientY-r.top), row.start],[Math.abs(clientY-r.bottom), Math.max(row.start, row.end-1)]].forEach(([dist, min])=>{
+        if(!best||dist<best.dist) best={dist, min};
+      });
+    });
+    return best?best.min:null;
+  }
+  function placeTimeSimLine(){
+    const line=document.getElementById('time-sim-line');
+    const btn=document.getElementById('btn-restore-now');
+    const timeline=document.getElementById('schedule-timeline');
+    const real=new Date();
+    const preview=isPreviewingSchedule(real);
+    if(!preview) simulatedMinutes=null;
+    if(btn) btn.classList.toggle('hidden', !(preview&&simulatedMinutes!=null));
+    const becamePreview=preview&&!timeSimWasPreview;
+    timeSimWasPreview=preview;
+    if(!line||!timeline) return;
+    if(!preview){
+      line.classList.add('hidden');
+      line.setAttribute('aria-valuenow','0');
+      return;
+    }
+    const rows=visibleTimeRows();
+    if(!rows.length){
+      line.classList.add('hidden');
+      return;
+    }
+    line.classList.remove('hidden');
+    const minutes=simulatedMinutes!=null?simulatedMinutes:(real.getHours()*60+real.getMinutes());
+    let top=null;
+    for(const row of rows){
+      if(minutes>=row.start && minutes<row.end){
+        top=row.el.offsetTop+((minutes-row.start)/(row.end-row.start))*row.el.offsetHeight;
+        break;
+      }
+    }
+    if(top==null){
+      const next=rows.find(row=>row.start>minutes);
+      const prev=[...rows].reverse().find(row=>row.end<=minutes);
+      if(next) top=next.el.offsetTop;
+      else if(prev) top=prev.el.offsetTop+prev.el.offsetHeight;
+      else top=rows[0].el.offsetTop;
+    }
+    line.style.top=Math.round(top)+'px';
+    line.classList.toggle('is-below', top < timeline.scrollTop+22);
+    const label=document.getElementById('time-sim-label');
+    if(label) label.textContent=formatClockMinutes(minutes);
+    line.setAttribute('aria-valuenow', String(minutes));
+    line.setAttribute('aria-valuetext', formatClockMinutes(minutes));
+    if(becamePreview && !timeSimDragging){
+      requestAnimationFrame(()=>line.scrollIntoView({block:'center'}));
+    }
+  }
+  function initTimeSim(){
+    const line=document.getElementById('time-sim-line');
+    const hit=document.getElementById('time-sim-hit');
+    const timeline=document.getElementById('schedule-timeline');
+    document.getElementById('btn-restore-now')?.addEventListener('click', ()=>{
+      simulatedMinutes=null;
+      updateDisplay();
+    });
+    if(!line||!hit||!timeline) return;
+    let dragging=false;
+    let lastY=0;
+    let scrollRaf=0;
+    function applyPointerY(clientY){
+      lastY=clientY;
+      const mins=minutesFromClientY(clientY);
+      if(mins==null||mins===simulatedMinutes) return;
+      simulatedMinutes=mins;
+      updateDisplay();
+    }
+    function stepScroll(){
+      if(!dragging) return;
+      const rect=timeline.getBoundingClientRect();
+      const edge=28;
+      if(lastY<rect.top+edge) timeline.scrollTop-=12;
+      else if(lastY>rect.bottom-edge) timeline.scrollTop+=12;
+      applyPointerY(lastY);
+      scrollRaf=requestAnimationFrame(stepScroll);
+    }
+    function stopDrag(){
+      dragging=false;
+      timeSimDragging=false;
+      cancelAnimationFrame(scrollRaf);
+    }
+    hit.addEventListener('pointerdown', (e)=>{
+      if(e.button!==0||!isPreviewingSchedule(new Date())) return;
+      dragging=true;
+      timeSimDragging=true;
+      try{ hit.setPointerCapture?.(e.pointerId); }catch{}
+      applyPointerY(e.clientY);
+      e.preventDefault();
+      e.stopPropagation();
+      cancelAnimationFrame(scrollRaf);
+      scrollRaf=requestAnimationFrame(stepScroll);
+    });
+    window.addEventListener('pointermove', (e)=>{
+      if(!dragging) return;
+      applyPointerY(e.clientY);
+    });
+    window.addEventListener('pointerup', stopDrag);
+    window.addEventListener('pointercancel', stopDrag);
+    timeline.addEventListener('pointerdown', (e)=>{
+      if(e.button!==0||e.target.closest('#time-sim-line')) return;
+      const row=e.target.closest('.timeline-item, #lunch-break-item');
+      if(!row||row.classList.contains('hidden')||!isPreviewingSchedule(new Date())) return;
+      const startX=e.clientX, startY=e.clientY;
+      const up=(ev)=>{
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        if(ev.type==='pointercancel') return;
+        if(Math.hypot((ev.clientX||0)-startX, (ev.clientY||0)-startY)>6) return;
+        const mins=minutesFromClientY(startY);
+        if(mins==null) return;
+        simulatedMinutes=mins;
+        updateDisplay();
+      };
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
+    });
+  }
   function getSplitSchedules(scheduleData){
-    const lunchIndex=scheduleData.findIndex(i=>i.start==='11:45'&&i.end==='13:05');
-    if(lunchIndex===-1) return {morning:scheduleData,lunch:null,afternoon:[]};
+    const lunchIndex=scheduleData.findIndex(i=>{
+      if(i.type!=='break') return false;
+      const s=minutesOf(i.start), e=minutesOf(i.end);
+      if(s==null||e==null) return false;
+      const named=/午休|中午/.test(i.name||'');
+      return named || (s<=12*60 && e>=12*60+20);
+    });
+    if(lunchIndex===-1){
+      const splitAt=scheduleData.findIndex(i=>{
+        const s=minutesOf(i.start);
+        return s!=null && s>=12*60+40;
+      });
+      if(splitAt<=0) return {morning:scheduleData,lunch:null,afternoon:[]};
+      return {morning:scheduleData.slice(0,splitAt),lunch:null,afternoon:scheduleData.slice(splitAt)};
+    }
     return {morning:scheduleData.slice(0,lunchIndex),lunch:scheduleData[lunchIndex],afternoon:scheduleData.slice(lunchIndex+1)};
   }
   function renderScheduleSegment(schedule,targetEl,startIndex){
@@ -1644,8 +1936,8 @@
       else if(item.type==='break'){colorClass='text-emerald-300';icon='☕'}
       const shouldHide = (hideBreaks && item.type === 'break') || (hideStudy && item.type === 'study');
       const html=`
-      <div id="schedule-item-${originalIndex}" class="timeline-item ${item.type} py-1 pr-2 cursor-pointer rounded-md hover:bg-slate-800/60 ${shouldHide ? 'hidden' : ''}"
-           data-type="${item.type}" data-index="${originalIndex}">
+      <div id="schedule-item-${originalIndex}" class="timeline-item ${item.type} py-1 pr-2 rounded-md hover:bg-slate-800/60 ${shouldHide ? 'hidden' : ''}"
+           data-type="${item.type}" data-index="${originalIndex}" data-start="${item.start}" data-end="${item.end}">
         <div class="timeline-indicator"></div>
         <div class="flex items-center gap-2">
           <div class="text-xs font-bold w-12 flex-shrink-0 text-slate-400">${item.start}</div>
@@ -1688,6 +1980,7 @@
       if(!first){ currentScheduleData=null; renderDayButtons(); renderSchedule(); updateDisplay(); return;}
       day=first;
     }
+    if(day!==currentDay) simulatedMinutes=null;
     currentDay=day;
     currentScheduleData=initialSchedules[currentDay];
     currentScheduleData.split=getSplitSchedules(currentScheduleData.data);
@@ -1697,12 +1990,20 @@
     renderSchedule(); updateDisplay();
   }
   function renderSchedule(){
+    const morningHeading=document.getElementById('morning-heading');
+    const afternoonHeading=document.getElementById('afternoon-heading');
     if(!currentScheduleData||!currentScheduleData.data){
       morningScheduleEl.innerHTML='<p class="text-center text-slate-400">無排程資料</p>';
       afternoonScheduleEl.innerHTML=''; lunchBreakItemEl.textContent='午休時間';
-      lunchBreakItemEl.classList.remove('bg-slate-800'); return;
+      lunchBreakItemEl.classList.add('hidden');
+      lunchBreakItemEl.classList.remove('bg-slate-800');
+      morningHeading?.classList.remove('hidden');
+      afternoonHeading?.classList.add('hidden');
+      return;
     }
     const {morning,lunch,afternoon}=currentScheduleData.split;
+    morningHeading?.classList.toggle('hidden', morning.length===0);
+    afternoonHeading?.classList.toggle('hidden', afternoon.length===0);
     renderScheduleSegment(morning,morningScheduleEl,0);
     const lunchIndex=currentScheduleData.data.findIndex(i=>i===lunch);
     const afternoonStartIndex=lunchIndex!==-1?lunchIndex+1:morning.length;
@@ -1735,7 +2036,18 @@
     expectedCountEl.textContent=expectedCount;
     absentCountEl.textContent=absentCount;
     actualCountEl.textContent=actual;
+    setAbsentWarning(absentCount);
     localStorage.setItem('absentSeats', raw);
+  }
+  function setAbsentWarning(count){
+    const over=count>expectedCount;
+    el('absent-warning')?.classList.toggle('hidden', !over);
+    el('pres-absent-warning')?.classList.toggle('hidden', !over);
+  }
+  function applySubjectScale(node,text){
+    if(!node) return;
+    const len=Math.max(2, [...String(text||'')].length);
+    node.style.setProperty('--subject-chars', String(len));
   }
   function showStatusMessage(message,isError=false){
     const statusMessageEl=document.getElementById('status-message');
@@ -1903,14 +2215,14 @@
     document.title=text;
     return text;
   }
+  let lastSheetExamTitle=null;
   function applyExamTitleFromSettings(settings){
-    const examTitle=settings?.ExamTitle?.trim();
-    if(examTitle){
-      localStorage.setItem(EXAM_TITLE_LS_KEY,examTitle);
-      return applyPageTitle(examTitle);
-    }
-    localStorage.removeItem(EXAM_TITLE_LS_KEY);
-    return applyPageTitle(DEFAULT_PAGE_TITLE);
+    const examTitle=settings?.ExamTitle?.trim()||'';
+    if(!examTitle) return (pageTitleEl?.textContent||DEFAULT_PAGE_TITLE).trim();
+    if(examTitle===lastSheetExamTitle) return (pageTitleEl?.textContent||examTitle).trim();
+    lastSheetExamTitle=examTitle;
+    localStorage.setItem(EXAM_TITLE_LS_KEY,examTitle);
+    return applyPageTitle(examTitle);
   }
   function escapeHtml(str){
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -2019,7 +2331,7 @@
     const endMs=startMs+msg.durationSec*1000;
     return nowMs>=startMs&&nowMs<endMs;
   }
-  const STACK_BASE_OPACITY=[1,0.75,0.5,0.35];
+  const STACK_BASE_OPACITY=[1,0.94,0.88,0.82];
   function getActiveMessagesWithOpacity(now){
     const active=broadcastMessages
       .filter(m=>isMessageActive(m,now))
@@ -2334,7 +2646,7 @@
     if(!statusEl) return;
     const lastAt=localStorage.getItem(SHEETS_LS_KEYS.lastSyncAt);
     const lastStatus=localStorage.getItem(SHEETS_LS_KEYS.lastSyncStatus);
-    const baseClass='text-xs min-h-[1.25rem] mt-1 truncate';
+    const baseClass='text-xs min-h-[1.25rem] mt-1 leading-snug whitespace-normal';
     if(errorMessage){
       statusEl.textContent=errorMessage;
       statusEl.className=`${baseClass} text-rose-300`;
@@ -2490,8 +2802,9 @@
 
   /* ===== v2.0.0：展示層同步 ===== */
   function updatePresentationView(){
-    const now=new Date();
-    updateBroadcastDisplay(now);
+    const realNow=new Date();
+    const now=getScheduleNow();
+    updateBroadcastDisplay(realNow);
     const subject=document.getElementById('current-subject')?.textContent||'—';
     const range=document.getElementById('subject-time-range')?.textContent||'';
     const raw=absentInput?.value||'';
@@ -2499,11 +2812,14 @@
     const absentCount=list.length;
     const actual=Math.max(0, expectedCount-absentCount);
     el('pres-subject').textContent=subject;
+    applySubjectScale(el('pres-subject'), subject);
+    syncScheduleContext(now, !!currentScheduleData?.data && !!findCurrentSlot(now, currentScheduleData.data));
     el('pres-range').textContent=range;
     el('pres-expected-compact').textContent=String(expectedCount);
     el('pres-absent-count-compact').textContent=String(absentCount);
     el('pres-absent-list-compact').textContent=list.length?list.join('、 '):'—';
     el('pres-actual-compact').textContent=String(actual);
+    setAbsentWarning(absentCount);
 
     let pct=0,currentIndex=-1,currentItem=null,nextInfo='—';
     if(currentScheduleData && currentScheduleData.data){
@@ -2522,16 +2838,31 @@
     presNextEl.textContent=nextInfo;
     presNextEl.classList.toggle('pres-next-hint--empty',nextInfo==='—');
   }
+  let presentationOwnsFullscreen=false;
+  function syncPresentButton(active){
+    if(!btnPresent) return;
+    btnPresent.classList.toggle('active', !!active);
+    btnPresent.setAttribute('aria-pressed', active?'true':'false');
+  }
   function openPresentation(){
     updatePresentationView();
     presentationOverlay().classList.remove('hidden');
-    // 使用統一的函數來更新時鐘顯示狀態
-    updateClockVisibility();
-    if(!document.fullscreenElement){ document.documentElement.requestFullscreen?.().catch(()=>{}); }
+    syncPresentButton(true);
+    if(typeof window.updateClockVisibility==='function') window.updateClockVisibility();
+    if(!document.fullscreenElement){
+      presentationOwnsFullscreen=true;
+      document.documentElement.requestFullscreen?.().catch(()=>{ presentationOwnsFullscreen=false; });
+    }else{
+      presentationOwnsFullscreen=false;
+    }
   }
   function closePresentation(){
     presentationOverlay().classList.add('hidden');
-    if(document.fullscreenElement){ document.exitFullscreen?.().catch(()=>{}); }
+    syncPresentButton(false);
+    if(presentationOwnsFullscreen&&document.fullscreenElement){
+      document.exitFullscreen?.().catch(()=>{});
+    }
+    presentationOwnsFullscreen=false;
   }
 
   /* ===== 大時鐘（一般/展示） 更新 ===== */
@@ -2645,63 +2976,101 @@
   }
 
   /* ===== 主更新 ===== */
+  let lastHighlightedIndex=-1;
+  function applyHeroTone(type){
+    const hero=document.getElementById('hero');
+    if(!hero) return;
+    const theme=document.documentElement.getAttribute('data-theme');
+    const tones={
+      'light-soft':{
+        exam:'linear-gradient(145deg, rgba(236,72,153,.30), rgba(219,39,119,.25))',
+        break:'linear-gradient(145deg, rgba(251,191,36,.25), rgba(34,197,94,.20))',
+        study:'linear-gradient(145deg, rgba(236,72,153,.25), rgba(219,39,119,.20))',
+        idle:'linear-gradient(145deg, rgba(236,72,153,.20), rgba(219,39,119,.15))'
+      },
+      light:{
+        exam:'linear-gradient(145deg, rgba(37,99,235,.14), rgba(99,102,241,.10))',
+        break:'linear-gradient(145deg, rgba(217,119,6,.16), rgba(5,150,105,.12))',
+        study:'linear-gradient(145deg, rgba(109,40,217,.12), rgba(37,99,235,.10))',
+        idle:'linear-gradient(145deg, rgba(148,163,184,.2), rgba(100,116,139,.1))'
+      },
+      'high-contrast':{exam:'#000',break:'#000',study:'#000',idle:'#000'}
+    };
+    const pack=tones[theme]||{
+      exam:'linear-gradient(145deg, rgba(14,165,233,.20), rgba(99,102,241,.18))',
+      break:'linear-gradient(145deg, rgba(251,191,36,.20), rgba(34,197,94,.18))',
+      study:'linear-gradient(145deg, rgba(167,139,250,.22), rgba(56,189,248,.18))',
+      idle:'linear-gradient(145deg, rgba(148,163,184,.12), rgba(100,116,139,.12))'
+    };
+    const key=(type==='exam'||type==='break'||type==='study')?type:'idle';
+    hero.style.background=pack[key]||pack.idle;
+  }
   function updateDisplay(){
-    const now=new Date();
-    updateDayToolbarHint(now);
-    updateBroadcastDisplay(now);
-    if(maybeAutoSwitchDay(now)) return;
+    const realNow=new Date();
+    const now=getScheduleNow();
+    updateDayToolbarHint(realNow);
+    updateBroadcastDisplay(realNow);
+    if(maybeAutoSwitchDay(realNow)) return;
 
     if(!currentScheduleData||!currentScheduleData.data){
       currentSubjectEl.textContent='無排程資料';
+      applySubjectScale(currentSubjectEl, currentSubjectEl.textContent);
       subjectTimeRangeEl.textContent='---';
       subjectProgressBarEl.style.width='0%';
       subjectProgressTextEl.textContent='0%';
+      syncScheduleContext(now, false);
+      placeTimeSimLine();
+      if(!presentationOverlay().classList.contains('hidden')) updatePresentationView();
       return;
     }
     const schedule=currentScheduleData.data;
 
     let currentItem=null,currentIndex=-1,pct=0;
-    document.querySelectorAll('.timeline-item').forEach(el=>el.classList.remove('active'));
+    lunchBreakItemEl?.classList.remove('active');
+    document.querySelectorAll('.timeline-item').forEach(node=>{
+      node.classList.remove('active');
+      const type=node.dataset.type;
+      const shouldHide=(hideBreaks && type==='break') || (hideStudy && type==='study');
+      node.classList.toggle('hidden', shouldHide);
+    });
     for(let i=0;i<schedule.length;i++){
       const item=schedule[i];
       const s=parseTime(item.start), e=parseTime(item.end);
       if(within(now,s,e)){ currentItem=item; currentIndex=i; pct=Math.min(100, Math.round(((now-s)/(e-s))*100)); break; }
     }
 
-    const hero=document.getElementById('hero');
     if(currentItem){
       currentSubjectEl.textContent=currentItem.name;
+      applySubjectScale(currentSubjectEl, currentItem.name);
       subjectTimeRangeEl.textContent=`(${currentItem.start} 至 ${currentItem.end})`;
       subjectProgressBarEl.style.width=pct+'%';
       subjectProgressTextEl.textContent=pct+'%';
-
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      if(currentTheme === 'light-soft'){
-        if(currentItem.type==='exam') hero.style.background='linear-gradient(145deg, rgba(236,72,153,.30), rgba(219,39,119,.25))';
-        else if(currentItem.type==='break') hero.style.background='linear-gradient(145deg, rgba(251,191,36,.25), rgba(34,197,94,.20))';
-        else if(currentItem.type==='study') hero.style.background='linear-gradient(145deg, rgba(236,72,153,.25), rgba(219,39,119,.20))';
-        else hero.style.background='linear-gradient(145deg, rgba(236,72,153,.20), rgba(219,39,119,.15))';
-      }else{
-        if(currentItem.type==='exam') hero.style.background='linear-gradient(145deg, rgba(14,165,233,.20), rgba(99,102,241,.18))';
-        else if(currentItem.type==='break') hero.style.background='linear-gradient(145deg, rgba(251,191,36,.20), rgba(34,197,94,.18))';
-        else if(currentItem.type==='study') hero.style.background='linear-gradient(145deg, rgba(167,139,250,.22), rgba(56,189,248,.18))';
-        else hero.style.background='linear-gradient(145deg, rgba(148,163,184,.15), rgba(100,116,139,.15))';
-      }
+      applyHeroTone(currentItem.type);
 
       const itemEl=document.getElementById(`schedule-item-${currentIndex}`);
-      if(itemEl) itemEl.classList.add('active');
+      if(itemEl){
+        itemEl.classList.remove('hidden');
+        itemEl.classList.add('active');
+        if(lastHighlightedIndex!==currentIndex && simulatedMinutes==null && !timeSimDragging){
+          lastHighlightedIndex=currentIndex;
+          itemEl.scrollIntoView({block:'nearest'});
+        }
+      }
     }else{
-      currentSubjectEl.textContent=getSelectedDayIdleTitle(now,currentDay);
+      const idleTitle=getSelectedDayIdleTitle(now,currentDay);
+      currentSubjectEl.textContent=idleTitle;
+      applySubjectScale(currentSubjectEl, idleTitle);
       subjectTimeRangeEl.textContent='---';
       subjectProgressBarEl.style.width='0%';
       subjectProgressTextEl.textContent='0%';
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      if(currentTheme === 'light-soft'){
-        hero.style.background='linear-gradient(145deg, rgba(236,72,153,.20), rgba(219,39,119,.15))';
-      }else{
-        hero.style.background='linear-gradient(145deg, rgba(148,163,184,.12), rgba(100,116,139,.12))';
-      }
+      applyHeroTone('idle');
+      lastHighlightedIndex=-1;
     }
+    if(hideBreaks && lunchBreakItemEl && !lunchBreakItemEl.classList.contains('active') && lunchBreakItemEl.dataset.start){
+      lunchBreakItemEl.classList.add('hidden');
+    }
+    syncScheduleContext(now, !!currentItem);
+    placeTimeSimLine();
 
     if(!presentationOverlay().classList.contains('hidden')) updatePresentationView();
   }
@@ -2744,6 +3113,77 @@
   }
 
   /* ===== 初始化 ===== */
+  function initHoverTip(){
+    const tip=document.createElement('div');
+    tip.id='hover-tip';
+    tip.setAttribute('role','tooltip');
+    tip.hidden=true;
+    document.body.appendChild(tip);
+    let current=null;
+    const margin=8;
+    function hide(){
+      if(current) current.removeAttribute('aria-describedby');
+      current=null;
+      tip.hidden=true;
+    }
+    function place(el){
+      const text=(el.dataset.tip||'').trim();
+      if(!text){ hide(); return; }
+      if(current&&current!==el) current.removeAttribute('aria-describedby');
+      current=el;
+      el.setAttribute('aria-describedby','hover-tip');
+      tip.textContent=text;
+      tip.hidden=false;
+      tip.classList.remove('is-above');
+      const rect=el.getBoundingClientRect();
+      if(rect.width<1&&rect.height<1){ hide(); return; }
+      const tipRect=tip.getBoundingClientRect();
+      const spaceBelow=window.innerHeight-rect.bottom;
+      const spaceAbove=rect.top;
+      let top=rect.bottom+margin;
+      if(spaceBelow<tipRect.height+margin && spaceAbove>spaceBelow){
+        top=rect.top-tipRect.height-margin;
+        tip.classList.add('is-above');
+      }
+      top=Math.max(margin, Math.min(top, window.innerHeight-tipRect.height-margin));
+      let left=rect.left+rect.width/2-tipRect.width/2;
+      left=Math.max(margin, Math.min(left, window.innerWidth-tipRect.width-margin));
+      const arrow=Math.max(14, Math.min(tipRect.width-14, rect.left+rect.width/2-left));
+      tip.style.top=Math.round(top)+'px';
+      tip.style.left=Math.round(left)+'px';
+      tip.style.setProperty('--arrow-left', Math.round(arrow)+'px');
+    }
+    function targetOf(node){
+      const el=node?.closest?.('[title],[data-tip]');
+      if(!el||el===tip) return null;
+      if(el.hasAttribute('title')){
+        el.dataset.tip=el.getAttribute('title');
+        el.removeAttribute('title');
+      }
+      return el.dataset.tip ? el : null;
+    }
+    document.addEventListener('pointerover',(e)=>{
+      const el=targetOf(e.target);
+      if(!el) return;
+      place(el);
+    });
+    document.addEventListener('pointerout',(e)=>{
+      if(!current) return;
+      const next=targetOf(e.relatedTarget);
+      if(next===current) return;
+      hide();
+    });
+    document.addEventListener('focusin',(e)=>{
+      const el=targetOf(e.target);
+      if(el) place(el);
+    });
+    document.addEventListener('focusout',(e)=>{
+      if(e.target===current) hide();
+    });
+    document.addEventListener('pointerdown', hide);
+    window.addEventListener('scroll', hide, true);
+    window.addEventListener('resize', ()=>{ if(current) place(current); });
+  }
   function init(){
     // 初始化主題
     const savedTheme = localStorage.getItem('selectedTheme');
@@ -2760,6 +3200,36 @@
     loadConfirmedMessageIds();
     initBroadcastConfirmHandlers();
     applyPageTitle(localStorage.getItem(EXAM_TITLE_LS_KEY)||DEFAULT_PAGE_TITLE);
+    if(pageTitleEl){
+      pageTitleEl.addEventListener('keydown',(e)=>{
+        if(e.key==='Enter'){ e.preventDefault(); pageTitleEl.blur(); }
+      });
+      pageTitleEl.addEventListener('paste',(e)=>{
+        e.preventDefault();
+        const text=(e.clipboardData?.getData('text/plain')||'').replace(/\s+/g,' ').trim();
+        const sel=window.getSelection();
+        if(!sel?.rangeCount) return;
+        sel.deleteFromDocument();
+        sel.getRangeAt(0).insertNode(document.createTextNode(text));
+        sel.collapseToEnd();
+      });
+      pageTitleEl.addEventListener('blur',()=>{
+        const text=(pageTitleEl.textContent||'').replace(/\s+/g,' ').trim()||DEFAULT_PAGE_TITLE;
+        localStorage.setItem(EXAM_TITLE_LS_KEY,text);
+        applyPageTitle(text);
+      });
+    }
+    initHoverTip();
+    initTimeSim();
+    el('btn-unpin-day')?.addEventListener('click',()=>{
+      dayManuallySelected=false;
+      localStorage.removeItem('dayManuallySelected');
+      localStorage.removeItem('forcedDayKey');
+      const switched=maybeAutoSwitchDay(new Date());
+      if(!switched) updateDisplay();
+      updateDayPinControl();
+      showStatusMessage(switched ? '已回到今日場次' : '已取消固定場次');
+    });
     restoreSheetsSettingsUI();
     if(!localStorage.getItem(SHEETS_LS_KEYS.url)){
       localStorage.setItem(SHEETS_LS_KEYS.url,getDefaultSheetsUrl());
@@ -3108,11 +3578,8 @@
     function syncFsBtn(){
       const isFs=!!document.fullscreenElement;
       btnFullscreen.setAttribute('aria-pressed', isFs?'true':'false');
-      if(isFs){
-        btnFullscreen.classList.add('active');
-      }else{
-        btnFullscreen.classList.remove('active');
-      }
+      btnFullscreen.classList.toggle('active', isFs);
+      if(!isFs) presentationOwnsFullscreen=false;
     }
     btnFullscreen.addEventListener('click', async ()=>{
       try{ if(!document.fullscreenElement){ await document.documentElement.requestFullscreen(); } else { await document.exitFullscreen(); } }
@@ -3134,6 +3601,36 @@
           closeAppearanceModal();
           return;
         }
+        if(messageRoleModal&&!messageRoleModal.classList.contains('hidden')){
+          closeMessageRoleModal();
+          return;
+        }
+        if(!el('expected-modal')?.classList.contains('hidden')){
+          el('expected-modal').classList.add('hidden');
+          return;
+        }
+        if(!el('absent-setup-modal')?.classList.contains('hidden')){
+          el('absent-setup-modal').classList.add('hidden');
+          return;
+        }
+        if(presentationOverlay()&&!presentationOverlay().classList.contains('hidden')){
+          closePresentation();
+          return;
+        }
+      }
+
+      if(!typing && presentationOverlay()?.classList.contains('hidden') && (e.key==='ArrowUp'||e.key==='ArrowDown') && isPreviewingSchedule(new Date())){
+        const modalOpen=[sheetsSyncModal, appearanceModal, messageRoleModal, el('expected-modal'), el('absent-setup-modal')].some(node=>node&&!node.classList.contains('hidden'));
+        if(!modalOpen){
+          e.preventDefault();
+          const step=e.shiftKey?5:1;
+          const real=new Date();
+          const base=simulatedMinutes!=null?simulatedMinutes:(real.getHours()*60+real.getMinutes());
+          const delta=e.key==='ArrowUp'?-step:step;
+          simulatedMinutes=Math.max(0, Math.min(1439, base+delta));
+          updateDisplay();
+          document.getElementById('time-sim-line')?.scrollIntoView({block:'nearest'});
+        }
       }
 
       // F：全螢幕
@@ -3150,20 +3647,14 @@
         hidden?openPresentation():closePresentation();
       }
 
-      // C：時鐘顯示/隱藏（鎖定時阻擋）
+      // C：時鐘顯示/隱藏（位置鎖定，顯示仍可切換）
       if(!typing && (e.key==='c'||e.key==='C')){
         e.preventDefault();
-        if(CLOCK_LOCKED){
-          showStatusMessage('時鐘已鎖定 / 無法顯示或隱藏');
-          return;
-        }
-        const hud = document.getElementById('clock-hud');
-        const pres = document.getElementById('pres-clock');
-        hud?.classList.toggle('hidden');
-        const overlayVisible = !presentationOverlay().classList.contains('hidden');
-        if(overlayVisible){ pres?.classList.toggle('hidden'); }
-        const isVisible = !(hud?.classList.contains('hidden'));
-        try{ showStatusMessage?.(isVisible ? '時鐘顯示' : '時鐘隱藏'); }catch{}
+        showClock=!showClock;
+        localStorage.setItem('showClock', showClock ? 'true' : 'false');
+        if(toggleClock) toggleClock.checked=showClock;
+        updateClockVisibility();
+        showStatusMessage(showClock ? '已顯示時鐘' : '已隱藏時鐘');
       }
     });
 
@@ -3227,10 +3718,12 @@
 
     // 確保時鐘顯示狀態正確應用（在所有初始化完成後）
     if(typeof updateClockVisibility === 'function'){
+      window.updateClockVisibility=updateClockVisibility;
       updateClockVisibility();
     }
     // 確保進度條顯示狀態正確應用（在所有初始化完成後）
     if(typeof updateProgressVisibility === 'function'){
+      window.updateProgressVisibility=updateProgressVisibility;
       updateProgressVisibility();
     }
 
