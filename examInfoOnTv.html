@@ -254,8 +254,84 @@
     @media (prefers-reduced-motion:reduce){
       .broadcast-msg-card--shake,.broadcast-msg-confirm--animate{animation:none}
     }
-    .pres-broadcast-dock .broadcast-msg-card{font-size:clamp(1.1rem,2.4vh,1.65rem)}
-    .pres-broadcast-dock .broadcast-messages-stack{padding:0 .85rem .65rem}
+    .pres-broadcast-dock .broadcast-msg-card,
+    .clock-board-broadcast .broadcast-msg-card{font-size:clamp(1.1rem,2.4vh,1.65rem)}
+    .pres-broadcast-dock .broadcast-messages-stack,
+    .clock-board-broadcast .broadcast-messages-stack{padding:0 .85rem .85rem}
+    .clock-board-layout{display:grid;grid-template-rows:minmax(0,1fr);height:100%;min-height:0;position:relative}
+    .clock-board-layout.clock-board-layout--messages-active{grid-template-rows:minmax(0,1fr) minmax(5.5rem,30%)}
+    .clock-board-face{min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(2.5rem,6vh,4rem) 1.5rem 1rem;text-align:center}
+    .clock-board-time{
+      font-weight:var(--clock-weight,900);font-variant-numeric:tabular-nums;
+      letter-spacing:var(--clock-track,.03em);line-height:.92;
+      color:var(--clock-fg,var(--text));font-size:var(--clock-size,clamp(4.25rem,16vw,13rem));
+      font-family:var(--clock-font,inherit);text-shadow:var(--clock-shadow,none);
+    }
+    .clock-board-sec{font-size:.42em;letter-spacing:0;opacity:.82}
+    .clock-board-date{
+      margin-top:clamp(.6rem,2vh,1.25rem);font-weight:700;letter-spacing:.04em;
+      color:var(--clock-date,var(--muted));font-size:var(--clock-date-size,clamp(1.05rem,2.8vh,1.85rem));
+      font-family:'Inter',system-ui,'Noto Sans TC',sans-serif;
+    }
+    .clock-board-tools{position:absolute;top:.65rem;right:.7rem;z-index:3;display:flex;align-items:center;gap:.15rem}
+    .clock-board-close{opacity:.75}
+    .clock-board-close:hover,.clock-board-close:focus-visible{opacity:1}
+    .clock-board-style-btn{
+      border:0;background:transparent;color:inherit;opacity:.34;cursor:pointer;
+      font-size:.7rem;font-weight:700;letter-spacing:.06em;line-height:1;
+      padding:.28rem .4rem;border-radius:.4rem;
+    }
+    .clock-board-style-btn:hover,.clock-board-style-btn:focus-visible,.clock-board-style-btn[aria-expanded="true"]{opacity:.8}
+    .clock-style-menu{
+      position:absolute;top:calc(100% + .3rem);right:0;min-width:8.75rem;padding:.3rem;
+      display:flex;flex-direction:column;gap:.1rem;
+      background:rgba(15,23,42,.94);color:#e2e8f0;
+      border:1px solid rgba(148,163,184,.28);border-radius:.65rem;
+      box-shadow:0 10px 28px rgba(0,0,0,.32);
+    }
+    .clock-style-menu.hidden{display:none}
+    .clock-style-option{
+      display:flex;align-items:center;gap:.45rem;width:100%;
+      border:0;background:transparent;color:inherit;cursor:pointer;
+      text-align:left;font-size:.8rem;font-weight:700;padding:.32rem .4rem;border-radius:.4rem;
+    }
+    .clock-style-option:hover,.clock-style-option.is-active{background:rgba(255,255,255,.1)}
+    .clock-style-swatch{width:.7rem;height:.7rem;border-radius:999px;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+    .clock-style-swatch--standard{background:linear-gradient(135deg,#334155,#e2e8f0)}
+    .clock-style-swatch--exam{background:#f5d90a}
+    .clock-style-swatch--board{background:#b6f27a}
+    .clock-style-swatch--paper{background:#f7f4ee;box-shadow:inset 0 0 0 1px #44403c}
+    .clock-style-swatch--night{background:#8eacd0}
+    .clock-style-swatch--poster{background:#eef2ff}
+    #clock-board-overlay{background:var(--clock-bg,var(--bg))!important;color:var(--clock-fg,var(--text))!important}
+    #clock-board-overlay[data-clock-style="exam"]{
+      --clock-bg:#0a0a0a;--clock-fg:#f5d90a;--clock-date:#fde68a;
+      --clock-font:'Roboto Mono',ui-monospace,monospace;
+      --clock-size:clamp(5rem,20vw,16rem);--clock-weight:700;--clock-track:-.04em;
+      --clock-date-size:clamp(1.15rem,3vh,2rem);
+    }
+    #clock-board-overlay[data-clock-style="board"]{
+      --clock-bg:#102216;--clock-fg:#d6ffb0;--clock-date:#b7e4a8;
+      --clock-font:system-ui,'Segoe UI','Noto Sans TC',sans-serif;
+      --clock-size:clamp(4.6rem,17vw,14rem);--clock-weight:800;--clock-track:.01em;
+      --clock-shadow:0 0 18px rgba(214,255,176,.28);
+    }
+    #clock-board-overlay[data-clock-style="paper"]{
+      --clock-bg:#f7f4ee;--clock-fg:#1c1917;--clock-date:#57534e;
+      --clock-font:'Inter',system-ui,'Noto Sans TC',sans-serif;
+      --clock-size:clamp(3.8rem,14vw,11rem);--clock-weight:600;--clock-track:.02em;
+    }
+    #clock-board-overlay[data-clock-style="night"]{
+      --clock-bg:#0b1220;--clock-fg:#9fb6d4;--clock-date:#6d829c;
+      --clock-font:'Roboto Mono',ui-monospace,monospace;
+      --clock-size:clamp(3.5rem,12.5vw,10rem);--clock-weight:500;--clock-track:.08em;
+    }
+    #clock-board-overlay[data-clock-style="poster"]{
+      --clock-bg:#1e1b4b;--clock-fg:#f8fafc;--clock-date:#a5b4fc;
+      --clock-font:system-ui,'Segoe UI','Noto Sans TC',sans-serif;
+      --clock-size:clamp(4.8rem,18vw,15rem);--clock-weight:900;--clock-track:.1em;
+      --clock-date-size:clamp(1.2rem,3.2vh,2.1rem);
+    }
     .pres-layout{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100%;min-height:0}
     .pres-layout.pres-layout--messages-active{grid-template-rows:auto minmax(0,1fr) auto minmax(5.5rem,26%)}
     .pres-header{
@@ -1310,8 +1386,9 @@
 
         <!-- 按鈕容器 -->
         <div class="flex items-center gap-2 flex-shrink-0">
-          <button id="btn-fullscreen" class="icon-btn icon-btn--labeled" aria-pressed="false" title="切換全螢幕 (F)">⤢<span class="icon-btn-label">全螢幕</span></button>
-          <button id="btn-present" class="icon-btn icon-btn--labeled" aria-pressed="false" title="全畫面展示 (X)">🖥️<span class="icon-btn-label">展示</span></button>
+          <button id="btn-fullscreen" class="icon-btn icon-btn--labeled" aria-pressed="false" title="詳細畫面，保留全部資訊 (F)">⤢<span class="icon-btn-label">詳細畫面</span></button>
+          <button id="btn-present" class="icon-btn icon-btn--labeled" aria-pressed="false" title="精簡看板，只留考科重點 (X)">🖥️<span class="icon-btn-label">精簡看板</span></button>
+          <button type="button" id="btn-clock-board" class="icon-btn icon-btn--labeled" aria-pressed="false" title="時間看板，只顯示現在時間 (T)">🕐<span class="icon-btn-label">時間看板</span></button>
         </div>
       </div>
       
@@ -1580,7 +1657,7 @@
             <button id="pres-zoom-in" title="放大">＋</button>
           </div>
         </div>
-        <button id="btn-close-present" class="btn btn-gray flex-shrink-0" title="關閉展示（Esc 或 X）">關閉</button>
+        <button id="btn-close-present" class="btn btn-gray flex-shrink-0" title="關閉精簡看板（Esc 或 X）">關閉</button>
       </div>
 
       <div class="pres-main">
@@ -1618,6 +1695,32 @@
 
       <section id="pres-broadcast-dock" class="broadcast-dock pres-broadcast-dock broadcast-dock--idle" aria-live="polite">
         <div id="pres-broadcast-messages" class="broadcast-messages-stack"></div>
+      </section>
+    </div>
+  </div>
+
+  <div id="clock-board-overlay" class="hidden fixed inset-0 z-[60]" aria-label="時間看板">
+    <div class="clock-board-layout">
+      <div class="clock-board-tools">
+        <button type="button" id="btn-clock-style" class="clock-board-style-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="clock-style-menu" title="切換時間樣式">標準</button>
+        <div id="clock-style-menu" class="clock-style-menu hidden" role="menu" aria-label="時間樣式">
+          <button type="button" class="clock-style-option is-active" data-clock-style="standard" role="menuitemradio" aria-checked="true"><span class="clock-style-swatch clock-style-swatch--standard"></span>標準</button>
+          <button type="button" class="clock-style-option" data-clock-style="exam" role="menuitemradio" aria-checked="false"><span class="clock-style-swatch clock-style-swatch--exam"></span>段考</button>
+          <button type="button" class="clock-style-option" data-clock-style="board" role="menuitemradio" aria-checked="false"><span class="clock-style-swatch clock-style-swatch--board"></span>黑板</button>
+          <button type="button" class="clock-style-option" data-clock-style="paper" role="menuitemradio" aria-checked="false"><span class="clock-style-swatch clock-style-swatch--paper"></span>白紙</button>
+          <button type="button" class="clock-style-option" data-clock-style="night" role="menuitemradio" aria-checked="false"><span class="clock-style-swatch clock-style-swatch--night"></span>夜讀</button>
+          <button type="button" class="clock-style-option" data-clock-style="poster" role="menuitemradio" aria-checked="false"><span class="clock-style-swatch clock-style-swatch--poster"></span>海報</button>
+        </div>
+        <button type="button" id="btn-close-clock-board" class="clock-board-close btn btn-gray" title="關閉時間看板（Esc 或 T）">關閉</button>
+      </div>
+      <div class="clock-board-face">
+        <div class="clock-board-time">
+          <span id="clock-board-hh">--</span><span>:</span><span id="clock-board-mm">--</span><span class="clock-board-sec">:<span id="clock-board-ss">--</span></span>
+        </div>
+        <div id="clock-board-date" class="clock-board-date">--</div>
+      </div>
+      <section id="clock-board-broadcast-dock" class="broadcast-dock clock-board-broadcast broadcast-dock--idle" aria-live="polite">
+        <div id="clock-board-messages" class="broadcast-messages-stack"></div>
       </section>
     </div>
   </div>
@@ -2523,11 +2626,14 @@
     const hasMessages=items.length>0;
     const dashboardLeft=el('broadcast-dock')?.closest('.dashboard-left');
     const presLayout=el('pres-broadcast-dock')?.closest('.pres-layout');
+    const clockLayout=el('clock-board-broadcast-dock')?.closest('.clock-board-layout');
     dashboardLeft?.classList.toggle('dashboard-left--messages-active',hasMessages);
     presLayout?.classList.toggle('pres-layout--messages-active',hasMessages);
+    clockLayout?.classList.toggle('clock-board-layout--messages-active',hasMessages);
     const targets=[
       {dock:el('broadcast-dock'),container:el('broadcast-messages')},
       {dock:el('pres-broadcast-dock'),container:el('pres-broadcast-messages')},
+      {dock:el('clock-board-broadcast-dock'),container:el('clock-board-messages')},
     ];
     targets.forEach(({dock,container})=>{
       if(!dock||!container) return;
@@ -2551,6 +2657,7 @@
     };
     el('broadcast-messages')?.addEventListener('click',onConfirmClick);
     el('pres-broadcast-messages')?.addEventListener('click',onConfirmClick);
+    el('clock-board-messages')?.addEventListener('click',onConfirmClick);
   }
   function looksLikeScheduleSheet(gvizJson){
     const table=gvizJson?.table;
@@ -2839,30 +2946,92 @@
     presNextEl.classList.toggle('pres-next-hint--empty',nextInfo==='—');
   }
   let presentationOwnsFullscreen=false;
+  let clockBoardOwnsFullscreen=false;
+  const clockBoardOverlay=()=>el('clock-board-overlay');
   function syncPresentButton(active){
     if(!btnPresent) return;
     btnPresent.classList.toggle('active', !!active);
     btnPresent.setAttribute('aria-pressed', active?'true':'false');
   }
+  function syncClockBoardButton(active){
+    const btn=el('btn-clock-board');
+    if(!btn) return;
+    btn.classList.toggle('active', !!active);
+    btn.setAttribute('aria-pressed', active?'true':'false');
+  }
+  function claimOverlayFullscreen(which){
+    const setOwner=(owner)=>{
+      presentationOwnsFullscreen=owner==='present';
+      clockBoardOwnsFullscreen=owner==='clock';
+    };
+    if(!document.fullscreenElement){
+      setOwner(which);
+      document.documentElement.requestFullscreen?.().catch(()=>{ setOwner(null); });
+      return;
+    }
+    if(presentationOwnsFullscreen||clockBoardOwnsFullscreen) setOwner(which);
+  }
+  function releaseOverlayFullscreen(which){
+    const owns=which==='present'?presentationOwnsFullscreen:clockBoardOwnsFullscreen;
+    if(which==='present') presentationOwnsFullscreen=false;
+    else clockBoardOwnsFullscreen=false;
+    if(owns&&document.fullscreenElement) document.exitFullscreen?.().catch(()=>{});
+  }
   function openPresentation(){
+    if(clockBoardOverlay()&&!clockBoardOverlay().classList.contains('hidden')) closeClockBoard({handoff:true});
     updatePresentationView();
     presentationOverlay().classList.remove('hidden');
     syncPresentButton(true);
     if(typeof window.updateClockVisibility==='function') window.updateClockVisibility();
-    if(!document.fullscreenElement){
-      presentationOwnsFullscreen=true;
-      document.documentElement.requestFullscreen?.().catch(()=>{ presentationOwnsFullscreen=false; });
-    }else{
-      presentationOwnsFullscreen=false;
-    }
+    claimOverlayFullscreen('present');
   }
-  function closePresentation(){
-    presentationOverlay().classList.add('hidden');
+  function closePresentation(options={}){
+    const {handoff=false}=options;
+    presentationOverlay()?.classList.add('hidden');
     syncPresentButton(false);
-    if(presentationOwnsFullscreen&&document.fullscreenElement){
-      document.exitFullscreen?.().catch(()=>{});
-    }
-    presentationOwnsFullscreen=false;
+    if(!handoff) releaseOverlayFullscreen('present');
+  }
+  function openClockBoard(){
+    if(presentationOverlay()&&!presentationOverlay().classList.contains('hidden')) closePresentation({handoff:true});
+    clockBoardOverlay()?.classList.remove('hidden');
+    syncClockBoardButton(true);
+    tickClocks();
+    updateBroadcastDisplay(new Date());
+    claimOverlayFullscreen('clock');
+  }
+  const CLOCK_STYLES=[
+    {id:'standard',name:'標準'},
+    {id:'exam',name:'段考'},
+    {id:'board',name:'黑板'},
+    {id:'paper',name:'白紙'},
+    {id:'night',name:'夜讀'},
+    {id:'poster',name:'海報'}
+  ];
+  const CLOCK_STYLE_LS='clockBoardStyle';
+  function closeClockStyleMenu(){
+    el('clock-style-menu')?.classList.add('hidden');
+    el('btn-clock-style')?.setAttribute('aria-expanded','false');
+  }
+  function applyClockBoardStyle(id){
+    if(!CLOCK_STYLES.some(style=>style.id===id)) id='standard';
+    const overlay=clockBoardOverlay();
+    if(overlay) overlay.dataset.clockStyle=id;
+    const style=CLOCK_STYLES.find(item=>item.id===id);
+    const btn=el('btn-clock-style');
+    if(btn) btn.textContent=style.name;
+    document.querySelectorAll('.clock-style-option').forEach(node=>{
+      const on=node.dataset.clockStyle===id;
+      node.classList.toggle('is-active', on);
+      node.setAttribute('aria-checked', on?'true':'false');
+    });
+    localStorage.setItem(CLOCK_STYLE_LS, id);
+  }
+  function closeClockBoard(options={}){
+    const {handoff=false}=options;
+    closeClockStyleMenu();
+    clockBoardOverlay()?.classList.add('hidden');
+    syncClockBoardButton(false);
+    if(!handoff) releaseOverlayFullscreen('clock');
   }
 
   /* ===== 大時鐘（一般/展示） 更新 ===== */
@@ -2874,6 +3043,7 @@
     const dateStr=`${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())}（${fmtWeekday(now)}）`;
     const hudHH=el('hud-hh'); if(hudHH){ hudHH.textContent=hh; el('hud-mm').textContent=mm; el('hud-ss').textContent=ss; el('hud-date').textContent=dateStr; }
     const presHH=el('pres-hh'); if(presHH){ presHH.textContent=hh; el('pres-mm').textContent=mm; el('pres-ss').textContent=ss; el('pres-date').textContent=dateStr; }
+    const boardHH=el('clock-board-hh'); if(boardHH){ boardHH.textContent=hh; el('clock-board-mm').textContent=mm; el('clock-board-ss').textContent=ss; el('clock-board-date').textContent=dateStr; }
   }
 
   /* ===== 仍保留：拖曳/縮放工具（鎖定時不會被啟用） ===== */
@@ -3463,6 +3633,29 @@
 
     // 事件綁定（原）
     document.getElementById('btn-close-present').addEventListener('click', closePresentation);
+    document.getElementById('btn-close-clock-board').addEventListener('click', closeClockBoard);
+    applyClockBoardStyle(localStorage.getItem(CLOCK_STYLE_LS)||'standard');
+    document.getElementById('btn-clock-style').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const menu=el('clock-style-menu');
+      const willOpen=menu.classList.contains('hidden');
+      menu.classList.toggle('hidden', !willOpen);
+      e.currentTarget.setAttribute('aria-expanded', willOpen?'true':'false');
+    });
+    document.getElementById('clock-style-menu').addEventListener('click', (e)=>{
+      const option=e.target.closest('.clock-style-option');
+      if(!option) return;
+      applyClockBoardStyle(option.dataset.clockStyle);
+      closeClockStyleMenu();
+    });
+    clockBoardOverlay()?.addEventListener('pointerdown', (e)=>{
+      if(e.target.closest('#clock-style-menu')||e.target.closest('#btn-clock-style')) return;
+      closeClockStyleMenu();
+    });
+    document.getElementById('btn-clock-board').addEventListener('click', ()=>{
+      const hidden=clockBoardOverlay().classList.contains('hidden');
+      hidden?openClockBoard():closeClockBoard();
+    });
 
 	btnPresent.addEventListener('click', () => {
 	  const hidden = presentationOverlay().classList.contains('hidden');
@@ -3579,11 +3772,14 @@
       const isFs=!!document.fullscreenElement;
       btnFullscreen.setAttribute('aria-pressed', isFs?'true':'false');
       btnFullscreen.classList.toggle('active', isFs);
-      if(!isFs) presentationOwnsFullscreen=false;
+      if(!isFs){
+        presentationOwnsFullscreen=false;
+        clockBoardOwnsFullscreen=false;
+      }
     }
     btnFullscreen.addEventListener('click', async ()=>{
       try{ if(!document.fullscreenElement){ await document.documentElement.requestFullscreen(); } else { await document.exitFullscreen(); } }
-      catch(e){ showStatusMessage('全螢幕切換失敗', true); }
+      catch(e){ showStatusMessage('詳細畫面切換失敗', true); }
     });
     document.addEventListener('fullscreenchange', syncFsBtn); syncFsBtn();
 
@@ -3613,13 +3809,21 @@
           el('absent-setup-modal').classList.add('hidden');
           return;
         }
+        if(clockBoardOverlay()&&!clockBoardOverlay().classList.contains('hidden')){
+          if(el('clock-style-menu')&&!el('clock-style-menu').classList.contains('hidden')){
+            closeClockStyleMenu();
+            return;
+          }
+          closeClockBoard();
+          return;
+        }
         if(presentationOverlay()&&!presentationOverlay().classList.contains('hidden')){
           closePresentation();
           return;
         }
       }
 
-      if(!typing && presentationOverlay()?.classList.contains('hidden') && (e.key==='ArrowUp'||e.key==='ArrowDown') && isPreviewingSchedule(new Date())){
+      if(!typing && presentationOverlay()?.classList.contains('hidden') && clockBoardOverlay()?.classList.contains('hidden') && (e.key==='ArrowUp'||e.key==='ArrowDown') && isPreviewingSchedule(new Date())){
         const modalOpen=[sheetsSyncModal, appearanceModal, messageRoleModal, el('expected-modal'), el('absent-setup-modal')].some(node=>node&&!node.classList.contains('hidden'));
         if(!modalOpen){
           e.preventDefault();
@@ -3633,18 +3837,25 @@
         }
       }
 
-      // F：全螢幕
+      // F：詳細畫面（瀏覽器全螢幕，保留全部資訊）
       if(!typing && (e.key==='f'||e.key==='F')){
         e.preventDefault();
         try{ if(!document.fullscreenElement){ document.documentElement.requestFullscreen?.().catch(()=>{});} else { document.exitFullscreen?.().catch(()=>{});} }
-        catch{ showStatusMessage('全螢幕切換失敗', true); }
+        catch{ showStatusMessage('詳細畫面切換失敗', true); }
       }
 
-      // X：展示層開關
+      // X：精簡看板開關。若時間看板開著，改開精簡看板。
       if(!typing && (e.key==='x'||e.key==='X')){
         e.preventDefault();
         const hidden=presentationOverlay().classList.contains('hidden');
         hidden?openPresentation():closePresentation();
+      }
+
+      // T：時間看板開關。若精簡看板開著，改開時間看板。
+      if(!typing && (e.key==='t'||e.key==='T')){
+        e.preventDefault();
+        const hidden=clockBoardOverlay().classList.contains('hidden');
+        hidden?openClockBoard():closeClockBoard();
       }
 
       // C：時鐘顯示/隱藏（位置鎖定，顯示仍可切換）
