@@ -184,6 +184,76 @@
       font-size: 1.15rem;
       font-weight: 800;
     }
+    #class-count { margin: .2rem 0 0; font-size: 1.05rem; font-weight: 800; opacity: .9; }
+    #class-count[hidden] { display: none !important; }
+
+    .wave {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: .55rem;
+      padding: calc(.7rem + env(safe-area-inset-top)) calc(.85rem + env(safe-area-inset-right)) calc(.75rem + env(safe-area-inset-bottom)) calc(.85rem + env(safe-area-inset-left));
+      background: #0b1220;
+      color: #f8fafc;
+      overflow: auto;
+    }
+    .wave[hidden] { display: none !important; }
+    .wave-top, .count-row, .hold-row, .slider-ends { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+    .wave-top { justify-content: space-between; }
+    .count-row p { margin: 0; font-size: 1.25rem; font-weight: 900; }
+    .wave button, .wave .toggle {
+      min-height: 3rem;
+      border-radius: .9rem;
+      padding: .55rem .9rem;
+      font-weight: 800;
+      font-size: 1.05rem;
+      background: rgba(255, 255, 255, .12);
+      border: 2px solid rgba(255, 255, 255, .55);
+    }
+    .wave .toggle[aria-pressed="true"] { background: #fff; color: #0b1220; border-color: #fff; }
+    .wave-status { margin: 0; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; }
+    .wave-status.ok { color: #86efac; }
+    .wave-status.near { color: #fcd34d; }
+    .wave-status.over { color: #fda4af; }
+    .wave-status.paused { color: #cbd5e1; }
+    .wave-hint { margin: 0; font-size: 1rem; line-height: 1.45; color: rgba(248, 250, 252, .82); }
+    .wave-body { display: flex; flex-direction: column; gap: .7rem; min-height: 0; }
+    .wave-stage { position: relative; flex: 1 1 220px; min-height: 220px; }
+    #wave-canvas {
+      width: 100%;
+      height: 100%;
+      min-height: 220px;
+      display: block;
+      border-radius: 1.1rem;
+      background: #020617;
+      touch-action: none;
+    }
+    .line-tag {
+      position: absolute;
+      left: .6rem;
+      transform: translateY(-50%);
+      background: #fde68a;
+      color: #1c1917;
+      font-weight: 900;
+      font-size: .95rem;
+      letter-spacing: .08em;
+      border-radius: 999px;
+      padding: .2rem .55rem;
+      pointer-events: none;
+    }
+    .wave-tools { display: flex; flex-direction: column; gap: .75rem; }
+    .wave-tools .pill { min-width: 3.5rem; }
+    .slider-label { display: flex; flex-direction: column; gap: .35rem; font-weight: 800; font-size: 1.05rem; }
+    #gain-slider { width: 100%; accent-color: #fde68a; height: 2.2rem; }
+    .slider-ends { justify-content: space-between; font-weight: 700; font-size: .95rem; color: rgba(248, 250, 252, .8); }
+    .hold-row span { font-weight: 800; margin-right: .2rem; }
+    @media (min-width: 980px) and (max-height: 860px) {
+      .wave { overflow: hidden; }
+      .wave-body { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr); flex: 1; }
+      .wave-tools { overflow: auto; }
+    }
     .error { width: min(760px, 100%); margin: 0 auto; justify-content: center; }
     .error h1 { font-size: clamp(2.2rem, 6vw, 4rem); }
     .retry { flex: none; min-width: min(100%, 18rem); align-self: flex-start; }
@@ -208,6 +278,7 @@
     <div class="live-head">
       <p id="scene-label">討論</p>
       <p id="agreement-text">小組聲，讓鄰組也能討論</p>
+      <p id="class-count" hidden>本節超過 0 次</p>
     </div>
     <div>
       <p id="status-text" aria-live="polite">維持這個音量</p>
@@ -221,8 +292,43 @@
     <div id="pills" class="pills"></div>
     <div class="live-actions">
       <button id="pause-btn" type="button">暫停</button>
-      <button id="capture-btn" type="button">把現在訂成約定</button>
+      <button id="wave-open-btn" type="button">調整波形</button>
       <button id="live-chime" class="ghost" type="button" aria-pressed="true">輕聲提醒 · 開</button>
+    </div>
+  </section>
+
+  <section id="panel-wave" class="wave" hidden>
+    <div class="wave-top">
+      <button id="wave-close" type="button">回到課堂</button>
+      <div class="count-row">
+        <p id="over-count">本節超過 0 次</p>
+        <button id="count-reset" type="button">重新計算</button>
+      </div>
+    </div>
+    <p id="wave-status" class="wave-status ok">維持這個音量</p>
+    <p id="wave-hint" class="wave-hint"></p>
+    <div class="wave-body">
+      <div class="wave-stage">
+        <canvas id="wave-canvas" role="slider" tabindex="0" aria-valuemin="2" aria-valuemax="90" aria-valuenow="14" aria-label="音量標準，上下拖動調整"></canvas>
+        <div id="line-tag" class="line-tag">標準</div>
+      </div>
+      <div class="wave-tools">
+        <button id="standard-now" type="button">以現在為標準</button>
+        <label class="slider-label" for="gain-slider">敏感度
+          <input id="gain-slider" type="range" min="0.5" max="2.5" step="0.05" value="1" aria-label="敏感度">
+          <span class="slider-ends"><span>較不敏感</span><span>較敏感</span></span>
+        </label>
+        <div class="hold-row" role="group" aria-label="持續時間">
+          <span>持續時間</span>
+          <button type="button" class="toggle" data-hold="1000">1 秒</button>
+          <button type="button" class="toggle" data-hold="1500">1.5 秒</button>
+          <button type="button" class="toggle" data-hold="2000">2 秒</button>
+          <button type="button" class="toggle" data-hold="3000">3 秒</button>
+        </div>
+        <button id="count-class" class="toggle" type="button" aria-pressed="false">課堂畫面也顯示次數</button>
+        <button id="wave-pause" type="button">暫停</button>
+        <div id="wave-pills" class="pills"></div>
+      </div>
     </div>
   </section>
 
@@ -241,36 +347,55 @@
       { id: 'play', name: '活動', agreement: '參與聲，玩得開心，指示還聽得見', limit: 0.36 },
       { id: 'chorus', name: '齊讀', agreement: '齊讀聲，聲音齊，不另外加油添醋', limit: 0.52 }
     ];
-    const HOLD_MS = 1500;
     const CHIME_GAP_MS = 8000;
     const THANKS_MS = 2000;
     const NEAR_RATIO = 0.8;
     const LINE_AT = 0.72;
     const NOISE_FLOOR = 0.008;
+    const AMP_MAX = 0.85;
+    const HISTORY_MS = 8000;
+    const HOLD_CHOICES = [1000, 1500, 2000, 3000];
 
     const setupPanel = document.getElementById('panel-setup');
     const livePanel = document.getElementById('panel-live');
     const errorPanel = document.getElementById('panel-error');
     const sceneGrid = document.getElementById('scene-grid');
     const pills = document.getElementById('pills');
+    const wavePills = document.getElementById('wave-pills');
     const startBtn = document.getElementById('start-btn');
     const setupChime = document.getElementById('setup-chime');
     const liveChime = document.getElementById('live-chime');
     const pauseBtn = document.getElementById('pause-btn');
-    const captureBtn = document.getElementById('capture-btn');
+    const wavePauseBtn = document.getElementById('wave-pause');
     const retryBtn = document.getElementById('retry-btn');
     const sceneLabel = document.getElementById('scene-label');
     const agreementText = document.getElementById('agreement-text');
     const statusText = document.getElementById('status-text');
+    const classCount = document.getElementById('class-count');
     const meter = document.getElementById('meter');
     const meterFill = document.getElementById('meter-fill');
     const errorTitle = document.getElementById('error-title');
     const errorBody = document.getElementById('error-body');
+    const wavePanel = document.getElementById('panel-wave');
+    const waveCanvas = document.getElementById('wave-canvas');
+    const waveStatus = document.getElementById('wave-status');
+    const waveHint = document.getElementById('wave-hint');
+    const lineTag = document.getElementById('line-tag');
+    const overCountText = document.getElementById('over-count');
+    const gainSlider = document.getElementById('gain-slider');
+    const countClassBtn = document.getElementById('count-class');
+    const standardNowBtn = document.getElementById('standard-now');
 
     let sceneId = 'talk';
     let threshold = 0.14;
-    let custom = false;
+    let customKind = '0';
     let chimeOn = true;
+    let sensitivity = 1;
+    let holdMs = 1500;
+    let countOnClass = false;
+    let overCount = 0;
+    let waveOpen = false;
+    let draggingLine = false;
     let paused = false;
     let running = false;
     let opening = false;
@@ -285,6 +410,7 @@
     let pendingThanks = false;
     let rafId = 0;
     let recent = [];
+    let history = [];
     let audioCtx = null;
     let stream = null;
     let analyser = null;
@@ -350,16 +476,29 @@
       const scene = sceneById(saved || 'talk');
       sceneId = scene.id;
       chimeOn = localStorage.getItem('va-chime') !== '0';
-      custom = localStorage.getItem('va-custom') === '1';
+      customKind = localStorage.getItem('va-custom') || '0';
+      if (customKind === '1') customKind = 'drag';
       const stored = parseFloat(localStorage.getItem('va-threshold'));
-      threshold = custom && stored > 0 ? stored : scene.limit;
+      threshold = isCustom() && stored > 0 ? stored : scene.limit;
+      const gain = parseFloat(localStorage.getItem('va-gain'));
+      sensitivity = gain >= 0.5 && gain <= 2.5 ? gain : 1;
+      const hold = parseInt(localStorage.getItem('va-hold'), 10);
+      holdMs = HOLD_CHOICES.indexOf(hold) >= 0 ? hold : 1500;
+      countOnClass = localStorage.getItem('va-count-class') === '1';
     }
 
     function saveSettings() {
       localStorage.setItem('va-scene', sceneId);
       localStorage.setItem('va-threshold', String(threshold));
-      localStorage.setItem('va-custom', custom ? '1' : '0');
+      localStorage.setItem('va-custom', customKind);
       localStorage.setItem('va-chime', chimeOn ? '1' : '0');
+      localStorage.setItem('va-gain', String(sensitivity));
+      localStorage.setItem('va-hold', String(holdMs));
+      localStorage.setItem('va-count-class', countOnClass ? '1' : '0');
+    }
+
+    function isCustom() {
+      return customKind === 'now' || customKind === 'drag';
     }
 
     function buildChoices() {
@@ -381,7 +520,17 @@
         pill.textContent = scene.name;
         pill.addEventListener('click', () => selectScene(scene.id));
         pills.appendChild(pill);
+
+        const wavePill = pill.cloneNode(true);
+        wavePill.addEventListener('click', () => selectScene(scene.id));
+        wavePills.appendChild(wavePill);
       });
+    }
+
+    function customLabel(name) {
+      if (customKind === 'now') return name + ' · 已以現在為標準';
+      if (customKind === 'drag') return name + ' · 標準已調整';
+      return name;
     }
 
     function renderSceneUi() {
@@ -389,24 +538,46 @@
       document.querySelectorAll('[data-scene]').forEach((el) => {
         el.setAttribute('aria-pressed', el.dataset.scene === sceneId ? 'true' : 'false');
       });
-      sceneLabel.textContent = custom ? scene.name + ' · 已依現在調整' : scene.name;
+      sceneLabel.textContent = customLabel(scene.name);
       agreementText.textContent = scene.agreement;
       const chimeLabel = chimeOn ? '輕聲提醒 · 開' : '輕聲提醒 · 關';
       setupChime.textContent = chimeLabel;
       liveChime.textContent = chimeLabel;
       setupChime.setAttribute('aria-pressed', chimeOn ? 'true' : 'false');
       liveChime.setAttribute('aria-pressed', chimeOn ? 'true' : 'false');
+      gainSlider.value = String(sensitivity);
+      document.querySelectorAll('[data-hold]').forEach((btn) => {
+        btn.setAttribute('aria-pressed', Number(btn.dataset.hold) === holdMs ? 'true' : 'false');
+      });
+      countClassBtn.setAttribute('aria-pressed', countOnClass ? 'true' : 'false');
+      const seconds = holdMs / 1000;
+      waveHint.textContent = '白線是音量標準。敏感度會放大或縮小波形。波形要連續留在白線外 ' + seconds + ' 秒，才會提醒。';
+      const shown = Math.round((threshold / AMP_MAX) * 100);
+      waveCanvas.setAttribute('aria-valuenow', String(Math.max(2, Math.min(90, shown))));
+      renderCount();
     }
 
     function selectScene(id) {
       const scene = sceneById(id);
       sceneId = scene.id;
       threshold = scene.limit;
-      custom = false;
+      customKind = '0';
       overMs = 0;
       quietSince = 0;
       saveSettings();
       renderSceneUi();
+    }
+
+    function renderCount() {
+      const text = '本節超過 ' + overCount + ' 次';
+      overCountText.textContent = text;
+      classCount.textContent = text;
+      classCount.hidden = !countOnClass;
+    }
+
+    function resetOverCount() {
+      overCount = 0;
+      renderCount();
     }
 
     function setChime(on) {
@@ -442,6 +613,7 @@
 
     function showMicMessage(kind) {
       stopMeter();
+      closeWave();
       const copy = micCopy(kind, isAppleTouch());
       errorTitle.textContent = copy.title;
       errorBody.textContent = copy.body;
@@ -463,6 +635,8 @@
       meter.setAttribute('aria-valuenow', String(shown));
       applyTone(tone);
       setStatus(sentence);
+      waveStatus.textContent = sentence;
+      waveStatus.className = 'wave-status ' + (tone === 'paused' ? 'paused' : tone);
     }
 
     function readRms() {
@@ -497,12 +671,15 @@
 
     function frame(now) {
       if (!running) return;
-      const raw = Math.max(0, readRms() - NOISE_FLOOR);
+      const raw = Math.max(0, readRms() - NOISE_FLOOR) * sensitivity;
       recent.push({ t: now, v: raw });
       while (recent.length && now - recent[0].t > 700) recent.shift();
       if (raw > smoothed) smoothed += (raw - smoothed) * 0.42;
       else smoothed += (raw - smoothed) * 0.14;
       haveLevel = true;
+      history.push({ t: now, v: smoothed });
+      while (history.length && now - history[0].t > HISTORY_MS) history.shift();
+      standardNowBtn.disabled = !haveLevel;
       const ratio = threshold > 0 ? smoothed / threshold : 0;
       const delta = lastFrameAt ? Math.min(80, now - lastFrameAt) : 16;
       lastFrameAt = now;
@@ -510,6 +687,7 @@
       if (paused) {
         if (!running) return;
         paint(ratio, 'paused', '暫停中');
+        if (waveOpen) drawWave();
         rafId = requestAnimationFrame(frame);
         return;
       }
@@ -521,9 +699,13 @@
       else if (ratio >= 1 && phase !== 'over') overMs += delta;
 
       let next = 'ok';
-      if (overMs >= HOLD_MS || (phase === 'over' && quietFor < 350)) next = 'over';
+      if (overMs >= holdMs || (phase === 'over' && quietFor < 350)) next = 'over';
       else if (ratio >= NEAR_RATIO || overMs > 0) next = 'near';
 
+      if (phase !== 'over' && next === 'over') {
+        overCount += 1;
+        renderCount();
+      }
       if (phase === 'over' && next !== 'over') {
         pendingThanks = true;
         thanksUntil = now + THANKS_MS;
@@ -551,7 +733,114 @@
       }
       if (!running) return;
       paint(ratio, tone, sentence);
+      if (waveOpen) drawWave();
       rafId = requestAnimationFrame(frame);
+    }
+
+    function ampOffset(amp, height) {
+      const usable = height / 2 - 16;
+      return Math.max(0, Math.min(usable, (amp / AMP_MAX) * usable));
+    }
+
+    function drawWave() {
+      const rect = waveCanvas.getBoundingClientRect();
+      const w = Math.max(1, rect.width);
+      const h = Math.max(1, rect.height);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const pxW = Math.floor(w * dpr);
+      const pxH = Math.floor(h * dpr);
+      if (waveCanvas.width !== pxW || waveCanvas.height !== pxH) {
+        waveCanvas.width = pxW;
+        waveCanvas.height = pxH;
+      }
+      const ctx = waveCanvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, w, h);
+      const mid = h / 2;
+      const now = history.length ? history[history.length - 1].t : 0;
+      const shade = w * (holdMs / HISTORY_MS);
+      ctx.fillStyle = 'rgba(253, 230, 138, .12)';
+      ctx.fillRect(w - shade, 0, shade, h);
+      ctx.strokeStyle = 'rgba(255,255,255,.18)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, mid);
+      ctx.lineTo(w, mid);
+      ctx.stroke();
+
+      if (timeBuf && timeBuf.length) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(148, 163, 184, .55)';
+        ctx.lineWidth = 1.25;
+        const step = timeBuf.length / w;
+        for (let x = 0; x < w; x++) {
+          const i = Math.min(timeBuf.length - 1, Math.floor(x * step));
+          const sample = Math.abs((timeBuf[i] - 128) / 128) * sensitivity;
+          const y = mid - ampOffset(sample, h);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+
+      history.forEach((pt) => {
+        const x = w * ((pt.t - (now - HISTORY_MS)) / HISTORY_MS);
+        const amp = ampOffset(pt.v, h);
+        ctx.fillStyle = pt.v >= threshold ? 'rgba(251, 113, 133, .9)' : 'rgba(248, 250, 252, .88)';
+        ctx.fillRect(x, mid - amp, 3, Math.max(2, amp * 2));
+      });
+
+      const yLine = mid - ampOffset(threshold, h);
+      ctx.strokeStyle = '#fde68a';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, yLine);
+      ctx.lineTo(w, yLine);
+      ctx.moveTo(0, mid + (mid - yLine));
+      ctx.lineTo(w, mid + (mid - yLine));
+      ctx.stroke();
+      const label = '連續 ' + (holdMs / 1000) + ' 秒';
+      ctx.font = '700 15px sans-serif';
+      const tw = ctx.measureText(label).width;
+      const lx = Math.max(8, w - Math.max(shade, tw + 20) + 8);
+      ctx.fillStyle = 'rgba(2, 6, 23, .78)';
+      ctx.fillRect(lx - 6, 8, tw + 12, 24);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillText(label, lx, 25);
+      const tagTop = Math.max(14, Math.min(h - 14, yLine));
+      lineTag.style.top = tagTop + 'px';
+    }
+
+    function thresholdFromClientY(clientY) {
+      const rect = waveCanvas.getBoundingClientRect();
+      const y = clientY - rect.top;
+      const mid = rect.height / 2;
+      const usable = rect.height / 2 - 16;
+      const dist = Math.min(usable, Math.max(0, Math.abs(y - mid)));
+      const amp = usable <= 0 ? 0.02 : (dist / usable) * AMP_MAX;
+      return Math.max(0.02, Math.min(0.9, amp));
+    }
+
+    function applyThreshold(value, kind) {
+      threshold = value;
+      customKind = kind;
+      overMs = 0;
+      quietSince = 0;
+      renderSceneUi();
+    }
+
+    function openWave() {
+      if (!running) return;
+      waveOpen = true;
+      wavePanel.hidden = false;
+      drawWave();
+    }
+
+    function closeWave() {
+      waveOpen = false;
+      wavePanel.hidden = true;
     }
 
     async function keepAwake() {
@@ -595,6 +884,9 @@
         thanksUntil = 0;
         paused = false;
         pauseBtn.textContent = '暫停';
+        wavePauseBtn.textContent = '暫停';
+        overCount = 0;
+        history = [];
         running = true;
         showPanel('live');
         renderSceneUi();
@@ -614,24 +906,21 @@
       }
     }
 
-    function setAgreementFromNow() {
+    function setStandardToNow() {
       if (!haveLevel) return;
       let peak = smoothed;
       recent.forEach((sample) => { if (sample.v > peak) peak = sample.v; });
-      const basis = Math.max(peak, 0.02);
-      threshold = basis / 0.62;
-      custom = true;
-      overMs = 0;
-      quietSince = 0;
+      applyThreshold(Math.max(peak, 0.02), 'now');
       saveSettings();
-      renderSceneUi();
     }
 
     function togglePause() {
       paused = !paused;
       overMs = 0;
       quietSince = 0;
-      pauseBtn.textContent = paused ? '繼續' : '暫停';
+      const label = paused ? '繼續' : '暫停';
+      pauseBtn.textContent = label;
+      wavePauseBtn.textContent = label;
       if (paused) paint(threshold > 0 ? smoothed / threshold : 0, 'paused', '暫停中');
     }
 
@@ -661,7 +950,51 @@
     startBtn.addEventListener('click', startMic);
     retryBtn.addEventListener('click', startMic);
     pauseBtn.addEventListener('click', togglePause);
-    captureBtn.addEventListener('click', setAgreementFromNow);
+    wavePauseBtn.addEventListener('click', togglePause);
+    document.getElementById('wave-open-btn').addEventListener('click', openWave);
+    document.getElementById('wave-close').addEventListener('click', closeWave);
+    standardNowBtn.addEventListener('click', setStandardToNow);
+    document.getElementById('count-reset').addEventListener('click', resetOverCount);
+    countClassBtn.addEventListener('click', () => {
+      countOnClass = !countOnClass;
+      saveSettings();
+      renderSceneUi();
+    });
+    gainSlider.addEventListener('input', () => {
+      sensitivity = parseFloat(gainSlider.value);
+      saveSettings();
+      renderSceneUi();
+    });
+    document.querySelectorAll('[data-hold]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        holdMs = Number(btn.dataset.hold);
+        saveSettings();
+        renderSceneUi();
+      });
+    });
+    waveCanvas.addEventListener('pointerdown', (event) => {
+      draggingLine = true;
+      waveCanvas.setPointerCapture(event.pointerId);
+      applyThreshold(thresholdFromClientY(event.clientY), 'drag');
+    });
+    waveCanvas.addEventListener('pointermove', (event) => {
+      if (!draggingLine) return;
+      applyThreshold(thresholdFromClientY(event.clientY), 'drag');
+    });
+    function endDrag() {
+      if (!draggingLine) return;
+      draggingLine = false;
+      saveSettings();
+    }
+    waveCanvas.addEventListener('pointerup', endDrag);
+    waveCanvas.addEventListener('pointercancel', endDrag);
+    waveCanvas.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+      event.preventDefault();
+      const step = event.key === 'ArrowUp' ? 0.02 : -0.02;
+      applyThreshold(Math.max(0.02, Math.min(0.9, threshold + step)), 'drag');
+      saveSettings();
+    });
   </script>
 </body>
 </html>
