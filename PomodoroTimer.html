@@ -4,258 +4,353 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>課堂番茄鐘</title>
-    <!-- 載入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 使用 Inter 字體 */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        html, body { height: 100%; }
         body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-            padding-bottom: 50px;
+            font-family: 'Inter', system-ui, sans-serif;
+            margin: 0;
+            min-height: 100dvh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #1f2937;
+            color: #f8fafc;
+        }
+        .dark { background-color: #1f2937; color: #f8fafc; }
+
+        .top-bar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: .75rem;
+            padding: .75rem 1rem 0;
+            flex-shrink: 0;
+        }
+        .sound-cluster, .top-actions { display: flex; align-items: center; gap: .5rem; }
+
+        .icon-btn {
+            padding: .7rem;
+            border-radius: 9999px;
+            transition: background-color .2s, color .2s, box-shadow .2s;
+            background-color: #374151;
+            color: #d1d5db;
+            border: 0;
+            cursor: pointer;
+        }
+        .icon-btn.active { background-color: #4f46e5; color: #fff; }
+        .sound-toggle {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: .2rem; min-width: 4.1rem; padding: .45rem .5rem .38rem; border-radius: .85rem;
+        }
+        .sound-toggle svg { width: 1.65rem; height: 1.65rem; }
+        .sound-toggle-label { font-size: .82rem; font-weight: 800; letter-spacing: .08em; line-height: 1; }
+        .sound-toggle .sound-slash { display: none; }
+        .sound-toggle:not(.active) .sound-slash { display: block; }
+        .sound-toggle:not(.active) .sound-waves { display: none; }
+
+        .fs-toggle {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: .18rem; min-width: 5.1rem; padding: .45rem .55rem .4rem; border-radius: .85rem;
+        }
+        .fs-toggle svg { width: 1.65rem; height: 1.65rem; }
+        .fs-toggle .fs-exit { display: none; }
+        .fs-toggle.active .fs-expand { display: none; }
+        .fs-toggle.active .fs-exit { display: block; }
+        .fs-caption { display: flex; align-items: center; gap: .28rem; }
+        .fs-kbd {
+            font-size: .62rem; font-weight: 800; line-height: 1.1;
+            border: 1px solid currentColor; border-radius: .28rem;
+            padding: .04rem .22rem; opacity: .85;
         }
 
-        /* 計時字體尺寸 */
-        #timer-display {
-            font-size: clamp(6rem, 25vw, 18rem);
+        .stage {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: .5rem 1rem;
+        }
+        .page-title {
+            margin: 0 0 .35rem;
+            font-size: clamp(1.35rem, 2.4vh, 2rem);
+            font-weight: 800;
+        }
+        #time-up {
+            display: none;
+            margin: 0 0 .2rem;
+            font-size: clamp(3.2rem, 12vh, 8rem);
+            font-weight: 900;
+            letter-spacing: .14em;
             line-height: 1;
-            font-weight: 700;
+            color: #fecaca;
+        }
+        #timer-display {
+            font-size: clamp(5.5rem, 22vh, 13rem);
+            line-height: .9;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
             user-select: none;
+            text-align: center;
+        }
+        #timer-text { color: #f8fafc; }
+        body.is-running #timer-display { font-size: clamp(8rem, 42vh, 20rem); }
+        body.is-warning #timer-text { color: #fbbf24; }
+        body.is-finished { background: radial-gradient(circle at center, #7f1d1d 0%, #1f2937 68%); }
+        body.is-finished #time-up { display: block; }
+        body.is-finished #timer-display { font-size: clamp(4rem, 16vh, 8rem); }
+        body.is-finished #timer-text { color: #fecaca; }
+
+        .timer-progress {
+            width: min(40rem, 78vw);
+            height: .6rem;
+            margin-top: 1rem;
+            background: rgba(255,255,255,.14);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        #timer-progress-bar {
+            height: 100%;
+            width: 100%;
+            background: #38bdf8;
+            border-radius: inherit;
+        }
+        body.is-warning #timer-progress-bar { background: #fbbf24; }
+        body.is-finished #timer-progress-bar { background: #f87171; }
+
+        #toast-area {
+            min-height: 2.4rem;
+            margin-top: .45rem;
+            display: flex;
+            justify-content: center;
+        }
+        .toast {
+            background: rgba(15,23,42,.92);
+            color: #fff;
+            border-radius: .75rem;
+            padding: .55rem 1rem;
+            font-size: 1.2rem;
+            font-weight: 800;
+            pointer-events: none;
         }
 
-        /* 強制深色 */
-        .dark { background-color: #1f2937; color: #f3f4f6; }
+        .preset-row, .controls, .custom-panel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: .65rem;
+            width: min(72rem, calc(100% - 1.5rem));
+            margin: 0 auto;
+        }
+        .preset-row { padding: .35rem .75rem 0; }
+        .controls { padding: .7rem .75rem .85rem; }
+        .custom-panel {
+            align-items: center;
+            padding: .15rem .75rem .35rem;
+        }
+        .custom-panel[hidden] { display: none; }
+        .preset-btn, .btn {
+            border: 0;
+            cursor: pointer;
+            font-weight: 800;
+            border-radius: .9rem;
+        }
+        .preset-btn {
+            min-width: 3.4rem;
+            min-height: 3.15rem;
+            padding: .45rem .8rem;
+            font-size: clamp(1.15rem, 2vh, 1.45rem);
+            color: #fff;
+        }
+        .preset-btn.is-selected { outline: 3px solid #f8fafc; outline-offset: 2px; }
+        .preset-btn-short { background: #0f766e; }
+        .preset-btn-medium { background: #0369a1; }
+        .preset-btn-long { background: #4338ca; }
+        .preset-btn-custom { background: #374151; color: #e2e8f0; }
+        .preset-btn-custom[aria-expanded="true"] { background: #be185d; color: #fff; }
+        .btn {
+            min-width: 8.6rem;
+            padding: .95rem 1.35rem .8rem;
+            font-size: 1.3rem;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .15rem;
+        }
+        .btn:disabled { opacity: .45; cursor: not-allowed; }
+        .btn-primary { background: #4f46e5; }
+        .btn-muted { background: #4b5563; }
+        .btn-accent { background: #db2777; }
+        .btn-kbd { font-size: .78rem; font-weight: 700; letter-spacing: .04em; opacity: .8; }
+        #custom-minutes-input {
+            width: 7.5rem;
+            padding: .7rem .4rem;
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+            border-radius: .8rem;
+            border: 2px solid #818cf8;
+            background: #111827;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+        }
+        .custom-go { background: #db2777; }
 
-        /* 隱藏數字輸入箭頭 */
+        .page-foot {
+            flex-shrink: 0;
+            text-align: right;
+            padding: .35rem .8rem .45rem;
+            font-size: .8rem;
+            color: #94a3b8;
+        }
+        body.is-running .run-hide { display: none !important; }
+
+        #message-box.hidden { display: none; }
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
-        /* 觸控友善按鈕 */
-        .btn {
-            padding: 1.25rem 2rem;
-            font-size: 1.125rem;
-            font-weight: 700;
-            border-radius: 1rem;
-            transition: all 0.2s;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-        }
-        .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-        }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        /* 圖示按鈕 */
-        .icon-btn {
-            padding: 1rem;
-            border-radius: 9999px;
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-            background-color: #374151;
-            color: #d1d5db;
-        }
-        .icon-btn:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15); transform: scale(1.05); }
-        .icon-btn.active { background-color: #4f46e5; color: #fff; box-shadow: 0 4px 10px rgba(79,70,229,.5); }
-
-        .sidebar-content-bg { background-color: #374151; opacity: .95; transition: all .3s; }
-
-        @media (min-width: 1024px) {
-            .slide-wrapper {
-                height: 100vh; width: 320px; padding-top: 2rem;
-                transition: transform .4s cubic-bezier(.25,.46,.45,.94);
-                transform: translateX(calc(100% - 50px));
-            }
-            .slide-wrapper:hover { transform: translateX(0); }
-            .vertical-text { writing-mode: vertical-rl; text-orientation: mixed; }
-        }
-
-        /* 預設時間按鈕色系 */
-        .preset-btn-short { background-color:#20b2aa; color:#fff; box-shadow:0 4px 6px -1px rgba(32,178,170,.3); }
-        .preset-btn-short:hover { background-color:#26a59d; transform: translateY(-2px); }
-        .preset-btn-medium { background-color:#06b6d4; color:#fff; box-shadow:0 4px 6px -1px rgba(6,182,212,.3); }
-        .preset-btn-medium:hover { background-color:#0e96b3; transform: translateY(-2px); }
-        .preset-btn-long { background-color:#4f46e5; color:#fff; box-shadow:0 4px 6px -1px rgba(79,70,229,.3); }
-        .preset-btn-long:hover { background-color:#4338ca; transform: translateY(-2px); }
-
-        /* Timer 跳一下動畫 */
         @keyframes jump {
             0% { transform: translateY(0) scale(1); }
             35% { transform: translateY(-6px) scale(1.02); }
-            70% { transform: translateY(0) scale(1); }
             100% { transform: translateY(0) scale(1); }
         }
         .jump-once { animation: jump 260ms ease; }
-
-        /* 小型提示 (toast) 動畫 */
-        @keyframes toastFade {
-            0%   { opacity: 0; transform: translateY(6px); }
-            10%  { opacity: 1; transform: translateY(0); }
-            90%  { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-6px); }
-        }
-        .toast {
-            animation: toastFade 1300ms ease forwards;
-            background-color: rgba(17,24,39,.9);
-            color:#fff;
-            border-radius:.75rem;
-            padding:.5rem .75rem;
-            font-size:.95rem;
-            pointer-events:none;
-            box-shadow:0 6px 16px rgba(0,0,0,.25);
-        }
     </style>
 </head>
-<body class="dark min-h-screen flex flex-col items-center p-4 sm:p-8">
+<body class="dark">
+    <header class="top-bar">
+        <div class="sound-cluster run-hide">
+            <button id="icon-toggle-ticking" class="icon-btn sound-toggle active" type="button" aria-pressed="true" title="滴答聲：倒數每秒一聲">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5.5 20.2h13"/>
+                    <path d="M7.4 20.2 12 7.2 16.6 20.2"/>
+                    <path d="M12 13.2 18.6 7.4"/>
+                    <circle cx="18.9" cy="6.9" r="1.45" fill="currentColor" stroke="none"/>
+                    <path class="sound-slash" d="M5 19.2 19 5.2"/>
+                </svg>
+                <span class="sound-toggle-label">滴答</span>
+            </button>
+            <button id="icon-toggle-alarm" class="icon-btn sound-toggle active" type="button" aria-pressed="true" title="結束鈴：時間到響一聲">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M6 16.5h12"/>
+                    <path d="M7.1 16.5c.7-1.5 1.1-2.7 1.1-4.2V9a3.8 3.8 0 0 1 7.6 0v3.3c0 1.5.4 2.7 1.1 4.2"/>
+                    <path d="M10 16.7a2 2 0 0 0 4 0"/>
+                    <path class="sound-slash" d="M5 19.2 19 5.2"/>
+                </svg>
+                <span class="sound-toggle-label">到點</span>
+            </button>
+            <button id="icon-toggle-speech" class="icon-btn sound-toggle active" type="button" aria-pressed="true" title="語音：時間到念出提醒">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4.8 6.6h9.2a1.8 1.8 0 0 1 1.8 1.8v3.8a1.8 1.8 0 0 1-1.8 1.8H8.6L5.8 16.8v-2.8H4.8a1.8 1.8 0 0 1-1.8-1.8V8.4a1.8 1.8 0 0 1 1.8-1.8z"/>
+                    <path class="sound-waves" d="M18.2 8.3a3.4 3.4 0 0 1 0 4.8"/>
+                    <path class="sound-waves" d="M20.5 6.3a6.2 6.2 0 0 1 0 8.8"/>
+                    <path class="sound-slash" d="M5 19.2 19 5.2"/>
+                </svg>
+                <span class="sound-toggle-label">語音</span>
+            </button>
+        </div>
+        <div class="top-actions">
+            <button id="fullscreen-toggle-btn" class="icon-btn fs-toggle" type="button" title="全螢幕 (F)" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <g class="fs-expand">
+                        <path d="M4.6 9.1V5.4a.8.8 0 0 1 .8-.8h3.7"/>
+                        <path d="M14.9 4.6h3.7a.8.8 0 0 1 .8.8v3.7"/>
+                        <path d="M19.4 14.9v3.7a.8.8 0 0 1-.8.8h-3.7"/>
+                        <path d="M9.1 19.4H5.4a.8.8 0 0 1-.8-.8v-3.7"/>
+                    </g>
+                    <g class="fs-exit">
+                        <path d="M9.2 4.6v3.2a.8.8 0 0 1-.8.8H5.2"/>
+                        <path d="M14.8 4.6v3.2a.8.8 0 0 0 .8.8h3.2"/>
+                        <path d="M19.4 14.8h-3.2a.8.8 0 0 0-.8.8v3.2"/>
+                        <path d="M9.2 19.4v-3.2a.8.8 0 0 0-.8-.8H5.2"/>
+                    </g>
+                </svg>
+                <span class="fs-caption">
+                    <span id="fullscreen-label" class="sound-toggle-label">全螢幕</span>
+                    <span class="fs-kbd">F</span>
+                </span>
+            </button>
+            <div id="current-time" class="text-xl font-semibold bg-gray-800/80 px-3 py-2 rounded-xl"></div>
+        </div>
+    </header>
 
-    <!-- 右上角角落：全螢幕 + 實時時間 -->
-    <div class="absolute top-4 right-4 flex items-center gap-2 z-50">
-        <button id="fullscreen-toggle-btn" class="icon-btn p-3 bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-full" title="全螢幕切換 (F)">
-            <svg id="fullscreen-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5v4m0 0h-4m4 0l-5 5M4 16v4m0 0h4M4 20l5-5m11 5v-4m0 0h-4m4 0l-5-5"></path>
-            </svg>
+    <main class="stage">
+        <h1 class="page-title run-hide">課堂番茄鐘</h1>
+        <p id="time-up">時間到</p>
+        <div id="timer-display"><span id="timer-text">25:00</span></div>
+        <div class="timer-progress" aria-hidden="true"><div id="timer-progress-bar"></div></div>
+        <div id="toast-area"></div>
+    </main>
+
+    <div class="preset-row run-hide" id="preset-row">
+        <button type="button" class="preset-btn preset-btn-short" data-minutes="1">1</button>
+        <button type="button" class="preset-btn preset-btn-short" data-minutes="2">2</button>
+        <button type="button" class="preset-btn preset-btn-short" data-minutes="3">3</button>
+        <button type="button" class="preset-btn preset-btn-short" data-minutes="5">5</button>
+        <button type="button" class="preset-btn preset-btn-medium" data-minutes="10">10</button>
+        <button type="button" class="preset-btn preset-btn-medium" data-minutes="15">15</button>
+        <button type="button" class="preset-btn preset-btn-medium" data-minutes="20">20</button>
+        <button type="button" class="preset-btn preset-btn-long" data-minutes="30">30</button>
+        <button type="button" class="preset-btn preset-btn-long" data-minutes="40">40</button>
+        <button type="button" id="btn-custom" class="preset-btn preset-btn-custom" aria-expanded="false" aria-controls="custom-panel">自訂</button>
+    </div>
+    <div id="custom-panel" class="custom-panel run-hide" hidden>
+        <input type="number" id="custom-minutes-input" min="1" max="999" value="25" inputmode="numeric" aria-label="自訂分鐘數">
+        <button type="button" id="set-custom-time-btn" class="btn custom-go">開始這個時間</button>
+    </div>
+
+    <div class="controls">
+        <button id="toggle-btn" class="btn btn-primary" type="button" title="開始或暫停">
+            <span id="toggle-btn-label">開始</span>
+            <span class="btn-kbd">空白鍵</span>
         </button>
-        <div id="current-time" class="text-xl sm:text-2xl font-semibold bg-gray-800 bg-opacity-50 backdrop-blur-sm p-3 rounded-xl shadow-md"></div>
+        <button id="reset-btn" class="btn btn-muted" type="button" title="重設">
+            <span>重設</span>
+            <span class="btn-kbd">R</span>
+        </button>
+        <button id="add-minute-btn" class="btn btn-accent" type="button" title="延長一分鐘">
+            <span>延長一分鐘</span>
+            <span class="btn-kbd">A</span>
+        </button>
     </div>
-    
-    <div id="app-container" class="flex flex-col w-full max-w-7xl mx-auto lg:gap-8 justify-center items-start">
+    <footer class="page-foot run-hide">Developed by DennisZ</footer>
 
-        <div id="main-area" class="flex flex-col items-center w-full lg:w-full lg:px-20 order-2">
-            <header class="text-center mb-8 w-full">
-                <h1 class="text-4xl sm:text-5xl font-bold">課堂番茄鐘</h1>
-            </header>
-
-            <!-- 聲音設定圖示 -->
-            <div class="flex justify-center gap-6 mb-10 w-full max-w-lg">
-                <button id="icon-toggle-ticking" class="icon-btn" title="滴答聲開關">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </button>
-                <button id="icon-toggle-alarm" class="icon-btn" title="提醒聲開關">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-2.809A4.004 4.004 0 0017 12V6a4 4 0 00-4-4H9a4 4 0 00-4 4v6a4.004 4.004 0 002.405 3.191L7 17h5m-2 4h4"></path></svg>
-                </button>
-                <button id="icon-toggle-speech" class="icon-btn" title="語音播報開關">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7v-2a5 5 0 005-5h2zM12 18V2a3 3 0 003 3v2a3 3 0 00-3-3v14a3 3 0 003-3v-2a3 3 0 00-3 3zM4 11a7 7 0 017 7v-2a5 5 0 00-5-5H4z"></path></svg>
-                </button>
-            </div>
-            
-            <!-- 計時器顯示 -->
-            <div class="relative w-full max-w-4xl flex flex-col items-center">
-                <div id="timer-display" class="mb-6 p-4 rounded-3xl shadow-2xl transition duration-500 ease-in-out dark:bg-gray-700 w-full text-center">
-                    <span id="timer-text">25:00</span>
-                </div>
-                <!-- 動態小提示容器 -->
-                <div id="toast-area" class="absolute -bottom-2 translate-y-full"></div>
-            </div>
-
-            <!-- 控制按鈕：開始/暫停（合併）、重設、延長一分鐘 -->
-            <div class="flex flex-wrap justify-center gap-4 mb-10 w-full max-w-4xl">
-                <button id="toggle-btn" class="btn bg-indigo-600 text-white hover:bg-indigo-700 flex-grow sm:flex-grow-0" title="開始/暫停 (Space)">
-                    開始
-                </button>
-                <button id="reset-btn" class="btn bg-gray-500 text-white hover:bg-gray-600 flex-grow sm:flex-grow-0" title="重設 (R)">
-                    重設
-                </button>
-                <button id="add-minute-btn" class="btn bg-pink-600 text-white hover:bg-pink-700 flex-grow sm:flex-grow-0" title="延長一分鐘 (A)">
-                    延長一分鐘
-                </button>
-            </div>
-        </div>
-        
-        <!-- 手機/平板 設定（略，與原本相同） -->
-        <div id="sidebar-area-mobile" class="w-full pt-8 order-1 lg:hidden">
-            <div class="sidebar-content-bg p-6 rounded-2xl shadow-2xl flex flex-col gap-8 w-full">
-                <div>
-                    <h2 class="text-xl font-semibold mb-4 text-center">自訂分鐘數</h2>
-                    <div class="flex flex-col gap-4 items-center">
-                        <input type="number" id="custom-minutes-input-mobile" min="1" max="999" value="25" 
-                               class="w-full p-4 text-3xl text-center rounded-xl border-2 border-indigo-500 dark:bg-gray-700 dark:text-white transition duration-200 focus:border-indigo-600 font-mono">
-                        <button id="set-custom-time-btn-mobile" class="btn bg-pink-600 text-white hover:bg-pink-700 w-full p-3 text-lg">確定並設定</button>
-                    </div>
-                </div>
-                <div>
-                    <h2 class="text-xl font-semibold mb-4 text-center border-t pt-4 border-gray-700 lg:border-none lg:pt-0">預設時間 (分鐘)</h2>
-                    <div class="grid grid-cols-3 gap-3 sm:grid-cols-4">
-                        <button class="preset-btn btn preset-btn-short p-3" data-minutes="1">1</button>
-                        <button class="preset-btn btn preset-btn-short p-3" data-minutes="2">2</button>
-                        <button class="preset-btn btn preset-btn-short p-3" data-minutes="3">3</button>
-                        <button class="preset-btn btn preset-btn-short p-3" data-minutes="5">5</button>
-                        <button class="preset-btn btn preset-btn-medium p-3" data-minutes="10">10</button>
-                        <button class="preset-btn btn preset-btn-medium p-3" data-minutes="15">15</button>
-                        <button class="preset-btn btn preset-btn-medium p-3" data-minutes="20">20</button>
-                        <button class="preset-btn btn preset-btn-medium p-3" data-minutes="25">25</button>
-                        <button class="preset-btn btn preset-btn-long p-3" data-minutes="30">30</button>
-                        <button class="preset-btn btn preset-btn-long p-3" data-minutes="40">40</button>
-                        <button class="preset-btn btn preset-btn-long p-3" data-minutes="45">45</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 桌面滑動設定（保留原樣） -->
-    <div id="sidebar-area-desktop" class="hidden lg:block fixed top-0 right-0 h-full z-40">
-        <div class="slide-wrapper relative">
-            <div class="absolute top-1/3 left-0 transform -translate-x-full -translate-y-1/2 bg-indigo-600 text-white p-3 rounded-l-lg shadow-xl cursor-pointer vertical-text font-bold text-lg hover:bg-indigo-700">設定</div>
-            <div class="h-full w-full sidebar-content-bg p-6 rounded-l-2xl shadow-2xl flex flex-col gap-8 overflow-y-auto" style="padding-top: 6rem; padding-bottom: 50px;">
-                <div>
-                    <h2 class="text-xl font-semibold mb-4 text-center">自訂分鐘數</h2>
-                    <div class="flex flex-col gap-4 items-center">
-                        <input type="number" id="custom-minutes-input-desktop" min="1" max="999" value="25" 
-                               class="w-full p-4 text-3xl text-center rounded-xl border-2 border-indigo-500 dark:bg-gray-700 dark:text-white transition duration-200 focus:border-indigo-600 font-mono">
-                        <button id="set-custom-time-btn-desktop" class="btn bg-pink-600 text-white hover:bg-pink-700 w-full p-3 text-lg">確定並設定</button>
-                    </div>
-                </div>
-                <div>
-                    <h2 class="text-xl font-semibold mb-4 text-center border-t pt-4 border-gray-700">預設時間 (分鐘)</h2>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button class="preset-btn btn preset-btn-short p-3" data-minutes="1">1</button>
-                        <button class="preset-btn btn preset-btn-short p-3" data-minutes="2">2</button>
-                        <button class="preset-btn btn preset-btn-short p-3" data-minutes="3">3</button>
-                        <button class="preset-btn btn preset-btn-short p-3" data-minutes="5">5</button>
-                        <button class="preset-btn btn preset-btn-medium p-3" data-minutes="10">10</button>
-                        <button class="preset-btn btn preset-btn-medium p-3" data-minutes="15">15</button>
-                        <button class="preset-btn btn preset-btn-medium p-3" data-minutes="20">20</button>
-                        <button class="preset-btn btn preset-btn-medium p-3" data-minutes="25">25</button>
-                        <button class="preset-btn btn preset-btn-long p-3" data-minutes="30">30</button>
-                        <button class="preset-btn btn preset-btn-long p-3" data-minutes="40">40</button>
-                        <button class="preset-btn btn preset-btn-long p-3" data-minutes="45">45</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <footer class="fixed bottom-0 left-0 w-full bg-gray-800 bg-opacity-70 text-white text-right p-3 text-sm z-50 shadow-lg">
-        Developed by DennisZ
-    </footer>
-
-    <!-- 隱藏狀態 -->
     <div class="hidden">
         <input type="checkbox" id="toggle-ticking" checked>
         <input type="checkbox" id="toggle-alarm" checked>
         <input type="checkbox" id="toggle-speech" checked>
     </div>
 
-    <!-- 共用訊息框（保留） -->
-    <div id="message-box" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
-        <div class="dark:bg-gray-700 p-8 rounded-xl shadow-2xl max-w-sm w-full text-center">
+    <div id="message-box" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-gray-700 p-8 rounded-xl shadow-2xl max-w-sm w-full text-center">
             <p id="message-text" class="text-xl font-semibold mb-6"></p>
-            <button id="close-message-btn" class="btn bg-indigo-600 text-white hover:bg-indigo-700 w-full">確認</button>
+            <button id="close-message-btn" class="btn btn-primary w-full" type="button">確認</button>
         </div>
     </div>
 
     <script>
-        // 節點
         const timerText = document.getElementById('timer-text');
         const toggleBtn = document.getElementById('toggle-btn');
+        const toggleBtnLabel = document.getElementById('toggle-btn-label');
         const resetBtn = document.getElementById('reset-btn');
         const addMinuteBtn = document.getElementById('add-minute-btn');
         const currentTimeDisplay = document.getElementById('current-time');
         const fullscreenToggleBtn = document.getElementById('fullscreen-toggle-btn');
-        const fullscreenIcon = document.getElementById('fullscreen-icon');
+        const fullscreenLabel = document.getElementById('fullscreen-label');
         const toastArea = document.getElementById('toast-area');
+        const progressBar = document.getElementById('timer-progress-bar');
+        const customPanel = document.getElementById('custom-panel');
+        const customBtn = document.getElementById('btn-custom');
+        const customMinutesInput = document.getElementById('custom-minutes-input');
+        const setCustomTimeBtn = document.getElementById('set-custom-time-btn');
+        const presetBtns = document.querySelectorAll('.preset-btn[data-minutes]');
 
-        // 隱藏設定
         const toggleTicking = document.getElementById('toggle-ticking');
         const toggleAlarm = document.getElementById('toggle-alarm');
         const toggleSpeech = document.getElementById('toggle-speech');
@@ -263,59 +358,41 @@
         const iconToggleAlarm = document.getElementById('icon-toggle-alarm');
         const iconToggleSpeech = document.getElementById('icon-toggle-speech');
 
-        // 手機/桌面輸入
-        let customMinutesInput, setCustomTimeBtn;
-        const presetBtns = document.querySelectorAll('.preset-btn');
-
-        // 狀態
         let totalSeconds = 25 * 60;
         let secondsLeft = totalSeconds;
         let isRunning = false;
+        let isFinished = false;
         let timerInterval;
         let audioContext;
         let isTicking = false;
 
-        /* 初始化輸入來源切換 */
-        function setupSidebarInputs() {
-            const isDesktop = window.innerWidth >= 1024;
-            if (isDesktop) {
-                customMinutesInput = document.getElementById('custom-minutes-input-desktop');
-                setCustomTimeBtn = document.getElementById('set-custom-time-btn-desktop');
-            } else {
-                customMinutesInput = document.getElementById('custom-minutes-input-mobile');
-                setCustomTimeBtn = document.getElementById('set-custom-time-btn-mobile');
-            }
-            if (setCustomTimeBtn) {
-                setCustomTimeBtn.removeEventListener('click', setCustomTime);
-                setCustomTimeBtn.addEventListener('click', setCustomTime);
-            }
-        }
-        window.addEventListener('resize', setupSidebarInputs);
-
-        /* 小提示 */
         function showToast(text) {
             const el = document.createElement('div');
             el.className = 'toast';
             el.textContent = text;
-            toastArea.appendChild(el);
-            setTimeout(() => el.remove(), 1300);
+            toastArea.replaceChildren(el);
+            setTimeout(() => { if (el.isConnected) el.remove(); }, 1600);
         }
-
-        /* 訊息框（保留） */
         function showMessageBox(message) {
             document.getElementById('message-text').textContent = message;
             const box = document.getElementById('message-box');
-            box.classList.remove('hidden'); box.classList.add('flex');
+            box.classList.remove('hidden');
+            box.classList.add('flex');
             document.getElementById('close-message-btn').onclick = () => {
-                box.classList.add('hidden'); box.classList.remove('flex');
+                box.classList.add('hidden');
+                box.classList.remove('flex');
             };
         }
+        function closeMessageBox() {
+            const box = document.getElementById('message-box');
+            box.classList.add('hidden');
+            box.classList.remove('flex');
+        }
 
-        /* Audio */
         function initAudioContext() {
             if (!audioContext) {
                 try { audioContext = new (window.AudioContext || window.webkitAudioContext)(); }
-                catch (e) { console.error('Web Audio API 不可用:', e); showMessageBox('瀏覽器不支持 Web Audio API'); }
+                catch (e) { showMessageBox('瀏覽器不支持 Web Audio API'); }
             }
         }
         function playTick() {
@@ -330,7 +407,7 @@
             gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.05);
             osc.connect(gain); gain.connect(audioContext.destination);
             osc.start(); osc.stop(audioContext.currentTime + 0.05);
-            setTimeout(()=>{ isTicking = false; }, 100);
+            setTimeout(() => { isTicking = false; }, 100);
         }
         function playAlarmSound() {
             if (!toggleAlarm.checked) return;
@@ -338,7 +415,8 @@
             const dur = 1.0, t0 = audioContext.currentTime;
             const osc = audioContext.createOscillator();
             const gain = audioContext.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(660, t0);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(660, t0);
             gain.gain.setValueAtTime(0, t0);
             gain.gain.linearRampToValueAtTime(0.3, t0 + 0.1);
             gain.gain.linearRampToValueAtTime(0.0001, t0 + dur);
@@ -347,183 +425,220 @@
         }
         function speakAlert() {
             if (!toggleSpeech.checked || !window.speechSynthesis) return;
-            const u = new SpeechSynthesisUtterance("時間到！請休息一下，或者開始下一個活動吧。");
+            const u = new SpeechSynthesisUtterance('時間到！請休息一下，或者開始下一個活動吧。');
             const voices = window.speechSynthesis.getVoices();
             const zh = voices.find(v => v.lang === 'zh-TW' || v.lang === 'zh-CN');
-            if (zh) u.voice = zh; u.lang='zh-TW'; u.rate=1; u.pitch=1;
+            if (zh) u.voice = zh;
+            u.lang = 'zh-TW';
             window.speechSynthesis.speak(u);
         }
         if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = () => {};
 
-        /* UI 狀態 */
+        function syncStage() {
+            document.body.classList.toggle('is-running', isRunning);
+            document.body.classList.toggle('is-finished', isFinished);
+            document.body.classList.toggle('is-warning', !isFinished && secondsLeft > 0 && secondsLeft <= 60);
+            const pct = totalSeconds > 0 ? Math.max(0, Math.min(100, (secondsLeft / totalSeconds) * 100)) : 0;
+            progressBar.style.width = pct + '%';
+            presetBtns.forEach(btn => {
+                btn.classList.toggle('is-selected', parseInt(btn.dataset.minutes, 10) * 60 === totalSeconds);
+            });
+        }
         function updateButtonStates() {
-            toggleBtn.textContent = isRunning ? '暫停' : (secondsLeft>0 && secondsLeft<totalSeconds ? '繼續' : '開始');
+            toggleBtnLabel.textContent = isRunning ? '暫停' : (secondsLeft > 0 && secondsLeft < totalSeconds ? '繼續' : '開始');
             toggleBtn.disabled = (secondsLeft === 0 && !isRunning);
             resetBtn.disabled = (secondsLeft === totalSeconds && !isRunning);
+            syncStage();
         }
-
         function updateTimerDisplay() {
             const m = Math.floor(secondsLeft / 60);
             const s = secondsLeft % 60;
-            timerText.textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            timerText.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            syncStage();
         }
-
         function updateCurrentTime() {
-            const now = new Date();
-            currentTimeDisplay.textContent = now.toLocaleTimeString('zh-TW', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+            currentTimeDisplay.textContent = new Date().toLocaleTimeString('zh-TW', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
         }
 
-        /* 計時邏輯 */
         function countdown() {
             secondsLeft--;
             if (toggleTicking.checked) playTick();
             if (secondsLeft < 0) {
-                clearInterval(timerInterval); isRunning = false; secondsLeft = 0;
-                updateTimerDisplay(); playAlarmSound(); speakAlert(); showMessageBox("倒數計時結束！");
-                updateButtonStates(); return;
+                clearInterval(timerInterval);
+                isRunning = false;
+                isFinished = true;
+                secondsLeft = 0;
+                updateTimerDisplay();
+                updateButtonStates();
+                playAlarmSound();
+                speakAlert();
+                return;
             }
             updateTimerDisplay();
         }
-
         function startTimer() {
-            if (secondsLeft <= 0) { showMessageBox("請先設定一個有效時間！"); return; }
+            if (secondsLeft <= 0) { showMessageBox('請先設定一個有效時間！'); return; }
             initAudioContext();
+            isFinished = false;
+            closeCustomPanel();
             clearInterval(timerInterval);
             timerInterval = setInterval(countdown, 1000);
             isRunning = true;
             updateButtonStates();
         }
-
         function pauseTimer() {
             if (!isRunning) return;
             clearInterval(timerInterval);
             isRunning = false;
             updateButtonStates();
         }
-
         function toggleStartPause() {
+            if (isFinished) { isFinished = false; updateButtonStates(); return; }
             if (isRunning) pauseTimer(); else startTimer();
         }
-
         function resetTimer(minutes) {
             clearInterval(timerInterval);
             isRunning = false;
+            isFinished = false;
             if (minutes !== undefined) {
                 totalSeconds = minutes * 60;
-                const mIn = document.getElementById('custom-minutes-input-mobile');
-                const dIn = document.getElementById('custom-minutes-input-desktop');
-                if (mIn) mIn.value = minutes;
-                if (dIn) dIn.value = minutes;
+                customMinutesInput.value = minutes;
             }
             secondsLeft = totalSeconds;
             updateTimerDisplay();
             updateButtonStates();
         }
-
         function setCustomTime() {
-            if (!customMinutesInput) return;
-            const minutes = parseInt(customMinutesInput.value);
+            const minutes = parseInt(customMinutesInput.value, 10);
             if (isNaN(minutes) || minutes <= 0 || minutes > 999) {
-                showMessageBox("請輸入 1~999 的有效分鐘數！");
-                customMinutesInput.value = Math.floor(totalSeconds / 60);
+                showMessageBox('請輸入 1～999 的有效分鐘數！');
+                customMinutesInput.value = Math.max(1, Math.floor(totalSeconds / 60));
                 return;
             }
-            const otherId = customMinutesInput.id === 'custom-minutes-input-mobile' ? 'custom-minutes-input-desktop' : 'custom-minutes-input-mobile';
-            const other = document.getElementById(otherId);
-            if (other) other.value = minutes;
             resetTimer(minutes);
-            showToast(`已設定 ${minutes} 分鐘`);
+            startTimer();
         }
-
-        /* 延長一分鐘：數字跳一下 + 小提示 */
         function addOneMinute() {
-            secondsLeft += 60;
-            // 若希望 reset 後總時長也增加，同步打開下一行：
-            // totalSeconds += 60;
-            timerText.classList.remove('jump-once'); void timerText.offsetWidth; // 重新觸發動畫
+            if (isFinished || secondsLeft <= 0) {
+                totalSeconds = 60;
+                secondsLeft = 60;
+                isFinished = false;
+            } else {
+                secondsLeft += 60;
+                totalSeconds += 60;
+            }
+            timerText.classList.remove('jump-once');
+            void timerText.offsetWidth;
             timerText.classList.add('jump-once');
             updateTimerDisplay();
             updateButtonStates();
             showToast('已延長 1 分鐘');
         }
 
-        /* 設定儲存 & 圖示樣式 */
+        function closeCustomPanel() {
+            customPanel.hidden = true;
+            customBtn.setAttribute('aria-expanded', 'false');
+        }
+        function openCustomPanel() {
+            customPanel.hidden = false;
+            customBtn.setAttribute('aria-expanded', 'true');
+            customMinutesInput.focus();
+            customMinutesInput.select();
+        }
+
         function saveSettings() {
             localStorage.setItem('toggle-ticking', toggleTicking.checked);
             localStorage.setItem('toggle-alarm', toggleAlarm.checked);
             localStorage.setItem('toggle-speech', toggleSpeech.checked);
         }
-        function updateIconStyle(el, checked){ el.classList.toggle('active', !!checked); }
+        function updateIconStyle(el, checked) {
+            el.classList.toggle('active', !!checked);
+            el.setAttribute('aria-pressed', checked ? 'true' : 'false');
+        }
         function loadSettings() {
             const load = (id, def, iconEl) => {
                 const v = localStorage.getItem(id);
                 const el = document.getElementById(id);
                 if (!el) return;
                 const checked = v === null ? def : (v === 'true');
-                el.checked = checked; updateIconStyle(iconEl, checked);
+                el.checked = checked;
+                updateIconStyle(iconEl, checked);
             };
             load('toggle-ticking', true, iconToggleTicking);
             load('toggle-alarm', true, iconToggleAlarm);
             load('toggle-speech', true, iconToggleSpeech);
-            document.documentElement.classList.add('dark');
-            document.documentElement.classList.remove('light');
         }
-        function handleIconToggle(btn, chk) { chk.checked = !chk.checked; updateIconStyle(btn, chk.checked); saveSettings(); }
+        function handleIconToggle(btn, chk) {
+            chk.checked = !chk.checked;
+            updateIconStyle(btn, chk.checked);
+            saveSettings();
+        }
 
-        /* 全螢幕 */
+        function setFullscreenButton(on) {
+            fullscreenToggleBtn.classList.toggle('active', !!on);
+            fullscreenToggleBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            fullscreenLabel.textContent = on ? '退出' : '全螢幕';
+            fullscreenToggleBtn.title = on ? '退出全螢幕 (F)' : '全螢幕 (F)';
+        }
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => { showMessageBox(`無法開啟全螢幕：${err.message}`); });
+                document.documentElement.requestFullscreen().catch(() => { showMessageBox('全螢幕切換失敗'); });
             } else { document.exitFullscreen(); }
         }
         function handleFullscreenChange() {
-            if (document.fullscreenElement) {
-                fullscreenIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 10h4m0 0v4m0-4l-4 4m-4 4H6m0 0v-4m0 4l4-4m4-4V6m0 0H6m0 0l4 4m4-4h4m0 0v4m0-4l-4 4"></path>`;
-            } else {
-                fullscreenIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5v4m0 0h-4m4 0l-5 5M4 16v4m0 0h4M4 20l5-5m11 5v-4m0 0h-4m4 0l-5-5"></path>`;
-            }
+            setFullscreenButton(!!document.fullscreenElement);
         }
-
-        /* 鍵盤快捷鍵 */
         function handleHotkeys(e) {
             const tag = document.activeElement?.tagName?.toLowerCase();
             const isTyping = tag === 'input' || tag === 'textarea';
+            if (e.key === 'Escape') {
+                const box = document.getElementById('message-box');
+                if (box && !box.classList.contains('hidden')) { closeMessageBox(); return; }
+                if (!customPanel.hidden) { closeCustomPanel(); return; }
+                if (isFinished) { isFinished = false; updateButtonStates(); }
+                return;
+            }
             if (isTyping) return;
-
-            if (e.code === 'Space') { e.preventDefault(); toggleStartPause(); }        // Space：開始/暫停
-            else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); } // F：全螢幕
-            else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); resetTimer(); }       // R：重設
-            else if (e.key === 'a' || e.key === 'A') { e.preventDefault(); addOneMinute(); }     // A：延長一分鐘
+            if (e.code === 'Space') { e.preventDefault(); toggleStartPause(); }
+            else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
+            else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); resetTimer(); }
+            else if (e.key === 'a' || e.key === 'A') { e.preventDefault(); addOneMinute(); }
         }
 
-        /* 初始化 */
         window.onload = function () {
             loadSettings();
             resetTimer(25);
             updateCurrentTime();
             setInterval(updateCurrentTime, 1000);
 
-            setupSidebarInputs();
-
             toggleBtn.addEventListener('click', toggleStartPause);
             resetBtn.addEventListener('click', () => resetTimer());
             addMinuteBtn.addEventListener('click', addOneMinute);
+            setCustomTimeBtn.addEventListener('click', setCustomTime);
+            customMinutesInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); setCustomTime(); }
+            });
+            customBtn.addEventListener('click', () => {
+                if (customPanel.hidden) openCustomPanel();
+                else closeCustomPanel();
+            });
+            document.getElementById('time-up').addEventListener('click', () => {
+                if (!isFinished) return;
+                isFinished = false;
+                updateButtonStates();
+            });
 
             iconToggleTicking.addEventListener('click', () => handleIconToggle(iconToggleTicking, toggleTicking));
             iconToggleAlarm.addEventListener('click', () => handleIconToggle(iconToggleAlarm, toggleAlarm));
             iconToggleSpeech.addEventListener('click', () => handleIconToggle(iconToggleSpeech, toggleSpeech));
 
-            if (fullscreenToggleBtn) {
-                fullscreenToggleBtn.addEventListener('click', toggleFullscreen);
-                document.addEventListener('fullscreenchange', handleFullscreenChange);
-                document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-                document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-                document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-            }
+            fullscreenToggleBtn.addEventListener('click', toggleFullscreen);
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
 
             presetBtns.forEach(btn => {
-                btn.addEventListener('click', function(){
-                    const minutes = parseInt(this.getAttribute('data-minutes'));
+                btn.addEventListener('click', function () {
+                    closeCustomPanel();
+                    const minutes = parseInt(this.getAttribute('data-minutes'), 10);
                     resetTimer(minutes);
                     startTimer();
                 });
@@ -531,10 +646,8 @@
 
             document.addEventListener('keydown', handleHotkeys);
             document.addEventListener('click', initAudioContext, { once: true });
-
             updateButtonStates();
         };
     </script>
 </body>
 </html>
-
