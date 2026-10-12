@@ -436,6 +436,11 @@
     let quietSince = 0;
     let lastFrameAt = 0;
     let lastChimeAt = -CHIME_GAP_MS;
+    let chimeUntil = 0;
+    let chimeUrl = '';
+    const chimeAudio = new Audio();
+    chimeAudio.preload = 'auto';
+    chimeAudio.setAttribute('playsinline', '');
     let phase = 'ok';
     let thanksUntil = 0;
     let pendingThanks = false;
@@ -721,9 +726,89 @@
       return Math.sqrt(sum / timeBuf.length);
     }
 
-    function playChime() {
+    function setAudioRoute(type) {
+      try {
+        if (navigator.audioSession && 'type' in navigator.audioSession) navigator.audioSession.type = type;
+      } catch (e) {}
+    }
+
+    function resumeAudio() {
+      setAudioRoute('play-and-record');
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended' || audioCtx.state === 'interrupted') audioCtx.resume().catch(() => {});
+    }
+
+    function makeBellWav() {
+      const rate = 22050;
+      const dur = 1.7;
+      const length = Math.floor(rate * dur);
+      const data = new Float32Array(length);
+      const notes = [
+        { f: 784, t: 0, a: 0.9, d: 1.15 },
+        { f: 659.25, t: 0.32, a: 0.75, d: 1.2 },
+        { f: 523.25, t: 0.64, a: 0.62, d: 1.05 }
+      ];
+      const partials = [[1, 1], [2.01, 0.4], [2.76, 0.2], [3.95, 0.08]];
+      notes.forEach((note) => {
+        const start = Math.floor(note.t * rate);
+        const span = Math.floor(note.d * rate);
+        for (let i = 0; i < span && start + i < length; i++) {
+          const time = i / rate;
+          const env = Math.exp(-3.1 * time);
+          let sample = 0;
+          partials.forEach(([ratio, weight]) => {
+            sample += Math.sin(2 * Math.PI * note.f * ratio * time) * weight;
+          });
+          data[start + i] += sample * env * note.a;
+        }
+      });
+      let peak = 0;
+      for (let i = 0; i < length; i++) peak = Math.max(peak, Math.abs(data[i]));
+      const scale = peak > 0 ? 0.92 / peak : 1;
+      const bytes = new ArrayBuffer(44 + length * 2);
+      const view = new DataView(bytes);
+      const text = (offset, value) => { for (let i = 0; i < value.length; i++) view.setUint8(offset + i, value.charCodeAt(i)); };
+      text(0, 'RIFF');
+      view.setUint32(4, 36 + length * 2, true);
+      text(8, 'WAVE');
+      text(12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, rate, true);
+      view.setUint32(28, rate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      text(36, 'data');
+      view.setUint32(40, length * 2, true);
+      for (let i = 0; i < length; i++) {
+        const v = Math.max(-1, Math.min(1, data[i] * scale));
+        view.setInt16(44 + i * 2, v < 0 ? v * 0x8000 : v * 0x7fff, true);
+      }
+      return URL.createObjectURL(new Blob([bytes], { type: 'audio/wav' }));
+    }
+
+    function prepareChime() {
+      if (chimeUrl) return;
+      chimeUrl = makeBellWav();
+      chimeAudio.src = chimeUrl;
+    }
+
+    function unlockChime() {
+      prepareChime();
+      chimeAudio.muted = true;
+      const pending = chimeAudio.play();
+      if (!pending || !pending.then) return;
+      pending.then(() => {
+        chimeAudio.pause();
+        chimeAudio.currentTime = 0;
+        chimeAudio.muted = false;
+      }).catch(() => { chimeAudio.muted = false; });
+    }
+
+    function playChimeWebAudio() {
       if (!audioCtx || audioCtx.state === 'closed') return;
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      resumeAudio();
       const t = audioCtx.currentTime;
       const master = audioCtx.createGain();
       master.gain.setValueAtTime(0.9, t);
@@ -751,14 +836,27 @@
       strike(523.25, t + 0.68, 0.28, 1.45);
     }
 
+    function playChime() {
+      prepareChime();
+      chimeUntil = performance.now() + 2000;
+      chimeAudio.muted = false;
+      chimeAudio.volume = 1;
+      try { chimeAudio.currentTime = 0; } catch (e) {}
+      const pending = chimeAudio.play();
+      if (pending && pending.catch) pending.catch(() => playChimeWebAudio());
+    }
+
     function frame(now) {
       if (!running) return;
-      const raw = Math.max(0, readRms() - NOISE_FLOOR) * sensitivity;
-      recent.push({ t: now, v: raw });
-      while (recent.length && now - recent[0].t > 700) recent.shift();
-      if (raw > smoothed) smoothed += (raw - smoothed) * 0.42;
-      else smoothed += (raw - smoothed) * 0.14;
-      haveLevel = true;
+      const hearingBell = now < chimeUntil;
+      if (!hearingBell) {
+        const raw = Math.max(0, readRms() - NOISE_FLOOR) * sensitivity;
+        recent.push({ t: now, v: raw });
+        while (recent.length && now - recent[0].t > 700) recent.shift();
+        if (raw > smoothed) smoothed += (raw - smoothed) * 0.42;
+        else smoothed += (raw - smoothed) * 0.14;
+        haveLevel = true;
+      }
       history.push({ t: now, v: smoothed });
       while (history.length && now - history[0].t > HISTORY_MS) history.shift();
       standardNowBtn.disabled = !haveLevel;
@@ -940,6 +1038,8 @@
       opening = true;
       startBtn.disabled = true;
       startBtn.textContent = '正在開啟麥克風…';
+      unlockChime();
+      setAudioRoute('auto');
       try {
         if (!audioCtx) audioCtx = new AudioContext();
         await audioCtx.resume();
@@ -950,6 +1050,7 @@
             autoGainControl: { ideal: false }
           }
         });
+        setAudioRoute('play-and-record');
         const track = stream.getAudioTracks()[0];
         if (track) track.addEventListener('ended', () => { if (running) showMicMessage('unreadable'); });
         const source = audioCtx.createMediaStreamSource(stream);
@@ -1015,6 +1116,7 @@
         return;
       }
       keepAwake();
+      resumeAudio();
     });
 
     if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
@@ -1029,8 +1131,8 @@
     buildChoices();
     buildHoldChoices();
     renderSceneUi();
-    setupChime.addEventListener('click', () => setChime(!chimeOn));
-    liveChime.addEventListener('click', () => setChime(!chimeOn));
+    setupChime.addEventListener('click', () => { unlockChime(); setChime(!chimeOn); });
+    liveChime.addEventListener('click', () => { unlockChime(); setChime(!chimeOn); });
     startBtn.addEventListener('click', startMic);
     retryBtn.addEventListener('click', startMic);
     pauseBtn.addEventListener('click', togglePause);
