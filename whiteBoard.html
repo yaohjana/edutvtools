@@ -47,6 +47,7 @@
     body.present .logo-wrap .badge,
     body.present #undo,
     body.present #redo,
+    body.present #deleteSel,
     body.present #toggleGrid,
     body.present .page-actions,
     body.present .tool[data-tool="select"],
@@ -148,6 +149,16 @@
     .btn.danger:hover {
       border-color: var(--warn);
       color: var(--warn)
+    }
+
+    .btn:disabled,
+    .btn.danger:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      filter: none;
+      transform: none;
+      border-color: var(--line);
+      color: var(--muted)
     }
 
     .btn.sm {
@@ -514,6 +525,7 @@
       <div class="sep"></div>
       <button class="btn" id="undo" title="復原 (Ctrl+Z)">復原</button>
       <button class="btn" id="redo" title="重做 (Ctrl+Y)">重做</button>
+      <button class="btn danger" id="deleteSel" title="刪除選取物件 (Delete)" disabled>刪除</button>
       <div class="sep"></div>
 
       <div class="more-wrap">
@@ -882,6 +894,20 @@
     $('#fullscreen').addEventListener('click', () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); });
     $('#undo').addEventListener('click', () => undo());
     $('#redo').addEventListener('click', () => redo());
+    function updateDeleteBtn() {
+      const btn = $('#deleteSel');
+      if (btn) btn.disabled = !selection.length;
+    }
+    function deleteSelection() {
+      if (!selection.length) return;
+      pushUndo();
+      const objs = objects();
+      for (const i of selection.sort((a, b) => b - a)) objs.splice(i, 1);
+      selection = [];
+      render();
+      scheduleDraft();
+    }
+    $('#deleteSel').addEventListener('click', deleteSelection);
     $('#clear').addEventListener('click', () => {
       if (!confirm('確定清空本頁標註與物件？（背景保留）')) return;
       pushUndo();
@@ -1455,6 +1481,7 @@
       if (selection.length) drawSelectionBox();
       drawLaser();
       ctx.restore();
+      updateDeleteBtn();
     }
 
     function drawOpOn(c, op) {
@@ -1685,10 +1712,8 @@
         selection = newIdx; render(); scheduleDraft();
       }
       else if ((e.key === 'Delete' || e.key === 'Backspace') && selection.length) {
-        pushUndo();
-        const objs = objects();
-        for (const i of selection.sort((a, b) => b - a)) objs.splice(i, 1);
-        selection = []; render(); scheduleDraft();
+        e.preventDefault();
+        deleteSelection();
       }
       else if (k === 'escape') {
         if (presentMode) togglePresent();
