@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>單純時鐘</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Orbitron:wght@500;700;800&family=Roboto+Mono:wght@500;700&display=swap');
+
+    :root {
+      --bg: #0b1220;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden
+    }
+
+    body {
+      font-family: 'Inter', system-ui, 'Noto Sans TC', sans-serif;
+      background: var(--clock-bg, var(--bg));
+      color: var(--clock-fg, var(--text))
+    }
+
+    #clock-root {
+      height: 100%;
+      min-height: 100dvh;
+      background: var(--clock-bg, var(--bg));
+      color: var(--clock-fg, var(--text))
+    }
+
+    .clock-board-layout {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr);
+      height: 100%;
+      min-height: 0;
+      position: relative
+    }
+
+    .clock-board-face {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(2.5rem, 6vh, 4rem) 1.5rem 1rem;
+      text-align: center
+    }
+
+    .clock-board-time {
+      font-weight: var(--clock-weight, 900);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: var(--clock-track, .03em);
+      line-height: .92;
+      color: var(--clock-fg, var(--text));
+      font-size: var(--clock-size, clamp(4.25rem, 16vw, 13rem));
+      font-family: var(--clock-font, inherit);
+      text-shadow: var(--clock-shadow, none);
+    }
+
+    .clock-board-sec {
+      font-size: .42em;
+      letter-spacing: 0;
+      opacity: .82
+    }
+
+    .clock-board-date {
+      margin-top: clamp(.6rem, 2vh, 1.25rem);
+      font-weight: 700;
+      letter-spacing: .04em;
+      color: var(--clock-date, var(--muted));
+      font-size: var(--clock-date-size, clamp(1.05rem, 2.8vh, 1.85rem));
+      font-family: 'Inter', system-ui, 'Noto Sans TC', sans-serif;
+    }
+
+    .clock-board-tools {
+      position: absolute;
+      top: .65rem;
+      right: .7rem;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: .15rem
+    }
+
+    .clock-board-style-btn {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      opacity: .34;
+      cursor: pointer;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      line-height: 1;
+      padding: .28rem .4rem;
+      border-radius: .4rem;
+    }
+
+    .clock-board-style-btn:hover,
+    .clock-board-style-btn:focus-visible,
+    .clock-board-style-btn[aria-expanded="true"] {
+      opacity: .8
+    }
+
+    .clock-board-fs-btn {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      opacity: .75;
+      cursor: pointer;
+      font: inherit;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      padding: .35rem .55rem;
+      border-radius: .45rem;
+    }
+
+    .clock-board-fs-btn:hover,
+    .clock-board-fs-btn:focus-visible {
+      opacity: 1;
+      background: rgba(148, 163, 184, .14)
+    }
+
+    .clock-style-menu {
+      position: absolute;
+      top: calc(100% + .3rem);
+      right: 0;
+      min-width: 8.75rem;
+      padding: .3rem;
+      display: flex;
+      flex-direction: column;
+      gap: .1rem;
+      background: rgba(15, 23, 42, .94);
+      color: #e2e8f0;
+      border: 1px solid rgba(148, 163, 184, .28);
+      border-radius: .65rem;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, .32);
+    }
+
+    .clock-style-menu.hidden {
+      display: none
+    }
+
+    .clock-style-option {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      text-align: left;
+      font-size: .8rem;
+      font-weight: 700;
+      padding: .32rem .4rem;
+      border-radius: .4rem;
+    }
+
+    .clock-style-option:hover,
+    .clock-style-option.is-active {
+      background: rgba(255, 255, 255, .1)
+    }
+
+    .clock-style-swatch {
+      width: .7rem;
+      height: .7rem;
+      border-radius: 999px;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .35)
+    }
+
+    .clock-style-swatch--standard {
+      background: linear-gradient(135deg, #334155, #e2e8f0)
+    }
+
+    .clock-style-swatch--exam {
+      background: #f5d90a
+    }
+
+    .clock-style-swatch--board {
+      background: #b6f27a
+    }
+
+    .clock-style-swatch--paper {
+      background: #f7f4ee;
+      box-shadow: inset 0 0 0 1px #44403c
+    }
+
+    .clock-style-swatch--night {
+      background: #8eacd0
+    }
+
+    .clock-style-swatch--poster {
+      background: #eef2ff
+    }
+
+    .clock-style-swatch--flip {
+      background: #7dffb3
+    }
+
+    .clock-style-swatch--digital {
+      background: #ffb000
+    }
+
+    .clock-style-swatch--glitch {
+      background: linear-gradient(90deg, #ff3355 50%, #33f0ff 50%)
+    }
+
+    .clock-style-hotkey {
+      margin-left: auto;
+      opacity: .45;
+      font-size: .72em;
+      font-weight: 800;
+      letter-spacing: .04em
+    }
+
+    #clock-root[data-clock-style="exam"] {
+      --clock-bg: #0a0a0a;
+      --clock-fg: #f5d90a;
+      --clock-date: #fde68a;
+      --clock-font: 'Roboto Mono', ui-monospace, monospace;
+      --clock-size: clamp(5rem, 20vw, 16rem);
+      --clock-weight: 700;
+      --clock-track: -.04em;
+      --clock-date-size: clamp(1.15rem, 3vh, 2rem);
+    }
+
+    #clock-root[data-clock-style="board"] {
+      --clock-bg: #102216;
+      --clock-fg: #d6ffb0;
+      --clock-date: #b7e4a8;
+      --clock-font: system-ui, 'Segoe UI', 'Noto Sans TC', sans-serif;
+      --clock-size: clamp(4.6rem, 17vw, 14rem);
+      --clock-weight: 800;
+      --clock-track: .01em;
+      --clock-shadow: 0 0 18px rgba(214, 255, 176, .28);
+    }
+
+    #clock-root[data-clock-style="paper"] {
+      --clock-bg: #f7f4ee;
+      --clock-fg: #1c1917;
+      --clock-date: #57534e;
+      --clock-font: 'Inter', system-ui, 'Noto Sans TC', sans-serif;
+      --clock-size: clamp(3.8rem, 14vw, 11rem);
+      --clock-weight: 600;
+      --clock-track: .02em;
+    }
+
+    #clock-root[data-clock-style="night"] {
+      --clock-bg: #0b1220;
+      --clock-fg: #9fb6d4;
+      --clock-date: #6d829c;
+      --clock-font: 'Roboto Mono', ui-monospace, monospace;
+      --clock-size: clamp(3.5rem, 12.5vw, 10rem);
+      --clock-weight: 500;
+      --clock-track: .08em;
+    }
+
+    #clock-root[data-clock-style="poster"] {
+      --clock-bg: #1e1b4b;
+      --clock-fg: #f8fafc;
+      --clock-date: #a5b4fc;
+      --clock-font: system-ui, 'Segoe UI', 'Noto Sans TC', sans-serif;
+      --clock-size: clamp(4.8rem, 18vw, 15rem);
+      --clock-weight: 900;
+      --clock-track: .1em;
+      --clock-date-size: clamp(1.2rem, 3.2vh, 2.1rem);
+    }
+
+    #clock-root[data-clock-style="flip"] {
+      --clock-bg: #14081f;
+      --clock-fg: #7dffb3;
+      --clock-date: #b8ffd9;
+      --clock-font: 'Roboto Mono', ui-monospace, monospace;
+      --clock-size: clamp(4.4rem, 16vw, 13rem);
+      --clock-weight: 700;
+      --clock-track: .12em;
+      --clock-shadow: 0 0 22px rgba(125, 255, 179, .35);
+      --clock-date-size: clamp(1.1rem, 2.8vh, 1.9rem);
+    }
+
+    #clock-root[data-clock-style="flip"] .clock-board-face {
+      transform: rotate(180deg)
+    }
+
+    #clock-root[data-clock-style="digital"] {
+      --clock-bg: #050805;
+      --clock-fg: #ffb000;
+      --clock-date: #7a5a10;
+      --clock-font: 'Orbitron', ui-monospace, monospace;
+      --clock-size: min(28vw, 42vh);
+      --clock-weight: 800;
+      --clock-track: -.06em;
+      --clock-shadow: 0 0 28px rgba(255, 176, 0, .28);
+      --clock-date-size: clamp(.85rem, 2.2vh, 1.35rem);
+    }
+
+    #clock-root[data-clock-style="digital"] .clock-board-face {
+      padding: .5rem 1vw;
+      justify-content: center;
+      gap: .35rem
+    }
+
+    #clock-root[data-clock-style="digital"] .clock-board-time {
+      width: 100%;
+      max-width: 100vw;
+      line-height: .85;
+      white-space: nowrap
+    }
+
+    #clock-root[data-clock-style="digital"] .clock-board-sec {
+      font-size: .38em;
+      opacity: .72
+    }
+
+    #clock-root[data-clock-style="digital"] .clock-board-date {
+      letter-spacing: .18em;
+      font-family: 'Orbitron', ui-monospace, monospace;
+      font-weight: 500
+    }
+
+    #clock-root[data-clock-style="glitch"] {
+      --clock-bg: #050505;
+      --clock-fg: #e8ffe8;
+      --clock-date: #5f7a5f;
+      --clock-font: 'Roboto Mono', ui-monospace, monospace;
+      --clock-size: clamp(4.2rem, 15.5vw, 12.5rem);
+      --clock-weight: 700;
+      --clock-track: -.02em;
+      --clock-shadow:
+        -3px 0 #ff3355,
+        3px 0 #33f0ff;
+      --clock-date-size: clamp(1rem, 2.5vh, 1.7rem);
+    }
+
+    #clock-root[data-clock-style="glitch"] .clock-board-date {
+      font-family: 'Roboto Mono', ui-monospace, monospace;
+      letter-spacing: .14em;
+      text-transform: uppercase
+    }
+
+    #clock-root[data-clock-style="glitch"] .clock-board-sec {
+      display: inline-block;
+      animation: clock-glitch-sec .55s steps(2, end) infinite;
+      text-shadow:
+        -2px 0 #ff3355,
+        2px 0 #33f0ff
+    }
+
+    @keyframes clock-glitch-sec {
+
+      0%,
+      100% {
+        transform: translate(0, 0);
+        opacity: .82
+      }
+
+      40% {
+        transform: translate(2px, -1px);
+        opacity: 1
+      }
+
+      70% {
+        transform: translate(-2px, 1px);
+        opacity: .55
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="clock-root" aria-label="單純時鐘">
+    <div class="clock-board-layout">
+      <div class="clock-board-tools">
+        <button type="button" id="btn-clock-style" class="clock-board-style-btn" aria-haspopup="menu"
+          aria-expanded="false" aria-controls="clock-style-menu" title="切換時間樣式（按 1–9）">標準</button>
+        <div id="clock-style-menu" class="clock-style-menu hidden" role="menu" aria-label="時間樣式">
+          <button type="button" class="clock-style-option is-active" data-clock-style="standard" role="menuitemradio"
+            aria-checked="true"><span class="clock-style-swatch clock-style-swatch--standard"></span>標準<span
+              class="clock-style-hotkey">1</span></button>
+          <button type="button" class="clock-style-option" data-clock-style="exam" role="menuitemradio"
+            aria-checked="false"><span class="clock-style-swatch clock-style-swatch--exam"></span>段考<span
+              class="clock-style-hotkey">2</span></button>
+          <button type="button" class="clock-style-option" data-clock-style="board" role="menuitemradio"
+            aria-checked="false"><span class="clock-style-swatch clock-style-swatch--board"></span>黑板<span
+              class="clock-style-hotkey">3</span></button>
+          <button type="button" class="clock-style-option" data-clock-style="paper" role="menuitemradio"
+            aria-checked="false"><span class="clock-style-swatch clock-style-swatch--paper"></span>白紙<span
+              class="clock-style-hotkey">4</span></button>
+          <button type="button" class="clock-style-option" data-clock-style="night" role="menuitemradio"
+            aria-checked="false"><span class="clock-style-swatch clock-style-swatch--night"></span>夜讀<span
+              class="clock-style-hotkey">5</span></button>
+          <button type="button" class="clock-style-option" data-clock-style="poster" role="menuitemradio"
+            aria-checked="false"><span class="clock-style-swatch clock-style-swatch--poster"></span>海報<span
+              class="clock-style-hotkey">6</span></button>
+          <button type="button" class="clock-style-option" data-clock-style="flip" role="menuitemradio"
+            aria-checked="false"><span class="clock-style-swatch clock-style-swatch--flip"></span>倒鐘<span
+              class="clock-style-hotkey">7</span></button>
+          <button type="button" class="clock-style-option" data-clock-style="digital" role="menuitemradio"
+            aria-checked="false"><span class="clock-style-swatch clock-style-swatch--digital"></span>電子錶<span
+              class="clock-style-hotkey">8</span></button>
+          <button type="button" class="clock-style-option" data-clock-style="glitch" role="menuitemradio"
+            aria-checked="false"><span class="clock-style-swatch clock-style-swatch--glitch"></span>故障<span
+              class="clock-style-hotkey">9</span></button>
+        </div>
+        <button type="button" id="btn-fullscreen" class="clock-board-fs-btn" title="全螢幕（F）">全螢幕</button>
+      </div>
+      <div class="clock-board-face">
+        <div class="clock-board-time">
+          <span id="clock-hh">--</span><span>:</span><span id="clock-mm">--</span><span class="clock-board-sec">:<span
+              id="clock-ss">--</span></span>
+        </div>
+        <div id="clock-date" class="clock-board-date">--</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const el = (id) => document.getElementById(id);
+    const CLOCK_STYLES = [
+      { id: 'standard', name: '標準' },
+      { id: 'exam', name: '段考' },
+      { id: 'board', name: '黑板' },
+      { id: 'paper', name: '白紙' },
+      { id: 'night', name: '夜讀' },
+      { id: 'poster', name: '海報' },
+      { id: 'flip', name: '倒鐘' },
+      { id: 'digital', name: '電子錶' },
+      { id: 'glitch', name: '故障' }
+    ];
+    const CLOCK_STYLE_LS = 'clockBoardStyle';
+
+    function pad(n) { return String(n).padStart(2, '0') }
+    function fmtWeekday(d) { return ['日', '一', '二', '三', '四', '五', '六'][d.getDay()] }
+
+    function tickClocks() {
+      const now = new Date();
+      const hh = pad(now.getHours());
+      const mm = pad(now.getMinutes());
+      const ss = pad(now.getSeconds());
+      const dateStr = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())}（${fmtWeekday(now)}）`;
+      el('clock-hh').textContent = hh;
+      el('clock-mm').textContent = mm;
+      el('clock-ss').textContent = ss;
+      el('clock-date').textContent = dateStr;
+    }
+
+    function closeClockStyleMenu() {
+      el('clock-style-menu')?.classList.add('hidden');
+      el('btn-clock-style')?.setAttribute('aria-expanded', 'false');
+    }
+
+    function applyClockBoardStyle(id) {
+      if (id === 'sticker') id = 'digital';
+      if (!CLOCK_STYLES.some(style => style.id === id)) id = 'standard';
+      const root = el('clock-root');
+      if (root) root.dataset.clockStyle = id;
+      const style = CLOCK_STYLES.find(item => item.id === id);
+      const btn = el('btn-clock-style');
+      if (btn) btn.textContent = style.name;
+      document.querySelectorAll('.clock-style-option').forEach(node => {
+        const on = node.dataset.clockStyle === id;
+        node.classList.toggle('is-active', on);
+        node.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+      localStorage.setItem(CLOCK_STYLE_LS, id);
+    }
+
+    function syncFullscreenButton() {
+      const btn = el('btn-fullscreen');
+      if (!btn) return;
+      const active = !!document.fullscreenElement;
+      btn.textContent = active ? '離開全螢幕' : '全螢幕';
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
+
+    function toggleFullscreen() {
+      if (document.fullscreenElement) {
+        document.exitFullscreen?.().catch(() => { });
+      } else {
+        document.documentElement.requestFullscreen?.().catch(() => { });
+      }
+    }
+
+    applyClockBoardStyle(localStorage.getItem(CLOCK_STYLE_LS) || 'standard');
+    tickClocks();
+    setInterval(tickClocks, 1000);
+    syncFullscreenButton();
+
+    el('btn-clock-style').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const menu = el('clock-style-menu');
+      const willOpen = menu.classList.contains('hidden');
+      menu.classList.toggle('hidden', !willOpen);
+      e.currentTarget.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+
+    el('clock-style-menu').addEventListener('click', (e) => {
+      const option = e.target.closest('.clock-style-option');
+      if (!option) return;
+      applyClockBoardStyle(option.dataset.clockStyle);
+      closeClockStyleMenu();
+    });
+
+    el('clock-root').addEventListener('pointerdown', (e) => {
+      if (e.target.closest('#clock-style-menu') || e.target.closest('#btn-clock-style')) return;
+      closeClockStyleMenu();
+    });
+
+    el('btn-fullscreen').addEventListener('click', toggleFullscreen);
+    document.addEventListener('fullscreenchange', syncFullscreenButton);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const menu = el('clock-style-menu');
+        if (menu && !menu.classList.contains('hidden')) {
+          closeClockStyleMenu();
+          e.preventDefault();
+          return;
+        }
+        if (document.fullscreenElement) {
+          document.exitFullscreen?.().catch(() => { });
+        }
+        return;
+      }
+      const target = e.target;
+      if (target && typeof target.closest === 'function'
+        && target.closest('input, textarea, select, [contenteditable="true"]')) return;
+      if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+        return;
+      }
+      if (/^[1-9]$/.test(e.key)) {
+        const style = CLOCK_STYLES[Number(e.key) - 1];
+        if (!style) return;
+        e.preventDefault();
+        applyClockBoardStyle(style.id);
+        closeClockStyleMenu();
+      }
+    });
+  </script>
+</body>
+
+</html>
