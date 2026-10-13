@@ -1,349 +1,475 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EduTV 工具箱</title>
-    <style>
-      :root {
-        color-scheme: light dark;
-        --bg-gradient: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-        --card-bg: rgba(255, 255, 255, 0.12);
-        --card-border: rgba(255, 255, 255, 0.25);
-        --text-main: #f3f7fa;
-        --text-secondary: #cfe3f0;
-        --muted: #93a4b4;
-        --accent: #4fd1c5;
-        --accent-strong: #2bc4ad;
-        --shadow: 0 25px 45px rgba(15, 25, 35, 0.35);
-        --glass-blur: blur(20px);
-        --max-width: min(1200px, 90vw);
-        font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduTV 工具箱</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1520;
+      --bg-glow: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(79, 209, 197, .22), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(56, 120, 180, .18), transparent 50%),
+        linear-gradient(160deg, #0b1520 0%, #132433 48%, #0f1c28 100%);
+      --panel: rgba(255, 255, 255, .08);
+      --panel-border: rgba(255, 255, 255, .16);
+      --text: #f3f7fa;
+      --muted: #9db0c0;
+      --accent: #4fd1c5;
+      --accent-strong: #2bc4ad;
+      --shadow: 0 18px 40px rgba(8, 18, 28, .45);
+      --radius: 1.35rem;
+      --max: min(1180px, 94vw);
+      font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      color: var(--text);
+      background: var(--bg-glow);
+      background-color: var(--bg);
+    }
+
+    main {
+      width: 100%;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: clamp(1.25rem, 3vh, 2.5rem) clamp(1rem, 2.5vw, 2rem) clamp(1.5rem, 3vh, 2.5rem);
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: clamp(1rem, 2.5vh, 1.75rem);
+      flex-shrink: 0;
+    }
+
+    .brand {
+      margin: 0;
+      font-size: clamp(2.4rem, 5.5vw, 3.6rem);
+      font-weight: 800;
+      letter-spacing: .12em;
+      line-height: 1.05;
+    }
+
+    .brand span {
+      color: var(--accent)
+    }
+
+    .lead {
+      margin: .55rem auto 0;
+      max-width: 36rem;
+      font-size: clamp(.95rem, 1.8vw, 1.15rem);
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .45rem;
+      margin: 0 0 clamp(1rem, 2.2vh, 1.5rem);
+      flex-shrink: 0;
+    }
+
+    .filter-btn {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, .16);
+      background: rgba(255, 255, 255, .06);
+      color: var(--muted);
+      font: inherit;
+      font-size: clamp(.85rem, 1.5vw, 1rem);
+      font-weight: 800;
+      letter-spacing: .04em;
+      padding: .55rem 1rem;
+      border-radius: .75rem;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s, transform .15s;
+    }
+
+    .filter-btn:hover {
+      color: var(--text);
+      border-color: rgba(79, 209, 197, .45);
+      background: rgba(79, 209, 197, .1);
+    }
+
+    .filter-btn.is-active {
+      color: #06221e;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      border-color: transparent;
+      box-shadow: 0 8px 20px rgba(43, 196, 173, .28);
+    }
+
+    .filter-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .launcher {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: clamp(.75rem, 1.6vw, 1.15rem);
+      flex: 1;
+      align-content: start;
+    }
+
+    .tool-tile {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .65rem;
+      min-height: clamp(8.5rem, 18vh, 11.5rem);
+      padding: clamp(.9rem, 1.8vh, 1.25rem) .75rem;
+      text-decoration: none;
+      color: inherit;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+      overflow: hidden;
+    }
+
+    .tool-tile::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--tile, var(--accent)) 35%, transparent), transparent 60%);
+      opacity: .55;
+      pointer-events: none;
+    }
+
+    .tool-tile:hover,
+    .tool-tile:focus-visible {
+      transform: translateY(-4px) scale(1.02);
+      border-color: color-mix(in srgb, var(--tile, var(--accent)) 70%, white);
+      box-shadow: 0 22px 48px rgba(8, 18, 28, .55);
+      background: rgba(255, 255, 255, .12);
+      outline: none;
+    }
+
+    .tool-tile.is-hidden {
+      display: none
+    }
+
+    .tool-icon {
+      position: relative;
+      z-index: 1;
+      width: clamp(3.4rem, 7vw, 4.6rem);
+      height: clamp(3.4rem, 7vw, 4.6rem);
+      border-radius: 1.15rem;
+      display: grid;
+      place-items: center;
+      background: color-mix(in srgb, var(--tile, var(--accent)) 22%, rgba(8, 18, 28, .65));
+      border: 1px solid color-mix(in srgb, var(--tile, var(--accent)) 45%, transparent);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
+    }
+
+    .tool-icon svg {
+      width: 58%;
+      height: 58%;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      color: #e8fbff;
+    }
+
+    .tool-name {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-align: center;
+      line-height: 1.15;
+    }
+
+    .tool-tip {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      font-size: clamp(.72rem, 1.25vw, .88rem);
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.3;
+      max-width: 12rem;
+    }
+
+    .empty-hint {
+      display: none;
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 700;
+      padding: 2rem;
+    }
+
+    .launcher.is-empty .empty-hint {
+      display: block
+    }
+
+    footer {
+      margin-top: clamp(1.25rem, 3vh, 2rem);
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: .75rem;
+      padding: .28rem .65rem;
+      border: 1px solid rgba(148, 163, 184, .35);
+      border-radius: 999px;
+      color: var(--muted);
+      letter-spacing: .02em;
+    }
+
+    @media (max-width: 960px) {
+      .launcher {
+        grid-template-columns: repeat(3, minmax(0, 1fr))
+      }
+    }
+
+    @media (max-width: 680px) {
+      .launcher {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
       }
 
-      * {
-        box-sizing: border-box;
+      .tool-tile {
+        min-height: 7.5rem
+      }
+    }
+
+    @media (max-width: 380px) {
+      .launcher {
+        grid-template-columns: 1fr
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <header>
+      <h1 class="brand">Edu<span>TV</span></h1>
+      <p class="lead">教室大螢幕工具箱 · 點圖示即可開啟</p>
+    </header>
+
+    <div class="filters" role="tablist" aria-label="工具分類">
+      <button type="button" class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">全部</button>
+      <button type="button" class="filter-btn" data-filter="board" role="tab" aria-selected="false">揭示</button>
+      <button type="button" class="filter-btn" data-filter="tempo" role="tab" aria-selected="false">節奏</button>
+      <button type="button" class="filter-btn" data-filter="interact" role="tab" aria-selected="false">互動</button>
+      <button type="button" class="filter-btn" data-filter="mood" role="tab" aria-selected="false">氛圍</button>
+    </div>
+
+    <section class="launcher" id="launcher" aria-label="工具啟動器">
+      <a class="tool-tile" data-cat="board" href="examInfoOnTv.html" target="_blank" rel="noopener"
+        style="--tile:#38bdf8" title="段考時程、缺考與公告揭示">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="4" width="18" height="14" rx="2" />
+            <path d="M7 20h10M8 9h8M8 13h5" />
+          </svg>
+        </span>
+        <h2 class="tool-name">段考板</h2>
+        <p class="tool-tip">時程 · 缺考 · 公告</p>
+      </a>
+
+      <a class="tool-tile" data-cat="interact" href="whiteBoard.html" target="_blank" rel="noopener"
+        style="--tile:#a78bfa" title="互動白板，隨寫隨顯">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 19h16M7 15l9.5-9.5a2.1 2.1 0 0 1 3 3L10 18H7v-3z" />
+          </svg>
+        </span>
+        <h2 class="tool-name">白板</h2>
+        <p class="tool-tip">繪圖與註記</p>
+      </a>
+
+      <a class="tool-tile" data-cat="tempo" href="SlowJoggingMetronome.html" target="_blank" rel="noopener"
+        style="--tile:#34d399" title="慢跑節拍與呼吸節奏">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" />
+            <path d="M12 8v4l3 2" />
+          </svg>
+        </span>
+        <h2 class="tool-name">慢跑節拍</h2>
+        <p class="tool-tip">穩定步伐提示</p>
+      </a>
+
+      <a class="tool-tile" data-cat="tempo" href="superMetronome.html" target="_blank" rel="noopener"
+        style="--tile:#2dd4bf" title="多音色進階節拍器">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 3v18M8 8l8 8M16 8l-8 8" />
+            <circle cx="12" cy="12" r="9" />
+          </svg>
+        </span>
+        <h2 class="tool-name">進階節拍</h2>
+        <p class="tool-tip">多音色節奏</p>
+      </a>
+
+      <a class="tool-tile" data-cat="tempo" href="PomodoroTimer.html" target="_blank" rel="noopener"
+        style="--tile:#fb7185" title="番茄鐘專注與休息">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="13" r="8" />
+            <path d="M12 9v4l2.5 1.5M9 4c1 .8 2 1.2 3 1.2S14 4.8 15 4" />
+          </svg>
+        </span>
+        <h2 class="tool-name">番茄鐘</h2>
+        <p class="tool-tip">專注與休息</p>
+      </a>
+
+      <a class="tool-tile" data-cat="interact" href="random-picker/index.html" target="_blank" rel="noopener"
+        style="--tile:#fbbf24" title="公平隨機點名">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <rect x="4" y="4" width="7" height="7" rx="1.5" />
+            <rect x="13" y="13" width="7" height="7" rx="1.5" />
+            <path d="M14 7h3v3M10 17H7v-3" />
+          </svg>
+        </span>
+        <h2 class="tool-name">點名</h2>
+        <p class="tool-tip">隨機抽出學生</p>
+      </a>
+
+      <a class="tool-tile" data-cat="tempo" href="classCountdownQueue.html" target="_blank" rel="noopener"
+        style="--tile:#f97316" title="多段倒數與排隊提醒">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M9 3h6M12 7v5l3 2" />
+            <circle cx="12" cy="14" r="7" />
+          </svg>
+        </span>
+        <h2 class="tool-name">倒數</h2>
+        <p class="tool-tip">多段時間提醒</p>
+      </a>
+
+      <a class="tool-tile" data-cat="interact" href="groupTaskAllocator.html" target="_blank" rel="noopener"
+        style="--tile:#c084fc" title="隨機分組與任務指派">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <circle cx="8" cy="9" r="2.5" />
+            <circle cx="16" cy="9" r="2.5" />
+            <path d="M4.5 18c.8-2.2 2.4-3.5 4.5-3.5s3.7 1.3 4.5 3.5M11.5 18c.8-2.2 2.4-3.5 4.5-3.5s3.7 1.3 4.5 3.5" />
+          </svg>
+        </span>
+        <h2 class="tool-name">分組</h2>
+        <p class="tool-tip">分組與任務</p>
+      </a>
+
+      <a class="tool-tile" data-cat="board" href="progressWall.html" target="_blank" rel="noopener"
+        style="--tile:#60a5fa" title="學習進度牆">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M5 19V9M10 19V5M15 19v-7M20 19V8" />
+          </svg>
+        </span>
+        <h2 class="tool-name">進度牆</h2>
+        <p class="tool-tip">進度與徽章</p>
+      </a>
+
+      <a class="tool-tile" data-cat="interact" href="classScoreboard.html" target="_blank" rel="noopener"
+        style="--tile:#f43f5e" title="班級即時記分板">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M8 20V10M12 20V4M16 20v-6" />
+            <path d="M5 20h14" />
+          </svg>
+        </span>
+        <h2 class="tool-name">記分板</h2>
+        <p class="tool-tip">即時加扣分</p>
+      </a>
+
+      <a class="tool-tile" data-cat="interact" href="interactivePoll.html" target="_blank" rel="noopener"
+        style="--tile:#22d3ee" title="互動問答與投票">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M5 19V9h4v10H5zM10 19v-6h4v6h-4zM15 19V5h4v14h-4z" />
+          </svg>
+        </span>
+        <h2 class="tool-name">問答牆</h2>
+        <p class="tool-tip">投票與簡答</p>
+      </a>
+
+      <a class="tool-tile" data-cat="mood" href="classroomAtmosphere.html" target="_blank" rel="noopener"
+        style="--tile:#818cf8" title="教室氛圍與背景音樂">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M9 18V6l10-2v12" />
+            <circle cx="7" cy="18" r="2.5" />
+            <circle cx="17" cy="16" r="2.5" />
+          </svg>
+        </span>
+        <h2 class="tool-name">氛圍</h2>
+        <p class="tool-tip">音樂與場景</p>
+      </a>
+
+      <a class="tool-tile" data-cat="board" href="volumeAgreement.html" target="_blank" rel="noopener"
+        style="--tile:#4ade80" title="音量約定與提醒">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 10v4h3l4 4V6L7 10H4zM16 9a4 4 0 0 1 0 6M18.5 7a7 7 0 0 1 0 10" />
+          </svg>
+        </span>
+        <h2 class="tool-name">音量</h2>
+        <p class="tool-tip">約定與提醒</p>
+      </a>
+
+      <p class="empty-hint">此分類尚無工具</p>
+    </section>
+
+    <footer>
+      <span class="badge">Developed by DennisZ</span>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      const launcher = document.getElementById('launcher');
+      const tiles = [...launcher.querySelectorAll('.tool-tile')];
+      const buttons = [...document.querySelectorAll('.filter-btn')];
+
+      function applyFilter(cat) {
+        let visible = 0;
+        tiles.forEach((tile) => {
+          const show = cat === 'all' || tile.dataset.cat === cat;
+          tile.classList.toggle('is-hidden', !show);
+          if (show) visible += 1;
+        });
+        launcher.classList.toggle('is-empty', visible === 0);
+        buttons.forEach((btn) => {
+          const active = btn.dataset.filter === cat;
+          btn.classList.toggle('is-active', active);
+          btn.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
       }
 
-      body {
-        margin: 0;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--bg-gradient);
-        color: var(--text-main);
-      }
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => applyFilter(btn.dataset.filter || 'all'));
+      });
+    })();
+  </script>
+</body>
 
-      main {
-        width: 100%;
-        max-width: var(--max-width);
-        padding: clamp(2rem, 4vw, 4rem);
-      }
-
-      header {
-        text-align: center;
-        margin-bottom: clamp(2rem, 4vw, 3rem);
-      }
-
-      h1 {
-        font-size: clamp(2.5rem, 4vw, 3.5rem);
-        margin-bottom: 0.75rem;
-        letter-spacing: 0.08em;
-      }
-
-      p.lead {
-        margin: 0 auto;
-        max-width: 720px;
-        font-size: clamp(1rem, 2.2vw, 1.25rem);
-        color: var(--text-secondary);
-        line-height: 1.6;
-      }
-
-      section.grid {
-        display: grid;
-        gap: clamp(1.5rem, 3vw, 2.5rem);
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      }
-
-      article.tool-card {
-        position: relative;
-        padding: clamp(1.5rem, 3vw, 2.25rem);
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: 24px;
-        backdrop-filter: var(--glass-blur);
-        box-shadow: var(--shadow);
-        transition: transform 220ms ease, border-color 220ms ease,
-          box-shadow 220ms ease;
-        overflow: hidden;
-      }
-
-      article.tool-card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(
-          circle at top right,
-          rgba(79, 209, 197, 0.35),
-          transparent 55%
-        );
-        opacity: 0;
-        transition: opacity 220ms ease;
-        pointer-events: none;
-      }
-
-      article.tool-card:hover,
-      article.tool-card:focus-within {
-        transform: translateY(-8px);
-        border-color: rgba(79, 209, 197, 0.7);
-        box-shadow: 0 30px 60px rgba(23, 43, 60, 0.55);
-      }
-
-      article.tool-card:hover::before,
-      article.tool-card:focus-within::before {
-        opacity: 1;
-      }
-
-      h2.tool-title {
-        font-size: clamp(1.4rem, 2.8vw, 1.75rem);
-        margin: 0 0 0.75rem;
-      }
-
-      p.tool-desc {
-        margin: 0 0 1.5rem;
-        color: var(--text-secondary);
-        line-height: 1.6;
-        min-height: 4.8em;
-      }
-
-      a.tool-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.65rem;
-        padding: 0.85rem 1.4rem;
-        border-radius: 999px;
-        border: none;
-        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-        color: #0c1b21;
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        text-decoration: none;
-        transition: box-shadow 220ms ease, transform 220ms ease;
-      }
-
-      a.tool-link svg {
-        width: 1.1em;
-        height: 1.1em;
-        fill: currentColor;
-      }
-
-      a.tool-link:hover,
-      a.tool-link:focus-visible {
-        box-shadow: 0 12px 25px rgba(43, 196, 173, 0.35);
-        transform: translateY(-2px);
-      }
-
-      footer {
-        margin-top: clamp(2rem, 4vw, 3rem);
-        text-align: center;
-        font-size: 0.95rem;
-        color: rgba(243, 247, 250, 0.75);
-      }
-
-      footer a {
-        color: var(--accent);
-        text-decoration: none;
-      }
-
-      @media (max-width: 600px) {
-        article.tool-card {
-          padding: 1.5rem;
-        }
-        p.tool-desc {
-          min-height: auto;
-        }
-      }
-
-      .badge {
-        font-size: 12px;
-        padding: 4px 8px;
-        border: 1px solid rgba(51, 65, 85, 0.75);
-        border-radius: 999px;
-        color: var(--muted);
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <header>
-        <h1>EduTV 工具箱</h1>
-        <p class="lead">
-          精選一系列為教室大螢幕打造的小工具，協助老師在課堂上快速展示資訊、互動與節奏。點擊下方按鈕，即刻開啟專屬場景。
-        </p>
-      </header>
-      <section class="grid">
-        <article class="tool-card">
-          <h2 class="tool-title">公告資訊板</h2>
-          <p class="tool-desc">
-            在大螢幕上展示考試時程、教室公告與注意事項，支援醒目排版，確保學生一目了然。
-          </p>
-          <a class="tool-link" href="examInfoOnTv.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-        <article class="tool-card">
-          <h2 class="tool-title">互動白板</h2>
-          <p class="tool-desc">
-            免粉筆的互動白板，支援繪圖與註記，讓教學重點隨寫隨顯，適合快速講解與討論。
-          </p>
-          <a class="tool-link" href="whiteBoard.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-        <article class="tool-card">
-          <h2 class="tool-title">跑步節奏器</h2>
-          <p class="tool-desc">
-            為慢跑課程準備的節奏器，可自訂節拍與提示，協助學生維持穩定步伐與呼吸節奏。
-          </p>
-          <a class="tool-link" href="SlowJoggingMetronome.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-        <article class="tool-card">
-          <h2 class="tool-title">進階節奏器</h2>
-          <p class="tool-desc">
-            多功能節拍工具，提供更多音色與節奏選項，適合音樂課或需要精準步調的團隊活動。
-          </p>
-          <a class="tool-link" href="superMetronome.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-        <article class="tool-card">
-          <h2 class="tool-title">番茄鐘助理</h2>
-          <p class="tool-desc">
-            使用番茄工作法來安排專注與休息時段，支援倒數提示，協助課堂活動掌握節奏。
-          </p>
-          <a class="tool-link" href="PomodoroTimer.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-        <article class="tool-card">
-          <h2 class="tool-title">隨機點名器</h2>
-          <p class="tool-desc">
-            公平隨機選出學生或小組，具備視覺與音效效果，讓課堂互動更活潑有趣。
-          </p>
-          <a class="tool-link" href="random-picker/index.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-        <article class="tool-card">
-          <h2 class="tool-title">課室倒數提醒</h2>
-          <p class="tool-desc">
-            自訂多段倒數與排隊順序，搭配視覺提示協助全班掌握時間與規則，適用於任何活動。
-          </p>
-          <a class="tool-link" href="classCountdownQueue.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-        <article class="tool-card">
-          <h2 class="tool-title">隨機分組任務</h2>
-          <p class="tool-desc">
-            透過學生名單快速分組並指派任務或角色，支援即時洗牌與重新分配，提升協作效率。
-          </p>
-          <a class="tool-link" href="groupTaskAllocator.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-        <article class="tool-card">
-          <h2 class="tool-title">學習進度牆</h2>
-          <p class="tool-desc">
-            即時更新各小組或學生進度，搭配徽章與進度條呈現成果，強化成就感與互相激勵。
-          </p>
-          <a class="tool-link" href="progressWall.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-        <article class="tool-card">
-          <h2 class="tool-title">班級即時記分板</h2>
-          <p class="tool-desc">
-            2–8 組大數字即時加扣分與排名，可掛倒數鎖分；適合單字對抗、實驗站、辯論與班會積分，大電視後排也看得懂。
-          </p>
-          <a class="tool-link" href="classScoreboard.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-        <article class="tool-card">
-          <h2 class="tool-title">互動問答牆</h2>
-          <p class="tool-desc">
-            快速出題並蒐集投票或簡答結果，圖表即時刷新，適合課堂暖身、總結與形成性評量。
-          </p>
-          <a class="tool-link" href="interactivePoll.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-        <article class="tool-card">
-          <h2 class="tool-title">教室氛圍控制</h2>
-          <p class="tool-desc">
-            一鍵切換背景音樂、白噪音與視覺主題，建立專注、放鬆或討論場景，營造沉浸氛圍。
-          </p>
-          <a class="tool-link" href="classroomAtmosphere.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-        <article class="tool-card">
-          <h2 class="tool-title">音量約定</h2>
-          <p class="tool-desc">
-            用平板一起看音量。超過約定時換顏色、輕聲提醒，讓學生自己調回來。
-          </p>
-          <a class="tool-link" href="volumeAgreement.html" target="_blank" rel="noopener">
-            <span>開啟工具</span>
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M11 3h6v6h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H11V3z" />
-            </svg>
-          </a>
-        </article>
-      </section>
-      <footer>
-        <span class="badge">Developed by DennisZ</span>
-      </footer>
-    </main>
-  </body>
 </html>
-
