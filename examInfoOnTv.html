@@ -1462,7 +1462,8 @@
       grid-template-areas:
         "clock"
         "subject"
-        "absent";
+        "absent"
+        "day";
     }
 
     #presentation-overlay[data-pres-level="3"] .pres-stage-body {
@@ -1524,14 +1525,17 @@
 
     #presentation-overlay[data-pres-level="8"] .pres-stage-body {
       grid-template-columns: minmax(0, 1fr) minmax(13rem, 18rem);
-      grid-template-areas: "subject absent";
+      grid-template-areas:
+        "subject absent"
+        "day day";
     }
 
     #presentation-overlay[data-pres-level="9"] .pres-stage-body {
       grid-template-columns: minmax(0, 1fr) minmax(13rem, 18rem);
       grid-template-areas:
         "clock absent"
-        "subject absent";
+        "subject absent"
+        "day day";
     }
 
     #presentation-overlay[data-pres-level="7"] .pres-absent-bar {
@@ -1559,6 +1563,14 @@
       display: none !important
     }
 
+    .pres-day-head {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      flex-wrap: wrap;
+      min-width: 0
+    }
+
     .pres-day-label {
       font-size: clamp(.85rem, 1.6vh, 1.05rem);
       font-weight: 800;
@@ -1566,23 +1578,54 @@
       color: var(--accent, #38bdf8)
     }
 
+    .pres-day-filter {
+      border: 1px solid rgba(148, 163, 184, .45);
+      background: rgba(15, 23, 42, .55);
+      color: #e2e8f0;
+      border-radius: 999px;
+      padding: .18rem .75rem;
+      font-size: clamp(.78rem, 1.5vh, .95rem);
+      font-weight: 800;
+      letter-spacing: .04em;
+      cursor: pointer;
+      line-height: 1.3
+    }
+
+    .pres-day-filter:hover,
+    .pres-day-filter:focus-visible {
+      background: rgba(56, 189, 248, .18);
+      border-color: rgba(56, 189, 248, .6);
+      outline: none
+    }
+
     .pres-day-row {
       display: flex;
       flex-wrap: wrap;
-      gap: .4rem .5rem
+      align-items: center;
+      gap: .45rem 0
+    }
+
+    .pres-day-link {
+      flex: 0 0 1.65rem;
+      height: 4px;
+      margin: 0 .08rem;
+      border-radius: 999px;
+      background: rgba(125, 211, 252, .85);
+      align-self: center
     }
 
     .pres-day-item {
       display: inline-flex;
       align-items: baseline;
       gap: .35rem;
-      padding: .28rem .7rem;
+      padding: .32rem .78rem;
       border-radius: 999px;
       background: rgba(15, 23, 42, .72);
       border: 1px solid rgba(148, 163, 184, .28);
       font-size: clamp(.95rem, 2vh, 1.35rem);
       font-weight: 800;
-      color: #e2e8f0
+      color: #e2e8f0;
+      line-height: 1.2
     }
 
     .pres-day-item b {
@@ -1597,9 +1640,49 @@
       color: #f0f9ff
     }
 
-    #presentation-overlay[data-pres-level="7"] .pres-day-item {
+    .pres-day-item.is-study {
+      border-color: rgba(167, 139, 250, .55);
+      font-size: clamp(.78rem, 1.55vh, 1.05rem);
+      padding: .16rem .5rem;
+      gap: .25rem
+    }
+
+    .pres-day-item.is-study b {
+      color: #c4b5fd
+    }
+
+    .pres-day-item.is-break {
+      align-items: center;
+      justify-content: center;
+      border-color: rgba(52, 211, 153, .5);
+      font-size: clamp(.62rem, 1.15vh, .78rem);
+      font-weight: 800;
+      letter-spacing: .04em;
+      padding: .04rem .32rem;
+      min-width: 2.4em;
+      line-height: 1.35
+    }
+
+    #presentation-overlay[data-pres-level="7"] .pres-day-item:not(.is-study):not(.is-break) {
       font-size: clamp(1.05rem, 2.6vh, 1.7rem);
       padding: .4rem .85rem
+    }
+
+    #presentation-overlay[data-pres-level="7"] .pres-day-item.is-study {
+      font-size: clamp(.88rem, 1.9vh, 1.25rem);
+      padding: .2rem .58rem
+    }
+
+    [data-theme="light"] .pres-day-filter,
+    [data-theme="light-soft"] .pres-day-filter {
+      background: rgba(255, 255, 255, .92);
+      color: #111827;
+      border-color: rgba(15, 23, 42, .18)
+    }
+
+    [data-theme="light"] .pres-day-link,
+    [data-theme="light-soft"] .pres-day-link {
+      background: rgba(15, 23, 42, .38)
     }
 
     [data-theme="light"] .pres-day-item,
@@ -1671,6 +1754,40 @@
     #presentation-overlay[data-pres-level="1"] .pres-absent-box--absent {
       flex: 0 1 auto;
       min-width: 8.5rem
+    }
+
+    #presentation-overlay[data-pres-level="2"] .pres-absent-box--absent,
+    #presentation-overlay[data-pres-level="4"] .pres-absent-box--absent,
+    #presentation-overlay[data-pres-level="5"] .pres-absent-box--absent,
+    #presentation-overlay[data-pres-level="7"] .pres-absent-box--absent,
+    #presentation-overlay[data-pres-level="8"] .pres-absent-box--absent,
+    #presentation-overlay[data-pres-level="9"] .pres-absent-box--absent {
+      text-align: center
+    }
+
+    #presentation-overlay[data-pres-level="4"] #pres-clock.pres-clock--float,
+    #presentation-overlay[data-pres-level="5"] #pres-clock.pres-clock--float,
+    #presentation-overlay[data-pres-level="7"] #pres-clock.pres-clock--float {
+      container-type: inline-size;
+      max-width: 100%;
+      overflow: hidden;
+      box-sizing: border-box
+    }
+
+    #presentation-overlay[data-pres-level="4"] #pres-clock.pres-clock--float>.flex,
+    #presentation-overlay[data-pres-level="5"] #pres-clock.pres-clock--float>.flex,
+    #presentation-overlay[data-pres-level="7"] #pres-clock.pres-clock--float>.flex {
+      min-width: 0;
+      max-width: 100%
+    }
+
+    #presentation-overlay[data-pres-level="4"] #pres-clock.pres-clock--float .clock-time,
+    #presentation-overlay[data-pres-level="5"] #pres-clock.pres-clock--float .clock-time,
+    #presentation-overlay[data-pres-level="7"] #pres-clock.pres-clock--float .clock-time {
+      font-size: min(7rem, 12vh, 13cqi) !important;
+      max-width: 100%;
+      white-space: nowrap;
+      line-height: 1
     }
 
     #presentation-overlay[data-pres-level="6"] #pres-clock.pres-clock--float .clock-time {
@@ -3989,15 +4106,15 @@
     let absentScale = readStoredScale('absentScale');
     let scheduleScale = readStoredScale('scheduleScale');
     const PRES_LEVELS = {
-      1: { id: 1, name: '上下', showClock: true, showDate: false, showNext: false, showDayList: false, clockFace: 'full', clockSize: 'hero' },
+      1: { id: 1, name: '上下', showClock: true, showDate: false, showNext: false, showDayList: true, clockFace: 'full', clockSize: 'hero' },
       2: { id: 2, name: '並排', showClock: true, showDate: false, showNext: false, showDayList: true, clockFace: 'full', clockSize: 'match' },
       3: { id: 3, name: '置中', showClock: true, showDate: true, showNext: false, showDayList: true, clockFace: 'full', clockSize: 'hero' },
       4: { id: 4, name: '對半', showClock: true, showDate: true, showNext: false, showDayList: true, clockFace: 'full', clockSize: 'half' },
       5: { id: 5, name: '橫列', showClock: true, showDate: false, showNext: false, showDayList: true, clockFace: 'sec-small', clockSize: 'match' },
       6: { id: 6, name: '時分', showClock: true, showDate: false, showNext: false, showDayList: true, clockFace: 'full', clockSize: 'match' },
       7: { id: 7, name: '行程', showClock: true, showDate: false, showNext: false, showDayList: true, clockFace: 'full', clockSize: 'match' },
-      8: { id: 8, name: '原超精簡', showClock: false, showDate: false, showNext: false, showDayList: false, clockFace: 'full', clockSize: 'compact' },
-      9: { id: 9, name: '原微精簡', showClock: true, showDate: true, showNext: true, showDayList: false, clockFace: 'full', clockSize: 'compact' }
+      8: { id: 8, name: '原超精簡', showClock: false, showDate: false, showNext: false, showDayList: true, clockFace: 'full', clockSize: 'compact' },
+      9: { id: 9, name: '原微精簡', showClock: true, showDate: true, showNext: true, showDayList: true, clockFace: 'full', clockSize: 'compact' }
     };
     function readPresLevel() {
       const raw = localStorage.getItem('presLevel');
@@ -4208,7 +4325,13 @@
                 <div id="pres-actual-compact" class="pres-absent-box-value">—</div>
               </div>
             </div>
-            <div id="pres-day-list" class="pres-day-list" hidden aria-label="今日考科"></div>
+            <div id="pres-day-list" class="pres-day-list" hidden aria-label="今日考科">
+              <div class="pres-day-head">
+                <div id="pres-day-label" class="pres-day-label">今日考科</div>
+                <button type="button" id="pres-day-filter" class="pres-day-filter">加自修</button>
+              </div>
+              <div id="pres-day-row" class="pres-day-row"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -5619,35 +5742,70 @@
       showStatusMessage('找不到 CSV 範本檔，請至排程設定下載。', true);
     }
 
+    const PRES_DAY_FILTERS = [
+      { id: 'exam', next: '加自修', types: ['exam'] },
+      { id: 'study', next: '加下課', types: ['exam', 'study'] },
+      { id: 'break', next: '剩下考科', types: ['exam', 'study', 'break'] }
+    ];
+    function readPresDayFilter() {
+      const saved = localStorage.getItem('presDayFilter');
+      return PRES_DAY_FILTERS.some(item => item.id === saved) ? saved : 'exam';
+    }
+    let presDayFilter = readPresDayFilter();
+    function cyclePresDayFilter() {
+      const index = PRES_DAY_FILTERS.findIndex(item => item.id === presDayFilter);
+      presDayFilter = PRES_DAY_FILTERS[(index + 1) % PRES_DAY_FILTERS.length].id;
+      localStorage.setItem('presDayFilter', presDayFilter);
+      const live = getDisplayedSchedule(new Date());
+      renderPresDayList(live.now, live.schedule);
+      if (presentationOverlay() && !presentationOverlay().classList.contains('hidden')) updatePresentationView();
+    }
     function renderPresDayList(now, scheduleSource) {
       const host = el('pres-day-list');
-      if (!host) return;
+      const row = el('pres-day-row');
+      const label = el('pres-day-label');
+      const button = el('pres-day-filter');
+      if (!host || !row) return;
       const level = PRES_LEVELS[presLevel] || PRES_LEVELS[2];
-      host.replaceChildren();
       const source = scheduleSource || currentScheduleData;
       const data = source?.data || [];
-      const exams = data.filter(item => item.type === 'exam');
-      if (!level.showDayList || !exams.length) {
+      const filter = PRES_DAY_FILTERS.find(item => item.id === presDayFilter) || PRES_DAY_FILTERS[0];
+      const items = data.filter(item => filter.types.includes(item.type));
+      const hasAny = data.some(item => item.type === 'exam' || item.type === 'study' || item.type === 'break');
+      if (!level.showDayList || !hasAny) {
         host.hidden = true;
         return;
       }
       host.hidden = false;
-      const label = document.createElement('div');
-      label.className = 'pres-day-label';
-      const dayName = source?.name || '';
-      label.textContent = isSameCalendarDayAsName(dayName, now) ? '今日考科' : (dayName || '今日考科');
-      const row = document.createElement('div');
-      row.className = 'pres-day-row';
+      if (label) {
+        const dayName = source?.name || '';
+        label.textContent = isSameCalendarDayAsName(dayName, now) ? '今日考科' : (dayName || '今日考科');
+      }
+      if (button) {
+        button.textContent = filter.next;
+        button.title = filter.id === 'exam' ? '目前只顯示考科，按一下加入自修' : (filter.id === 'study' ? '目前顯示考科與自修，按一下加入下課' : '目前顯示考科、自修與下課，按一下只留考科');
+      }
+      row.replaceChildren();
       const current = findCurrentSlot(now, data);
-      exams.forEach(item => {
+      items.forEach((item, index) => {
+        if (index > 0) {
+          const link = document.createElement('span');
+          link.className = 'pres-day-link';
+          link.setAttribute('aria-hidden', 'true');
+          row.appendChild(link);
+        }
         const chip = document.createElement('span');
-        chip.className = 'pres-day-item' + (current && current.item === item ? ' is-now' : '');
-        const time = document.createElement('b');
-        time.textContent = item.start;
-        chip.append(time, document.createTextNode(' ' + item.name));
+        const kind = item.type === 'study' ? ' is-study' : (item.type === 'break' ? ' is-break' : '');
+        chip.className = 'pres-day-item' + kind + (current && current.item === item ? ' is-now' : '');
+        if (item.type === 'break') {
+          chip.textContent = '下課';
+        } else {
+          const time = document.createElement('b');
+          time.textContent = item.start;
+          chip.append(time, document.createTextNode(' ' + item.name));
+        }
         row.appendChild(chip);
       });
-      host.append(label, row);
     }
     /* ===== v2.0.0：展示層同步 ===== */
     function updatePresentationView() {
@@ -6830,6 +6988,7 @@
         localStorage.setItem(LAYOUT_TIP_LS, 'true');
         hideLayoutSwitchTip();
       });
+      el('pres-day-filter')?.addEventListener('click', () => cyclePresDayFilter());
       showLayoutSwitchTip();
 
     }
