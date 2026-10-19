@@ -1111,11 +1111,11 @@
 
     .pres-stage {
       position: relative;
-      width: min(100%, 72rem);
+      width: 100%;
       max-width: 100%;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
       padding: 0 .5rem;
     }
 
@@ -1133,7 +1133,10 @@
     .pres-float-clock {
       display: flex;
       justify-content: center;
+      align-items: center;
       width: 100%;
+      min-width: 0;
+      grid-area: clock;
       zoom: var(--pres-clock-scale, 1);
     }
 
@@ -1197,12 +1200,17 @@
     }
 
     .pres-stage-body {
-      display: flex;
+      display: grid;
       align-items: center;
       justify-content: center;
-      gap: clamp(.75rem, 1.5vw, 1.35rem);
+      gap: clamp(.65rem, 1.4vh, 1.1rem) clamp(.75rem, 1.5vw, 1.35rem);
       width: 100%;
       min-height: 0;
+      grid-template-columns: minmax(0, 1fr) minmax(13rem, 18rem);
+      grid-template-areas:
+        "clock clock"
+        "subject absent"
+        "day day";
     }
 
     .pres-absent-bar {
@@ -1216,9 +1224,11 @@
       background: rgba(15, 23, 42, .78);
       backdrop-filter: blur(10px);
       box-shadow: 0 10px 28px rgba(0, 0, 0, .28);
-      min-width: min(14rem, 34vw);
-      max-width: min(18rem, 38vw);
+      min-width: 0;
+      max-width: none;
+      width: 100%;
       flex-shrink: 0;
+      grid-area: absent;
       zoom: var(--pres-attendance-scale, 1);
     }
 
@@ -1322,6 +1332,7 @@
       text-align: center;
       zoom: var(--pres-subject-scale, 1);
       min-width: 0;
+      grid-area: subject;
     }
 
     .pres-level-option {
@@ -1411,29 +1422,295 @@
       min-width: 0
     }
 
-    @media (max-width:1023px) {
-      .pres-stage-body {
-        flex-direction: column
+    #pres-clock.pres-clock--hm #pres-ss,
+    #pres-clock.pres-clock--hm .clock-time .clock-dot:last-of-type {
+      display: none !important
+    }
+
+    #pres-clock.pres-clock--sec-small #pres-ss,
+    #pres-clock.pres-clock--sec-small .clock-time .clock-dot:last-of-type {
+      font-size: .42em !important;
+      opacity: .82
+    }
+
+    #presentation-overlay[data-clock-size="match"] #pres-clock.pres-clock--float .clock-time,
+    #presentation-overlay[data-clock-size="half"] #pres-clock.pres-clock--float .clock-time {
+      font-size: clamp(2.5rem, 12vh, 7rem) !important;
+      line-height: 1
+    }
+
+    #presentation-overlay[data-clock-size="hero"] #pres-clock.pres-clock--float .clock-time {
+      font-size: clamp(3.2rem, 18vh, 10rem) !important;
+      line-height: .95
+    }
+
+    #presentation-overlay[data-clock-size="match"] #pres-clock.pres-clock--float,
+    #presentation-overlay[data-clock-size="half"] #pres-clock.pres-clock--float,
+    #presentation-overlay[data-clock-size="hero"] #pres-clock.pres-clock--float {
+      width: 100%;
+      justify-content: center;
+      padding: clamp(.55rem, 1.4vh, 1rem) clamp(.8rem, 1.6vw, 1.6rem) !important
+    }
+
+    #presentation-overlay[data-pres-level="3"] #pres-clock.pres-clock--float .clock-date,
+    #presentation-overlay[data-pres-level="4"] #pres-clock.pres-clock--float .clock-date {
+      font-size: clamp(1.15rem, 2.8vh, 2rem) !important
+    }
+
+    #presentation-overlay[data-pres-level="1"] .pres-stage-body {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        "clock"
+        "subject"
+        "absent";
+    }
+
+    #presentation-overlay[data-pres-level="3"] .pres-stage-body {
+      grid-template-columns: minmax(0, 1.15fr) minmax(16rem, .9fr);
+      grid-template-areas:
+        "clock clock"
+        "subject day"
+        "absent absent";
+    }
+
+    #presentation-overlay[data-pres-level="4"] .pres-stage-body {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, .95fr);
+      grid-template-areas:
+        "clock subject"
+        "absent day";
+    }
+
+    #presentation-overlay[data-pres-level="4"] .pres-absent-bar {
+      justify-self: center;
+      width: min(100%, 22rem)
+    }
+
+    #presentation-overlay[data-pres-level="4"] .pres-day-list {
+      align-self: start
+    }
+
+    #presentation-overlay[data-pres-level="5"] .pres-stage-body {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        "clock subject"
+        "absent ."
+        "day day";
+    }
+
+    #presentation-overlay[data-pres-level="5"] .pres-absent-bar {
+      justify-self: start;
+      width: min(100%, 22rem)
+    }
+
+    #presentation-overlay[data-pres-level="7"] .pres-stage-body {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        "clock subject"
+        "absent absent"
+        "day day";
+    }
+
+    #presentation-overlay[data-pres-level="6"] .pres-stage-body {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      grid-template-areas:
+        "subject clock"
+        "day ."
+        "absent .";
+    }
+
+    #presentation-overlay[data-pres-level="6"] .pres-day-list {
+      align-self: start
+    }
+
+    #presentation-overlay[data-pres-level="8"] .pres-stage-body {
+      grid-template-columns: minmax(0, 1fr) minmax(13rem, 18rem);
+      grid-template-areas: "subject absent";
+    }
+
+    #presentation-overlay[data-pres-level="9"] .pres-stage-body {
+      grid-template-columns: minmax(0, 1fr) minmax(13rem, 18rem);
+      grid-template-areas:
+        "clock absent"
+        "subject absent";
+    }
+
+    #presentation-overlay[data-pres-level="7"] .pres-absent-bar {
+      flex-direction: row
+    }
+
+    #presentation-overlay[data-pres-level="7"] .pres-absent-box {
+      flex: 1 1 0
+    }
+
+    #presentation-overlay[data-pres-level="7"] .pres-absent-box--absent {
+      flex: 1.6 1 0
+    }
+
+    .pres-day-list {
+      grid-area: day;
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+      width: 100%;
+      min-width: 0
+    }
+
+    .pres-day-list[hidden] {
+      display: none !important
+    }
+
+    .pres-day-label {
+      font-size: clamp(.85rem, 1.6vh, 1.05rem);
+      font-weight: 800;
+      letter-spacing: .14em;
+      color: var(--accent, #38bdf8)
+    }
+
+    .pres-day-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem .5rem
+    }
+
+    .pres-day-item {
+      display: inline-flex;
+      align-items: baseline;
+      gap: .35rem;
+      padding: .28rem .7rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, .72);
+      border: 1px solid rgba(148, 163, 184, .28);
+      font-size: clamp(.95rem, 2vh, 1.35rem);
+      font-weight: 800;
+      color: #e2e8f0
+    }
+
+    .pres-day-item b {
+      font-variant-numeric: tabular-nums;
+      color: #7dd3fc;
+      font-weight: 900
+    }
+
+    .pres-day-item.is-now {
+      background: rgba(14, 165, 233, .22);
+      border-color: rgba(56, 189, 248, .7);
+      color: #f0f9ff
+    }
+
+    #presentation-overlay[data-pres-level="7"] .pres-day-item {
+      font-size: clamp(1.05rem, 2.6vh, 1.7rem);
+      padding: .4rem .85rem
+    }
+
+    [data-theme="light"] .pres-day-item,
+    [data-theme="light-soft"] .pres-day-item {
+      background: rgba(255, 255, 255, .9);
+      color: #111827;
+      border-color: rgba(15, 23, 42, .16)
+    }
+
+    [data-theme="light"] .pres-day-item b {
+      color: #1d4ed8
+    }
+
+    [data-theme="light-soft"] .pres-day-item b {
+      color: #be185d
+    }
+
+    [data-theme="light"] .pres-day-item.is-now,
+    [data-theme="light-soft"] .pres-day-item.is-now {
+      background: rgba(56, 189, 248, .16);
+      border-color: rgba(2, 132, 199, .45)
+    }
+
+    @media (max-width: 800px) {
+      #presentation-overlay .pres-stage-body {
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-areas:
+          "clock"
+          "subject"
+          "absent"
+          "day" !important
       }
 
-      .pres-col--subject {
-        max-width: 100%
+      #presentation-overlay .pres-absent-bar {
+        flex-direction: row
       }
 
-      .pres-absent-bar {
-        flex-direction: row;
-        max-width: min(42rem, 100%);
-        min-width: 0;
-        width: 100%;
-      }
-
-      .pres-absent-box {
+      #presentation-overlay .pres-absent-box {
         flex: 1 1 0
       }
 
-      .pres-absent-box--absent {
+      #presentation-overlay .pres-absent-box--absent {
         flex: 1.4 1 0
       }
+
+      #presentation-overlay[data-clock-size="hero"] #pres-clock.pres-clock--float .clock-time,
+      #presentation-overlay[data-clock-size="match"] #pres-clock.pres-clock--float .clock-time,
+      #presentation-overlay[data-clock-size="half"] #pres-clock.pres-clock--float .clock-time {
+        font-size: clamp(1.8rem, 11vw, 3.2rem) !important
+      }
+    }
+
+    #presentation-overlay[data-pres-level="1"] #pres-clock.pres-clock--float .clock-time {
+      font-size: clamp(2.2rem, 12.5vh, 7rem) !important;
+      font-weight: 400 !important;
+      line-height: 1.05
+    }
+
+    #presentation-overlay[data-pres-level="1"] .pres-absent-bar {
+      flex-direction: row;
+      justify-self: center;
+      width: fit-content;
+      max-width: min(100%, 48rem);
+      justify-content: center;
+      gap: .7rem
+    }
+
+    #presentation-overlay[data-pres-level="1"] .pres-absent-box,
+    #presentation-overlay[data-pres-level="1"] .pres-absent-box--absent {
+      flex: 0 1 auto;
+      min-width: 8.5rem
+    }
+
+    #presentation-overlay[data-pres-level="6"] #pres-clock.pres-clock--float .clock-time {
+      font-size: clamp(1.7rem, 6.5vh, 4rem) !important;
+      font-weight: 400 !important;
+      line-height: 1.05
+    }
+
+    #presentation-overlay[data-pres-level="6"] .pres-absent-bar {
+      flex-direction: row;
+      justify-self: start;
+      width: fit-content;
+      max-width: min(100%, 48rem);
+      justify-content: center;
+      gap: .7rem
+    }
+
+    #presentation-overlay[data-pres-level="6"] .pres-absent-box,
+    #presentation-overlay[data-pres-level="6"] .pres-absent-box--absent {
+      flex: 0 1 auto;
+      min-width: 8.5rem
+    }
+
+    #presentation-overlay[data-pres-level="3"] .pres-day-list {
+      align-self: center
+    }
+
+    #presentation-overlay[data-pres-level="3"] .pres-absent-bar {
+      flex-direction: row;
+      justify-self: center;
+      width: fit-content;
+      max-width: min(100%, 48rem);
+      justify-content: center;
+      gap: .7rem
+    }
+
+    #presentation-overlay[data-pres-level="3"] .pres-absent-box,
+    #presentation-overlay[data-pres-level="3"] .pres-absent-box--absent {
+      flex: 0 1 auto;
+      min-width: 8.5rem
     }
 
     /* === 淺色主題文字對比度優化 === */
@@ -2208,6 +2485,13 @@
       display: none
     }
 
+    #browse-menu {
+      left: auto;
+      right: 0;
+      max-height: min(78vh, 36rem);
+      overflow-y: auto;
+    }
+
     .toolbar-menu-item {
       display: flex;
       align-items: center;
@@ -2603,6 +2887,121 @@
       z-index: 100
     }
 
+    .layout-switch-tip {
+      position: fixed;
+      left: 50%;
+      top: 4.75rem;
+      transform: translateX(-50%);
+      z-index: 90;
+      width: min(92vw, 34rem);
+      padding: 1.05rem 1.2rem .95rem;
+      border-radius: 1rem;
+      background: rgba(15, 23, 42, .94);
+      color: #f8fafc;
+      border: 1px solid rgba(148, 163, 184, .35);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, .35);
+      text-align: center;
+      animation: layout-tip-in .28s ease
+    }
+
+    .layout-switch-tip.hidden {
+      display: none
+    }
+
+    .layout-switch-tip.is-leaving {
+      animation: layout-tip-out .28s ease forwards
+    }
+
+    .layout-switch-tip p {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      line-height: 1.45
+    }
+
+    .layout-switch-tip strong {
+      color: #7dd3fc;
+      letter-spacing: .04em
+    }
+
+    .layout-switch-tip-count {
+      margin-top: .45rem !important;
+      font-size: .95rem !important;
+      font-weight: 700 !important;
+      color: #cbd5e1
+    }
+
+    .layout-switch-tip-count span {
+      display: inline-block;
+      min-width: 1.2ch;
+      font-variant-numeric: tabular-nums;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #f8fafc
+    }
+
+    .layout-switch-tip button {
+      margin-top: .75rem;
+      border: 1px solid rgba(148, 163, 184, .4);
+      background: transparent;
+      color: #e2e8f0;
+      border-radius: .65rem;
+      padding: .35rem .8rem;
+      font-size: .85rem;
+      font-weight: 800;
+      cursor: pointer
+    }
+
+    .layout-switch-tip button:hover,
+    .layout-switch-tip button:focus-visible {
+      background: rgba(56, 189, 248, .16);
+      border-color: rgba(56, 189, 248, .55);
+      outline: none
+    }
+
+    [data-theme="light"] .layout-switch-tip,
+    [data-theme="light-soft"] .layout-switch-tip {
+      background: rgba(255, 255, 255, .96);
+      color: #111827;
+      border-color: rgba(15, 23, 42, .12)
+    }
+
+    [data-theme="light"] .layout-switch-tip strong,
+    [data-theme="light-soft"] .layout-switch-tip strong {
+      color: #0369a1
+    }
+
+    [data-theme="light"] .layout-switch-tip-count,
+    [data-theme="light-soft"] .layout-switch-tip-count {
+      color: #475569
+    }
+
+    [data-theme="light"] .layout-switch-tip-count span,
+    [data-theme="light-soft"] .layout-switch-tip-count span,
+    [data-theme="light"] .layout-switch-tip button,
+    [data-theme="light-soft"] .layout-switch-tip button {
+      color: #111827
+    }
+
+    @keyframes layout-tip-in {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-.4rem)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0)
+      }
+    }
+
+    @keyframes layout-tip-out {
+      to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-.4rem)
+      }
+    }
+
     #appearance-modal,
     #message-role-modal,
     #expected-modal,
@@ -2924,6 +3323,12 @@
     class="fixed top-4 left-1/2 -translate-x-1/2 px-4 py-2 text-sm text-white rounded-lg shadow-xl z-[100] transition-opacity duration-300 opacity-0 pointer-events-none glass">
     操作成功！
   </div>
+  <div id="layout-switch-tip" class="layout-switch-tip hidden">
+    <p><strong>← →</strong> 切換樣貌，<strong>↑ ↓</strong> 切換配色</p>
+    <p>也可按數字 <strong>1～9</strong> 直接選樣貌</p>
+    <p class="layout-switch-tip-count"><span id="layout-switch-tip-count">8</span> 秒後關閉</p>
+    <button type="button" id="layout-switch-tip-dismiss">不再顯示</button>
+  </div>
 
   <!-- （已移除：缺考 Base64 匯入 Modal） -->
 
@@ -3045,19 +3450,43 @@
         </div>
         <div>
           <div class="text-xs font-semibold text-slate-400 mb-1 uppercase tracking-wide">精簡看板</div>
-          <p class="text-xs text-slate-500 mb-2">等級決定顯示內容；快捷鍵 1／2／3 可從入口直接進入。</p>
+          <p class="text-xs text-slate-500 mb-2">1–7 都有時間、目前考科、出缺席。2 是預設，時間至少與考科一樣大，並列出今日考科。8、9 是原本的超精簡、微精簡。</p>
           <div class="space-y-2 rounded-xl border border-slate-700 bg-slate-800/40 p-2">
             <button type="button" class="pres-level-option" data-pres-level="1" id="pres-level-opt-1">
-              <span>超精簡<span class="pres-level-desc">考科＋出缺席</span></span>
+              <span>上下<span class="pres-level-desc">時間在上，考科在中，出缺席三格置中</span></span>
               <span class="toolbar-menu-kbd">1</span>
             </button>
             <button type="button" class="pres-level-option is-active" data-pres-level="2" id="pres-level-opt-2">
-              <span>精簡<span class="pres-level-desc">考科＋出缺席＋時間</span></span>
+              <span>並排<span class="pres-level-desc">時間在上，考科在左，出缺席在右</span></span>
               <span class="toolbar-menu-kbd">2</span>
             </button>
             <button type="button" class="pres-level-option" data-pres-level="3" id="pres-level-opt-3">
-              <span>微精簡<span class="pres-level-desc">時間含日期＋下一節</span></span>
+              <span>置中<span class="pres-level-desc">時間在上，考科在左，今日考科在右</span></span>
               <span class="toolbar-menu-kbd">3</span>
+            </button>
+            <button type="button" class="pres-level-option" data-pres-level="4" id="pres-level-opt-4">
+              <span>對半<span class="pres-level-desc">左時間與出缺席，右考科與今日考科</span></span>
+              <span class="toolbar-menu-kbd">4</span>
+            </button>
+            <button type="button" class="pres-level-option" data-pres-level="5" id="pres-level-opt-5">
+              <span>橫列<span class="pres-level-desc">左上時間、右上考科，出缺席在左下</span></span>
+              <span class="toolbar-menu-kbd">5</span>
+            </button>
+            <button type="button" class="pres-level-option" data-pres-level="6" id="pres-level-opt-6">
+              <span>時分<span class="pres-level-desc">左考科，其下今日考科，右上時間</span></span>
+              <span class="toolbar-menu-kbd">6</span>
+            </button>
+            <button type="button" class="pres-level-option" data-pres-level="7" id="pres-level-opt-7">
+              <span>行程<span class="pres-level-desc">時間、考科、出缺席，今日考科放大</span></span>
+              <span class="toolbar-menu-kbd">7</span>
+            </button>
+            <button type="button" class="pres-level-option" data-pres-level="8" id="pres-level-opt-8">
+              <span>超精簡<span class="pres-level-desc">考科＋出缺席</span></span>
+              <span class="toolbar-menu-kbd">8</span>
+            </button>
+            <button type="button" class="pres-level-option" data-pres-level="9" id="pres-level-opt-9">
+              <span>微精簡<span class="pres-level-desc">時間含日期＋下一節</span></span>
+              <span class="toolbar-menu-kbd">9</span>
             </button>
             <div class="block-setting">
               <label class="block-scale-field">考科倍率
@@ -3371,14 +3800,32 @@
               <button type="button" id="btn-fullscreen" class="toolbar-menu-item" role="menuitemcheckbox"
                 aria-pressed="false" title="詳細畫面，保留全部資訊 (F)">詳細畫面<span class="toolbar-menu-kbd">F</span></button>
               <button type="button" id="btn-present-1" class="toolbar-menu-item" role="menuitemcheckbox"
-                data-pres-level="1" aria-pressed="false" title="超精簡：考科＋出缺席 (1)">超精簡<span
+                data-pres-level="1" aria-pressed="false" title="上下：時間在上，出缺席三格置中 (1)">上下<span
                   class="toolbar-menu-kbd">1</span></button>
               <button type="button" id="btn-present-2" class="toolbar-menu-item" role="menuitemcheckbox"
-                data-pres-level="2" aria-pressed="false" title="精簡：考科＋出缺席＋時間 (2)">精簡<span
+                data-pres-level="2" aria-pressed="false" title="並排：時間在上，考科在左，出缺席在右 (2)">並排<span
                   class="toolbar-menu-kbd">2</span></button>
               <button type="button" id="btn-present-3" class="toolbar-menu-item" role="menuitemcheckbox"
-                data-pres-level="3" aria-pressed="false" title="微精簡：時間含日期＋下一節 (3)">微精簡<span
+                data-pres-level="3" aria-pressed="false" title="置中：時間在上，考科在左，今日考科在右 (3)">置中<span
                   class="toolbar-menu-kbd">3</span></button>
+              <button type="button" id="btn-present-4" class="toolbar-menu-item" role="menuitemcheckbox"
+                data-pres-level="4" aria-pressed="false" title="對半：左時間與出缺席，右考科與今日考科 (4)">對半<span
+                  class="toolbar-menu-kbd">4</span></button>
+              <button type="button" id="btn-present-5" class="toolbar-menu-item" role="menuitemcheckbox"
+                data-pres-level="5" aria-pressed="false" title="橫列：左時間與出缺席，右考科 (5)">橫列<span
+                  class="toolbar-menu-kbd">5</span></button>
+              <button type="button" id="btn-present-6" class="toolbar-menu-item" role="menuitemcheckbox"
+                data-pres-level="6" aria-pressed="false" title="時分：左考科、右上時間含秒 (6)">時分<span
+                  class="toolbar-menu-kbd">6</span></button>
+              <button type="button" id="btn-present-7" class="toolbar-menu-item" role="menuitemcheckbox"
+                data-pres-level="7" aria-pressed="false" title="行程：今日考科列表放大 (7)">行程<span
+                  class="toolbar-menu-kbd">7</span></button>
+              <button type="button" id="btn-present-8" class="toolbar-menu-item" role="menuitemcheckbox"
+                data-pres-level="8" aria-pressed="false" title="超精簡：考科＋出缺席 (8)">超精簡<span
+                  class="toolbar-menu-kbd">8</span></button>
+              <button type="button" id="btn-present-9" class="toolbar-menu-item" role="menuitemcheckbox"
+                data-pres-level="9" aria-pressed="false" title="微精簡：時間含日期＋下一節 (9)">微精簡<span
+                  class="toolbar-menu-kbd">9</span></button>
               <button type="button" id="btn-present" class="toolbar-menu-item hidden" role="menuitemcheckbox"
                 aria-pressed="false" title="精簡看板 (X)" tabindex="-1">精簡看板<span class="toolbar-menu-kbd">X</span></button>
               <button type="button" id="btn-clock-board" class="toolbar-menu-item" role="menuitemcheckbox"
@@ -3496,9 +3943,8 @@
               class="sticky top-[38px] z-10 text-lg font-bold text-violet-300 p-1 border-b border-slate-700 bg-slate-900/70 backdrop-blur">
               🌙 下午時段</h3>
             <div id="afternoon-schedule" class="space-y-2"></div>
-            <div id="time-sim-line" class="time-sim-line hidden" role="slider" aria-orientation="vertical"
-              aria-label="模擬時間" aria-valuemin="0" aria-valuemax="1439" tabindex="0">
-              <div id="time-sim-hit" class="time-sim-hit" title="拖曳可模擬時間"></div>
+            <div id="time-sim-line" class="time-sim-line hidden" aria-hidden="true">
+              <div id="time-sim-hit" class="time-sim-hit" title="點擊排程時段可預覽該時間"></div>
               <div class="time-sim-rule"></div>
               <div id="time-sim-label" class="time-sim-readout">--:--</div>
             </div>
@@ -3543,12 +3989,28 @@
     let absentScale = readStoredScale('absentScale');
     let scheduleScale = readStoredScale('scheduleScale');
     const PRES_LEVELS = {
-      1: { id: 1, name: '超精簡', showClock: false, showDate: false, showNext: false },
-      2: { id: 2, name: '精簡', showClock: true, showDate: false, showNext: false },
-      3: { id: 3, name: '微精簡', showClock: true, showDate: true, showNext: true }
+      1: { id: 1, name: '上下', showClock: true, showDate: false, showNext: false, showDayList: false, clockFace: 'full', clockSize: 'hero' },
+      2: { id: 2, name: '並排', showClock: true, showDate: false, showNext: false, showDayList: true, clockFace: 'full', clockSize: 'match' },
+      3: { id: 3, name: '置中', showClock: true, showDate: true, showNext: false, showDayList: true, clockFace: 'full', clockSize: 'hero' },
+      4: { id: 4, name: '對半', showClock: true, showDate: true, showNext: false, showDayList: true, clockFace: 'full', clockSize: 'half' },
+      5: { id: 5, name: '橫列', showClock: true, showDate: false, showNext: false, showDayList: true, clockFace: 'sec-small', clockSize: 'match' },
+      6: { id: 6, name: '時分', showClock: true, showDate: false, showNext: false, showDayList: true, clockFace: 'full', clockSize: 'match' },
+      7: { id: 7, name: '行程', showClock: true, showDate: false, showNext: false, showDayList: true, clockFace: 'full', clockSize: 'match' },
+      8: { id: 8, name: '原超精簡', showClock: false, showDate: false, showNext: false, showDayList: false, clockFace: 'full', clockSize: 'compact' },
+      9: { id: 9, name: '原微精簡', showClock: true, showDate: true, showNext: true, showDayList: false, clockFace: 'full', clockSize: 'compact' }
     };
     function readPresLevel() {
-      const n = Number(localStorage.getItem('presLevel'));
+      const raw = localStorage.getItem('presLevel');
+      const n = Number(raw);
+      if (localStorage.getItem('presLevelMap') !== '9') {
+        let mapped = 2;
+        if (n === 1) mapped = 8;
+        else if (n === 3) mapped = 9;
+        else if (PRES_LEVELS[n]) mapped = n;
+        localStorage.setItem('presLevel', String(mapped));
+        localStorage.setItem('presLevelMap', '9');
+        return mapped;
+      }
       return PRES_LEVELS[n] ? n : 2;
     }
     let presLevel = readPresLevel();
@@ -3698,38 +4160,36 @@
       <div class="pres-main">
         <div class="pres-stage">
           <div class="pres-stage-body">
-            <div class="pres-col--subject">
-              <div id="pres-float-clock" class="pres-float-clock">
-                <div id="pres-clock" class="clock-hud docked pres-clock--float">
-                  <div class="clock-badge">現在時間</div>
-                  <div class="flex flex-col leading-tight items-center">
-                    <div class="clock-time">
-                      <span id="pres-hh">--</span><span class="clock-dot">:</span><span id="pres-mm">--</span><span
-                        class="clock-dot">:</span><span id="pres-ss">--</span>
-                    </div>
-                    <div id="pres-date" class="clock-date">--</div>
+            <div id="pres-float-clock" class="pres-float-clock">
+              <div id="pres-clock" class="clock-hud docked pres-clock--float">
+                <div class="clock-badge">現在時間</div>
+                <div class="flex flex-col leading-tight items-center">
+                  <div class="clock-time">
+                    <span id="pres-hh">--</span><span class="clock-dot">:</span><span id="pres-mm">--</span><span
+                      class="clock-dot">:</span><span id="pres-ss">--</span>
                   </div>
-                  <div class="clock-actions flex gap-1 ml-1">
-                    <button id="pres-cycle" title="循環角落">⇲</button>
-                    <button id="pres-zoom-out" title="縮小">－</button>
-                    <button id="pres-zoom-in" title="放大">＋</button>
-                  </div>
+                  <div id="pres-date" class="clock-date">--</div>
+                </div>
+                <div class="clock-actions flex gap-1 ml-1">
+                  <button id="pres-cycle" title="循環角落">⇲</button>
+                  <button id="pres-zoom-out" title="縮小">－</button>
+                  <button id="pres-zoom-in" title="放大">＋</button>
                 </div>
               </div>
-              <div class="pres-subject-block">
-                <div id="pres-preview-banner" class="preview-chip" role="status" aria-live="polite"></div>
-                <div id="pres-status-label" class="pres-label">目前進行考科</div>
-                <div id="pres-subject" class="mt-2 font-black text-sky-300">—</div>
-                <div id="pres-range" class="mt-2 text-slate-300">—</div>
-                <div id="pres-progress-container" class="w-full max-w-3xl mx-auto mt-4">
-                  <div class="progress-track bg-slate-800 rounded-full h-5 shadow-inner overflow-hidden">
-                    <div id="pres-progress-bar" class="h-full rounded-full transition-all duration-700 bg-amber-400"
-                      style="width:0%"></div>
-                  </div>
-                  <span id="pres-progress-text" class="progress-label">0%</span>
+            </div>
+            <div class="pres-subject-block">
+              <div id="pres-preview-banner" class="preview-chip" role="status" aria-live="polite"></div>
+              <div id="pres-status-label" class="pres-label">目前進行考科</div>
+              <div id="pres-subject" class="mt-2 font-black text-sky-300">—</div>
+              <div id="pres-range" class="mt-2 text-slate-300">—</div>
+              <div id="pres-progress-container" class="w-full max-w-3xl mx-auto mt-4">
+                <div class="progress-track bg-slate-800 rounded-full h-5 shadow-inner overflow-hidden">
+                  <div id="pres-progress-bar" class="h-full rounded-full transition-all duration-700 bg-amber-400"
+                    style="width:0%"></div>
                 </div>
-                <p id="pres-next" class="pres-next-hint">—</p>
+                <span id="pres-progress-text" class="progress-label">0%</span>
               </div>
+              <p id="pres-next" class="pres-next-hint">—</p>
             </div>
             <div id="pres-absent-compact" class="pres-absent-bar" aria-label="出缺席">
               <div class="pres-absent-box pres-absent-box--expected pres-absent-box--clickable" id="pres-expected-box"
@@ -3748,6 +4208,7 @@
                 <div id="pres-actual-compact" class="pres-absent-box-value">—</div>
               </div>
             </div>
+            <div id="pres-day-list" class="pres-day-list" hidden aria-label="今日考科"></div>
           </div>
         </div>
       </div>
@@ -3892,7 +4353,7 @@
     function syncScheduleContext(now, hasCurrentItem) {
       const selected = currentDay && initialSchedules[currentDay];
       const dated = !!(selected && parseDayNameDate(selected.name, now.getFullYear()));
-      const preview = !!(selected && dated && !isSameCalendarDayAsName(selected.name, now));
+      const preview = simulatedMinutes != null && !!(selected && dated && !isSameCalendarDayAsName(selected.name, now));
       const text = preview ? previewChipLabel(selected.name) : '';
       ['preview-banner', 'pres-preview-banner'].forEach(id => {
         const node = document.getElementById(id);
@@ -3929,11 +4390,19 @@
       return !isSameCalendarDayAsName(selected.name, realNow);
     }
     function getScheduleNow() {
-      const real = new Date();
-      if (simulatedMinutes == null || !isPreviewingSchedule(real)) return real;
-      const d = new Date(real);
-      d.setHours(Math.floor(simulatedMinutes / 60), simulatedMinutes % 60, 0, 0);
-      return d;
+      return getDisplayedSchedule(new Date()).now;
+    }
+    function getDisplayedSchedule(realNow) {
+      const real = realNow || new Date();
+      if (simulatedMinutes != null && isPreviewingSchedule(real) && currentScheduleData) {
+        const d = new Date(real);
+        d.setHours(Math.floor(simulatedMinutes / 60), simulatedMinutes % 60, 0, 0);
+        return { now: d, schedule: currentScheduleData, dayKey: currentDay, timed: true };
+      }
+      const todayKey = resolveDayKeyForNow(real);
+      const today = todayKey ? initialSchedules[todayKey] : null;
+      if (today) return { now: real, schedule: today, dayKey: todayKey, timed: false };
+      return { now: real, schedule: currentScheduleData, dayKey: currentDay, timed: false };
     }
     function formatClockMinutes(mins) {
       const h = Math.floor(mins / 60) % 24;
@@ -4227,6 +4696,35 @@
       if (!node) return;
       const len = Math.max(2, [...String(text || '')].length);
       node.style.setProperty('--subject-chars', String(len));
+    }
+    const LAYOUT_TIP_LS = 'presLayoutTipHidden';
+    const LAYOUT_TIP_SEC = 8;
+    let layoutTipTimer = null;
+    function hideLayoutSwitchTip() {
+      const tip = el('layout-switch-tip');
+      if (!tip || tip.classList.contains('hidden') || tip.classList.contains('is-leaving')) return;
+      tip.classList.add('is-leaving');
+      clearInterval(layoutTipTimer);
+      layoutTipTimer = null;
+      setTimeout(() => {
+        tip.classList.add('hidden');
+        tip.classList.remove('is-leaving');
+      }, 280);
+    }
+    function showLayoutSwitchTip() {
+      if (localStorage.getItem(LAYOUT_TIP_LS) === 'true') return;
+      const tip = el('layout-switch-tip');
+      const countEl = el('layout-switch-tip-count');
+      if (!tip) return;
+      let left = LAYOUT_TIP_SEC;
+      if (countEl) countEl.textContent = String(left);
+      tip.classList.remove('hidden', 'is-leaving');
+      clearInterval(layoutTipTimer);
+      layoutTipTimer = setInterval(() => {
+        left -= 1;
+        if (countEl) countEl.textContent = String(Math.max(0, left));
+        if (left <= 0) hideLayoutSwitchTip();
+      }, 1000);
     }
     function showStatusMessage(message, isError = false) {
       const statusMessageEl = document.getElementById('status-message');
@@ -4775,12 +5273,11 @@
     function syncBrowseIcon() {
       const btn = el('btn-browse-menu');
       if (!btn) return;
+      const presentOn = [1, 2, 3, 4, 5, 6, 7, 8, 9].some(n => el('btn-present-' + n)?.classList.contains('active'));
       const on = !!(
         el('btn-fullscreen')?.classList.contains('active')
         || el('btn-present')?.classList.contains('active')
-        || el('btn-present-1')?.classList.contains('active')
-        || el('btn-present-2')?.classList.contains('active')
-        || el('btn-present-3')?.classList.contains('active')
+        || presentOn
         || el('btn-clock-board')?.classList.contains('active')
       );
       btn.classList.toggle('active', on);
@@ -4789,10 +5286,14 @@
     function applyPresLayout() {
       const overlay = presentationOverlay?.() || el('presentation-overlay');
       const level = PRES_LEVELS[presLevel] || PRES_LEVELS[2];
-      if (overlay) overlay.dataset.presLevel = String(level.id);
+      if (overlay) {
+        overlay.dataset.presLevel = String(level.id);
+        overlay.dataset.clockSize = level.clockSize || 'match';
+      }
       const clockWrap = el('pres-float-clock');
       const clock = el('pres-clock');
       const nextEl = el('pres-next');
+      const dayList = el('pres-day-list');
       const stage = document.querySelector('.pres-stage');
       const subject = document.querySelector('.pres-subject-block');
       const absent = el('pres-absent-compact');
@@ -4800,9 +5301,12 @@
       if (clock) {
         clock.classList.add('pres-clock--float', 'docked');
         clock.classList.toggle('pres-clock--time-only', level.showClock && !level.showDate);
+        clock.classList.toggle('pres-clock--hm', level.clockFace === 'hm');
+        clock.classList.toggle('pres-clock--sec-small', level.clockFace === 'sec-small');
         clock.classList.remove('hidden');
       }
       if (nextEl) nextEl.classList.toggle('hidden', !level.showNext);
+      if (dayList && !level.showDayList) dayList.hidden = true;
       if (stage) {
         stage.style.setProperty('--pres-subject-scale', presSubjectScale);
         stage.style.setProperty('--pres-attendance-scale', presAbsentScale);
@@ -4814,7 +5318,7 @@
       document.querySelectorAll('.pres-level-option').forEach(btn => {
         btn.classList.toggle('is-active', Number(btn.dataset.presLevel) === level.id);
       });
-      [1, 2, 3].forEach(n => {
+      [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(n => {
         const btn = el('btn-present-' + n);
         if (!btn) return;
         const active = !overlay?.classList.contains('hidden') && presLevel === n;
@@ -4829,15 +5333,13 @@
       presLevel = next;
       localStorage.setItem('presLevel', String(presLevel));
       applyPresLayout();
+      const overlay = presentationOverlay();
+      const alreadyOpen = overlay && !overlay.classList.contains('hidden');
       if (open) {
-        const overlay = presentationOverlay();
-        const alreadyOpen = overlay && !overlay.classList.contains('hidden');
-        if (alreadyOpen) {
-          updatePresentationView();
-          applyPresLayout();
-        } else {
-          openPresentation();
-        }
+        if (alreadyOpen) updatePresentationView();
+        else openPresentation();
+      } else if (alreadyOpen) {
+        updatePresentationView();
       }
       if (announce) showStatusMessage('精簡看板：' + (PRES_LEVELS[presLevel]?.name || '精簡'));
     }
@@ -4849,6 +5351,12 @@
         return;
       }
       setPresLevel(level, { open: true, announce: true });
+    }
+    function cyclePresLevel(step) {
+      const ids = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+      let idx = ids.indexOf(Number(presLevel));
+      if (idx < 0) idx = 1;
+      setPresLevel(ids[(idx + step + ids.length) % ids.length], { open: true, announce: true });
     }
     function initBroadcastConfirmHandlers() {
       const onConfirmClick = (e) => {
@@ -5111,10 +5619,41 @@
       showStatusMessage('找不到 CSV 範本檔，請至排程設定下載。', true);
     }
 
+    function renderPresDayList(now, scheduleSource) {
+      const host = el('pres-day-list');
+      if (!host) return;
+      const level = PRES_LEVELS[presLevel] || PRES_LEVELS[2];
+      host.replaceChildren();
+      const source = scheduleSource || currentScheduleData;
+      const data = source?.data || [];
+      const exams = data.filter(item => item.type === 'exam');
+      if (!level.showDayList || !exams.length) {
+        host.hidden = true;
+        return;
+      }
+      host.hidden = false;
+      const label = document.createElement('div');
+      label.className = 'pres-day-label';
+      const dayName = source?.name || '';
+      label.textContent = isSameCalendarDayAsName(dayName, now) ? '今日考科' : (dayName || '今日考科');
+      const row = document.createElement('div');
+      row.className = 'pres-day-row';
+      const current = findCurrentSlot(now, data);
+      exams.forEach(item => {
+        const chip = document.createElement('span');
+        chip.className = 'pres-day-item' + (current && current.item === item ? ' is-now' : '');
+        const time = document.createElement('b');
+        time.textContent = item.start;
+        chip.append(time, document.createTextNode(' ' + item.name));
+        row.appendChild(chip);
+      });
+      host.append(label, row);
+    }
     /* ===== v2.0.0：展示層同步 ===== */
     function updatePresentationView() {
       const realNow = new Date();
-      const now = getScheduleNow();
+      const live = getDisplayedSchedule(realNow);
+      const now = live.now;
       updateBroadcastDisplay(realNow);
       const subject = document.getElementById('current-subject')?.textContent || '—';
       const range = document.getElementById('subject-time-range')?.textContent || '';
@@ -5124,7 +5663,7 @@
       const actual = Math.max(0, expectedCount - absentCount);
       el('pres-subject').textContent = subject;
       applySubjectScale(el('pres-subject'), subject);
-      syncScheduleContext(now, !!currentScheduleData?.data && !!findCurrentSlot(now, currentScheduleData.data));
+      syncScheduleContext(now, !!live.schedule?.data && !!findCurrentSlot(now, live.schedule.data));
       el('pres-range').textContent = range;
       el('pres-expected-compact').textContent = String(expectedCount);
       el('pres-absent-count-compact').textContent = '缺席人數共 ' + absentCount + ' 人';
@@ -5133,8 +5672,8 @@
       setAbsentWarning(absentCount);
 
       let pct = 0, currentIndex = -1, currentItem = null, nextInfo = '—';
-      if (currentScheduleData && currentScheduleData.data) {
-        const schedule = currentScheduleData.data;
+      if (live.schedule && live.schedule.data) {
+        const schedule = live.schedule.data;
         for (let i = 0; i < schedule.length; i++) {
           const s = parseTime(schedule[i].start), e = parseTime(schedule[i].end);
           if (within(now, s, e)) { currentItem = schedule[i]; currentIndex = i; pct = Math.min(100, Math.round(((now - s) / (e - s)) * 100)); break; }
@@ -5150,6 +5689,7 @@
         presNextEl.textContent = nextInfo;
         presNextEl.classList.toggle('pres-next-hint--empty', nextInfo === '—');
       }
+      renderPresDayList(now, live.schedule);
       applyPresLayout();
     }
     let presentationOwnsFullscreen = false;
@@ -5189,6 +5729,7 @@
       if (owns && document.fullscreenElement) document.exitFullscreen?.().catch(() => { });
     }
     function openPresentation() {
+      hideLayoutSwitchTip();
       if (clockBoardOverlay() && !clockBoardOverlay().classList.contains('hidden')) closeClockBoard({ handoff: true });
       updatePresentationView();
       presentationOverlay().classList.remove('hidden');
@@ -5204,6 +5745,7 @@
       if (!handoff) releaseOverlayFullscreen('present');
     }
     function openClockBoard() {
+      hideLayoutSwitchTip();
       if (presentationOverlay() && !presentationOverlay().classList.contains('hidden')) closePresentation({ handoff: true });
       clockBoardOverlay()?.classList.remove('hidden');
       syncClockBoardButton(true);
@@ -5389,12 +5931,14 @@
     }
     function updateDisplay() {
       const realNow = new Date();
-      const now = getScheduleNow();
+      const live = getDisplayedSchedule(realNow);
+      const now = live.now;
       updateDayToolbarHint(realNow);
       updateBroadcastDisplay(realNow);
       if (maybeAutoSwitchDay(realNow)) return;
 
-      if (!currentScheduleData || !currentScheduleData.data) {
+      const scheduleSource = live.schedule;
+      if (!scheduleSource || !scheduleSource.data) {
         currentSubjectEl.textContent = '無排程資料';
         applySubjectScale(currentSubjectEl, currentSubjectEl.textContent);
         subjectTimeRangeEl.textContent = '---';
@@ -5405,7 +5949,8 @@
         if (!presentationOverlay().classList.contains('hidden')) updatePresentationView();
         return;
       }
-      const schedule = currentScheduleData.data;
+      const schedule = scheduleSource.data;
+      const highlightTimeline = scheduleSource === currentScheduleData;
 
       let currentItem = null, currentIndex = -1, pct = 0;
       lunchBreakItemEl?.classList.remove('active');
@@ -5429,7 +5974,7 @@
         subjectProgressTextEl.textContent = pct + '%';
         applyHeroTone(currentItem.type);
 
-        const itemEl = document.getElementById(`schedule-item-${currentIndex}`);
+        const itemEl = highlightTimeline ? document.getElementById(`schedule-item-${currentIndex}`) : null;
         if (itemEl) {
           itemEl.classList.remove('hidden');
           itemEl.classList.add('active');
@@ -5439,7 +5984,7 @@
           }
         }
       } else {
-        const idleTitle = getSelectedDayIdleTitle(now, currentDay);
+        const idleTitle = getSelectedDayIdleTitle(now, live.dayKey);
         currentSubjectEl.textContent = idleTitle;
         applySubjectScale(currentSubjectEl, idleTitle);
         subjectTimeRangeEl.textContent = '---';
@@ -5478,6 +6023,12 @@
       });
 
       if (!silent) showStatusMessage(`已切換至${getThemeName(themeName)}主題`);
+    }
+    function cycleTheme(step) {
+      const current = document.documentElement.getAttribute('data-theme') || THEME_DEFAULT;
+      let idx = THEME_ALLOWED.indexOf(current);
+      if (idx < 0) idx = 0;
+      applyTheme(THEME_ALLOWED[(idx + step + THEME_ALLOWED.length) % THEME_ALLOWED.length]);
     }
 
     function getThemeName(themeKey) {
@@ -5982,7 +6533,7 @@
         const hidden = presentationOverlay().classList.contains('hidden');
         hidden ? openPresentation() : closePresentation();
       });
-      [1, 2, 3].forEach(n => {
+      [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(n => {
         el('btn-present-' + n)?.addEventListener('click', () => activatePresLevel(n));
       });
 
@@ -6121,7 +6672,7 @@
 
       /* === 鍵盤快捷鍵：保留 F / X；C 在鎖定時無效 === */
       document.addEventListener('keydown', (e) => {
-        const tag = (e.target && e.target.tagName) || ''; const typing = ['INPUT', 'TEXTAREA'].includes(tag) || (e.target && e.target.isContentEditable);
+        const tag = (e.target && e.target.tagName) || ''; const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(tag) || (e.target && e.target.isContentEditable);
 
         if (e.key === 'Escape') {
           if (document.querySelector('.toolbar-popover:not(.hidden)')) {
@@ -6163,17 +6714,14 @@
           }
         }
 
-        if (!typing && presentationOverlay()?.classList.contains('hidden') && clockBoardOverlay()?.classList.contains('hidden') && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && isPreviewingSchedule(new Date())) {
+        if (!typing && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
           const modalOpen = [sheetsSyncModal, appearanceModal, messageRoleModal, el('expected-modal'), el('absent-setup-modal')].some(node => node && !node.classList.contains('hidden'));
           if (!modalOpen) {
             e.preventDefault();
-            const step = e.shiftKey ? 5 : 1;
-            const real = new Date();
-            const base = simulatedMinutes != null ? simulatedMinutes : (real.getHours() * 60 + real.getMinutes());
-            const delta = e.key === 'ArrowUp' ? -step : step;
-            simulatedMinutes = Math.max(0, Math.min(1439, base + delta));
-            updateDisplay();
-            document.getElementById('time-sim-line')?.scrollIntoView({ block: 'nearest' });
+            if (e.key === 'ArrowLeft') cyclePresLevel(-1);
+            else if (e.key === 'ArrowRight') cyclePresLevel(1);
+            else if (e.key === 'ArrowUp') cycleTheme(-1);
+            else cycleTheme(1);
           }
         }
 
@@ -6191,8 +6739,8 @@
           hidden ? openPresentation() : closePresentation();
         }
 
-        // 1／2／3：指定精簡等級並進入；同鍵再按則關閉
-        if (!typing && (e.key === '1' || e.key === '2' || e.key === '3')) {
+        // 1–9：指定精簡版面並進入；同鍵再按則關閉。8、9 為原本的超精簡、微精簡
+        if (!typing && /^[1-9]$/.test(e.key)) {
           const modalOpen = [sheetsSyncModal, appearanceModal, messageRoleModal, el('expected-modal'), el('absent-setup-modal')].some(node => node && !node.classList.contains('hidden'));
           if (!modalOpen) {
             e.preventDefault();
@@ -6276,13 +6824,13 @@
         updateProgressVisibility();
       }
 
-      // 開頁預設進入精簡看板（預設等級 2；已記住的等級仍沿用）
       if (!PRES_LEVELS[presLevel]) presLevel = 2;
-      openPresentation();
-      if (localStorage.getItem('presFullModeTipSeen') !== 'true') {
-        localStorage.setItem('presFullModeTipSeen', 'true');
-        setTimeout(() => showStatusMessage('右上角「完整」可回到設定與排程畫面'), 700);
-      }
+      applyPresLayout();
+      el('layout-switch-tip-dismiss')?.addEventListener('click', () => {
+        localStorage.setItem(LAYOUT_TIP_LS, 'true');
+        hideLayoutSwitchTip();
+      });
+      showLayoutSwitchTip();
 
     }
   </script>
