@@ -5666,7 +5666,7 @@
       syncScheduleContext(now, !!live.schedule?.data && !!findCurrentSlot(now, live.schedule.data));
       el('pres-range').textContent = range;
       el('pres-expected-compact').textContent = String(expectedCount);
-      el('pres-absent-count-compact').textContent = '缺席人：  ' + absentCount + ' 人';
+      el('pres-absent-count-compact').textContent = '缺席： ' + absentCount + ' 人';
       el('pres-absent-list-compact').textContent = list.length ? '（' + list.join('、') + '）' : '';
       el('pres-actual-compact').textContent = String(actual);
       setAbsentWarning(absentCount);
